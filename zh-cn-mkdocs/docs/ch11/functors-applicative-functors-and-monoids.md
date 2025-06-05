@@ -1,6 +1,6 @@
 # Functors, Applicative Functors 与 Monoids
 
-Haskell 的一些特色，像是纯粹性，高端函数，algebraic data types，typeclasses，这些让我们可以从更高的角度来看到 polymorphism 这件事。不像 OOP 当中需要从庞大的型态阶层来思考。我们只需要看看手边的型态的行为，将他们跟适当地 typeclass 对应起来就可以了。像 `Int` 的行为跟很多东西很像。好比说他可以比较相不相等，可以从大到小排列，也可以将他们一一穷举出来。
+Haskell 的一些特色，像是纯粹性，高阶函数，algebraic data types，typeclasses，这些让我们可以从更高的角度来看到 polymorphism 这件事。不像 OOP 当中需要从庞大的型态阶层来思考。我们只需要看看手边的型态的行为，将他们跟适当地 typeclass 对应起来就可以了。像 `Int` 的行为跟很多东西很像。好比说他可以比较相不相等，可以从大到小排列，也可以将他们一一穷举出来。
 
 Typeclass 的运用是很随意的。我们可以定义自己的数据型态，然后描述他可以怎样被操作，跟 typeclass 关联起来便定义了他的行为。由于 Haskell 强大的型态系统，这让我们只要读函数的型态宣告就可以知道很多信息。typeclass 可以定义得很抽象很 general。我们之前有看过 typeclass 定义了可以比较两个东西是否相等，或是定义了可以比较两个东西的大小。这些是既抽象但又描述简洁的行为，但我们不会认为他们有什么特别之处，因为我们时常碰到他们。最近我们看过了 functor，基本上他们是一群可以被 map over 的对象。这是其中一个例子能够抽象但又漂亮地描述行为。在这一章中，我们会详加阐述 functors，并会提到比较强一些的版本，也就是 applicative functors。我们也会提到 monoids。
 
@@ -31,7 +31,7 @@ instance Functor IO where
         return (f result)
 ```
 
-对一个 I/O action 做 map over 动作的结果仍会是一个 I/O action，所以我们才用 do syntax 来把两个 I/O action 黏成一个。在 `fmap` 的实作中，我们先执行了原本传进的 I/O action，并把结果绑定成 `result`。然后我们写了 `return (f result)`。`return` 就如你所知道的，是一个只会回传包了你传给他东西的 I/O action。还有一个 do block 的返回值一定是他最后一个 I/O action 的返回值。这也是为什么我们需要 return。其实他只是回传包了 `f result` 的 I/O action。
+对一个 I/O action 做 map over 动作的结果仍会是一个 I/O action，所以我们才用 do syntax 来把两个 I/O action 黏成一个。在 `fmap` 的实作中，我们先执行了原本传进的 I/O action，并把结果绑定成 `result`。然后我们写了 `return (f result)`。`return` 就如你所知道的，是一个只会返回包了你传给他东西的 I/O action。还有一个 do block 的返回值一定是他最后一个 I/O action 的返回值。这也是为什么我们需要 return。其实他只是返回包了 `f result` 的 I/O action。
 
 我们可以再多实验一下来找到些感觉。来看看这段 code：
 
@@ -52,11 +52,11 @@ main = do line <- fmap reverse getLine
 
 ![](./alien.png)
 
-就像我们用 `fmap` `reverse` 来 map over `Just "blah"` 会得到 `Just "halb"`，我们也可以 `fmap` `reverse` 来 map over `getLine`。`getLine` 是一个 I/O action，他的 type 是 `IO String`，而用 `reverse` 来 map over 他会回传一个取回一个字串并 `reverse` 他的 I/O action。就像我们 apply 一个 function 到一个 `Maybe` 一样，我们也可以 apply 一个 function 到一个 `IO`，只是这个 `IO` 会跑去外面拿回某些值。然后我们把结果用 `<-` 绑定到某个名称，而这个名称绑定的值是已经 `reverse` 过了。
+就像我们用 `fmap` `reverse` 来 map over `Just "blah"` 会得到 `Just "halb"`，我们也可以 `fmap` `reverse` 来 map over `getLine`。`getLine` 是一个 I/O action，他的 type 是 `IO String`，而用 `reverse` 来 map over 他会返回一个取回一个字串并 `reverse` 他的 I/O action。就像我们 apply 一个 function 到一个 `Maybe` 一样，我们也可以 apply 一个 function 到一个 `IO`，只是这个 `IO` 会跑去外面拿回某些值。然后我们把结果用 `<-` 绑定到某个名称，而这个名称绑定的值是已经 `reverse` 过了。
 
 而 `fmap (++"!") getLine` 这个 I/O action 表现得就像 `getLine`，只是他的结果多了一个 `"!"` 在最后。
 
-如果我们限缩 `fmap` 到 `IO` 型态上，那 fmap 的型态是 `fmap :: (a -> b) -> IO a -> IO b`。`fmap` 接受一个函数跟一个 I/O action，并回传一个 I/O action 包含了已经 apply 过 function 的结果。
+如果我们限缩 `fmap` 到 `IO` 型态上，那 fmap 的型态是 `fmap :: (a -> b) -> IO a -> IO b`。`fmap` 接受一个函数跟一个 I/O action，并返回一个 I/O action 包含了已经 apply 过 function 的结果。
 
 如果你曾经注意到你想要将一个 I/O action 绑定到一个名称上，只是为了要 apply 一个 function。你可以考虑使用 `fmap`，那会更漂亮地表达这件事。或者你想要对 functor 中的数据做 transformation，你可以先将你要用的 function 写在 top level，或是把他作成一个 lambda function，甚至用 function composition。
 
@@ -79,7 +79,7 @@ E-R-E-H-T- -O-L-L-E-H
 另一个 `Functor` 的案例是 `(->) r`，只是我们先前没有注意到。你可能会困惑到底 `(->) r` 究竟代表什么？一个 `r -> a` 的型态可以写成 `(->) r a`，就像是 `2 + 3` 可以写成 `(+) 2 3` 一样。我们可以从一个不同的角度来看待 `(->) r a`，他其实只是一个接受两个参数的 type constructor，好比 `Either`。但记住我们说过 `Functor` 只能接受一个 type constructor。这也是为什么 `(->)` 不是 `Functor` 的一个 instance，但 `(->) r` 则是。如果程序的语法允许的话，你也可以将 `(->) r` 写成 `(r ->)`。就如 `(2+)` 代表的其实是 `(+) 2`。至于细节是如何呢？我们可以看看 `Control.Monad.Instances`。
 
 ```text
-我们通常说一个接受任何东西以及回传随便一个东西的函数型态是 ``a -> b``。``r -> a`` 是同样意思，只是把符号代换了一下。
+我们通常说一个接受任何东西以及返回随便一个东西的函数型态是 ``a -> b``。``r -> a`` 是同样意思，只是把符号代换了一下。
 ```
 
 ```haskell
@@ -98,7 +98,7 @@ instance Functor (r ->) where
 
 首先我们来看看 `fmap` 的型态。他的型态是 `fmap :: (a -> b) -> f a -> f b`。我们把所有的 `f` 在心里代换成 `(->) r`。则 `fmap` 的型态就变成 `fmap :: (a -> b) -> ((->) r a) -> ((->) r b)`。接着我们把 `(->) r a` 跟 `(->) r b` 换成 `r -> a` 跟 `r -> b`。则我们得到 `fmap :: (a -> b) -> (r -> a) -> (r -> b)`。
 
-从上面的结果看到将一个 function map over 一个 function 会得到另一个 function，就如 map over 一个 function 到 `Maybe` 会得到一个 `Maybe`，而 map over 一个 function 到一个 list 会得到一个 list。而 `fmap :: (a -> b) -> (r -> a) -> (r -> b)` 告诉我们什么？他接受一个从 `a` 到 `b` 的 function，跟一个从 `r` 到 `a` 的 function，并回传一个从 `r` 到 `b` 的 function。这根本就是 function composition。把 `r -> a` 的输出接到 `a -> b` 的输入，的确是 function composition 在做的事。如果你再仔细看看 instance 的定义，会发现真的就是一个 function composition。
+从上面的结果看到将一个 function map over 一个 function 会得到另一个 function，就如 map over 一个 function 到 `Maybe` 会得到一个 `Maybe`，而 map over 一个 function 到一个 list 会得到一个 list。而 `fmap :: (a -> b) -> (r -> a) -> (r -> b)` 告诉我们什么？他接受一个从 `a` 到 `b` 的 function，跟一个从 `r` 到 `a` 的 function，并返回一个从 `r` 到 `b` 的 function。这根本就是 function composition。把 `r -> a` 的输出接到 `a -> b` 的输入，的确是 function composition 在做的事。如果你再仔细看看 instance 的定义，会发现真的就是一个 function composition。
 
 ```haskell
 instance Functor ((->) r) where  
@@ -120,7 +120,7 @@ ghci> fmap (show . (*3)) (*100) 1
 "300"
 ```
 
-我们调用 `fmap` 的方式是 infix 的方式，这跟 `.` 很像。在第二行，我们把 `(*3)` map over 到 `(+100)` 上，这会回传一个先把输入值 `(+100)` 再 `(*3)` 的 function，我们再用 `1` 去调用他。
+我们调用 `fmap` 的方式是 infix 的方式，这跟 `.` 很像。在第二行，我们把 `(*3)` map over 到 `(+100)` 上，这会返回一个先把输入值 `(+100)` 再 `(*3)` 的 function，我们再用 `1` 去调用他。
 
 到这边为止盒子的比喻还适用吗？如果你硬是要解释的话还是解释得通。当我们将 `fmap (+3)` map over `Just 3` 的时候，对于 `Maybe` 我们很容易把他想成是装了值的盒子，我们只是对盒子里面的值 `(+3)`。但对于 `fmap (*3) (+100)` 呢？你可以把 `(+100)` 想成是一个装了值的盒子。有点像把 I/O action 想成长了脚的盒子一样。对 `(+100)` 使用 `fmap (*3)` 会产生另一个表现得像 `(+100)` 的 function。只是在算出值之前，会再多计算 `(*3)`。这样我们可以看出来 `fmap` 表现得就像 `.` 一样。
 
@@ -128,9 +128,9 @@ ghci> fmap (show . (*3)) (*100) 1
 
 ![](./lifter.png)
 
-在我们继续看 `fmap` 该遵守的规则之前，我们再看一次 `fmap` 的型态，他是 `fmap :: (a -> b) -> f a -> f b`。很明显我们是在讨论 Functor，所以为了简洁，我们就不写 `(Functor f) =>` 的部份。当我们在学 curry 的时候，我们说过 Haskell 的 function 实际上只接受一个参数。一个型态是 `a -> b -> c` 的函数实际上是接受 `a` 然后回传 `b -> c`，而 `b -> c` 实际上接受一个 `b` 然后回传一个 `c`。如果我们用比较少的参数调用一个函数，他就会回传一个函数需要接受剩下的参数。所以 `a -> b -> c` 可以写成 `a -> (b -> c)`。这样 curry 可以明显一些。
+在我们继续看 `fmap` 该遵守的规则之前，我们再看一次 `fmap` 的型态，他是 `fmap :: (a -> b) -> f a -> f b`。很明显我们是在讨论 Functor，所以为了简洁，我们就不写 `(Functor f) =>` 的部份。当我们在学 curry 的时候，我们说过 Haskell 的 function 实际上只接受一个参数。一个型态是 `a -> b -> c` 的函数实际上是接受 `a` 然后返回 `b -> c`，而 `b -> c` 实际上接受一个 `b` 然后返回一个 `c`。如果我们用比较少的参数调用一个函数，他就会返回一个函数需要接受剩下的参数。所以 `a -> b -> c` 可以写成 `a -> (b -> c)`。这样 curry 可以明显一些。
 
-同样的，我们可以不要把 `fmap` 想成是一个接受 function 跟 functor 并回传一个 function 的 function。而是想成一个接受 function 并回传一个新的 function 的 function，回传的 function 接受一个 functor 并回传一个 functor。他接受 `a -> b` 并回传 `f a -> f b`。这动作叫做 lifting。我们用 GHCI 的 `:t` 来做的实验。
+同样的，我们可以不要把 `fmap` 想成是一个接受 function 跟 functor 并返回一个 function 的 function。而是想成一个接受 function 并返回一个新的 function 的 function，返回的 function 接受一个 functor 并返回一个 functor。他接受 `a -> b` 并返回 `f a -> f b`。这动作叫做 lifting。我们用 GHCI 的 `:t` 来做的实验。
 
 ```haskell
 ghci> :t fmap (*2)  
@@ -139,7 +139,7 @@ ghci> :t fmap (replicate 3)
 fmap (replicate 3) :: (Functor f) => f a -> f [a]
 ```
 
-`fmap (*2)` 接受一个 functor `f`，并回传一个基于数字的 functor。那个 functor 可以是 list，可以是 `Maybe`，可以是 `Either String`。`fmap (replicate 3)` 可以接受一个基于任何型态的 functor，并回传一个基于 list 的 functor。
+`fmap (*2)` 接受一个 functor `f`，并返回一个基于数字的 functor。那个 functor 可以是 list，可以是 `Maybe`，可以是 `Either String`。`fmap (replicate 3)` 可以接受一个基于任何型态的 functor，并返回一个基于 list 的 functor。
 
 ```text
 当我们提到 functor over numbers 的时候，你可以想像他是一个 functor 包含有许多数字在里面。前面一种说法其实比较正确，但后面一种说法比较容易让人理解。
@@ -149,7 +149,7 @@ fmap (replicate 3) :: (Functor f) => f a -> f [a]
 
 你可以把 `fmap` 想做是一个函数，他接受另一个函数跟一个 functor，然后把函数对 functor 每一个元素做映射，或你可以想做他是一个函数，他接受一个函数并把他 lift 到可以在 functors 上面操作。两种想法都是正确的，而且在 Haskell 中是等价。
 
-`fmap (replicate 3) :: (Functor f) => f a -> f [a]` 这样的型态代表这个函数可以运作在任何 functor 上。至于确切的行为则要看究竟我们操作的是什么样的 functor。如果我们是用 `fmap (replicate 3)` 对一个 list 操作，那我们会选择 `fmap` 针对 list 的实作，也就是只是一个 `map`。如果我们是碰到 `Maybe a`。那他在碰到 `Just` 型态的时候，会对里面的值套用 `replicate 3`。而碰到 `Nothing` 的时候就回传 `Nothing`。
+`fmap (replicate 3) :: (Functor f) => f a -> f [a]` 这样的型态代表这个函数可以运作在任何 functor 上。至于确切的行为则要看究竟我们操作的是什么样的 functor。如果我们是用 `fmap (replicate 3)` 对一个 list 操作，那我们会选择 `fmap` 针对 list 的实作，也就是只是一个 `map`。如果我们是碰到 `Maybe a`。那他在碰到 `Just` 型态的时候，会对里面的值套用 `replicate 3`。而碰到 `Nothing` 的时候就返回 `Nothing`。
 
 ```haskell
 ghci> fmap (replicate 3) [1,2,3,4]  
@@ -193,7 +193,7 @@ instance Functor Maybe where
     fmap f Nothing = Nothing
 ```
 
-我们可以想像在 `f` 的位置摆上 `id`。我们看到 `fmap id` 拿到 `Just x` 的时候，结果只不过是 `Just (id x)`，而 `id` 有只回传他拿到的东西，所以可以知道 `Just (id x)` 等价于 `Just x`。所以说我们可以知道对 `Maybe` 中的 `Just` 用 `id` 去做 map over 的动作，会拿回一样的值。
+我们可以想像在 `f` 的位置摆上 `id`。我们看到 `fmap id` 拿到 `Just x` 的时候，结果只不过是 `Just (id x)`，而 `id` 有只返回他拿到的东西，所以可以知道 `Just (id x)` 等价于 `Just x`。所以说我们可以知道对 `Maybe` 中的 `Just` 用 `id` 去做 map over 的动作，会拿回一样的值。
 
 而将 `id` map over `Nothing` 会拿回 `Nothing` 并不稀奇。所以从这两个 `fmap` 的实作，我们可以看到的确 `fmap id = id` 有被遵守。
 
@@ -203,7 +203,7 @@ _第二定律描述说先将两个函数合成并将结果 map over 一个 funct
 
 如果我们能够证明某个类型遵守两个定律，那我们就可以保证他跟其他 functor 对于映射方面都拥有相同的性质。我们知道如果对他用 `fmap`，我们知道不会有除了 mapping 以外的事会发生，而他就仅仅会表现成某个可以被 map over 的东西。也就是一个 functor。你可以再仔细查看 `fmap` 对于某些类型的实作来了解第二定律。正如我们先前对 `Maybe` 查看第一定律一般。
 
-如果你需要的话，我们能在这边演练一下 `Maybe` 是如何遵守第二定律的。首先 `fmap (f . g)` 来 map over `Nothing` 的话，我们会得到 `Nothing`。因为用任何函数来 `fmap` `Nothing` 的话都会回传 `Nothing`。如果我们 `fmap f (fmap g Nothing)`，我们会得到 `Nothing`。可以看到当面对 `Nothing` 的时候，`Maybe` 很显然是遵守第二定律的。 那对于 `Just something` 呢？如果我们使用 `fmap (f . g) (Just x)` 的话，从实作的代码中我可以看到 `Just ((f . g ) x)`，也就是 `Just (f (g x))`。如果我们使用 `fmap f (fmap g (Just x))` 的话我们可以从实作知道 `fmap g (Just x)` 会是 `Just (g x)`。`fmap f (fmap g (Just x))` 跟 `fmap f (Just (g x))` 相等。而从实作上这又会相等于 `Just (f (g x))`。
+如果你需要的话，我们能在这边演练一下 `Maybe` 是如何遵守第二定律的。首先 `fmap (f . g)` 来 map over `Nothing` 的话，我们会得到 `Nothing`。因为用任何函数来 `fmap` `Nothing` 的话都会返回 `Nothing`。如果我们 `fmap f (fmap g Nothing)`，我们会得到 `Nothing`。可以看到当面对 `Nothing` 的时候，`Maybe` 很显然是遵守第二定律的。 那对于 `Just something` 呢？如果我们使用 `fmap (f . g) (Just x)` 的话，从实作的代码中我可以看到 `Just ((f . g ) x)`，也就是 `Just (f (g x))`。如果我们使用 `fmap f (fmap g (Just x))` 的话我们可以从实作知道 `fmap g (Just x)` 会是 `Just (g x)`。`fmap f (fmap g (Just x))` 跟 `fmap f (Just (g x))` 相等。而从实作上这又会相等于 `Just (f (g x))`。
 
 如果你不太理解这边的说明，别担心。只要确定你了解什么是函数合成就好。在多数的情况下你可以直觉地对应到这些类型表现得就像 containers 或函数一样。或是也可以换种方法，只要多尝试对类型中不同的值做操作你就可以看看类型是否有遵守定律。
 
@@ -272,7 +272,7 @@ CJust 0 "haha"
 
 在这个章节中，我们会学到 applicative functors，也就是加强版的 functors，在 Haskell 中是用在 `Control.Applicative` 中的 `Applicative` 这个 typeclass 来定义的。
 
-你还记得 Haskell 中函数缺省就是 Curried 的，那代表接受多个参数的函数实际上是接受一个参数然后回传一个接受剩余参数的函数，以此类推。如果一个函数的类型是 `a -> b -> c`，我们通常会说这个函数接受两个参数并回传 `c`，但他实际上是接受 `a` 并回传一个 `b -> c` 的函数。这也是为什么我们可以用 `(f x) y` 的方式调用 `f x y`。这个机制让我们可以 partially apply 一个函数，可以用比较少的参数调用他们。可以做成一个函数再喂给其他函数。
+你还记得 Haskell 中函数缺省就是 Curried 的，那代表接受多个参数的函数实际上是接受一个参数然后返回一个接受剩余参数的函数，以此类推。如果一个函数的类型是 `a -> b -> c`，我们通常会说这个函数接受两个参数并返回 `c`，但他实际上是接受 `a` 并返回一个 `b -> c` 的函数。这也是为什么我们可以用 `(f x) y` 的方式调用 `f x y`。这个机制让我们可以 partially apply 一个函数，可以用比较少的参数调用他们。可以做成一个函数再喂给其他函数。
 
 到目前为止，当我们要对 functor map over 一个函数的时候，我们用的函数都是只接受一个参数的。但如果我们要 map 一个接受两个参数的函数呢？我们来看几个具体的例子。如果我们有 `Just 3` 然后我们做 `fmap (*) (Just 3)`，那我们会获得什么样的结果？从 `Maybe` 对 `Functor` 的 instance 实作来看，我们知道如果他是 `Just something`，他会对在 `Just` 中的 `something` 做映射。因此当 `fmap (*) (Just 3)` 会得到 `Just ((*) 3)`，也可以写做 `Just (* 3)`。我们得到了一个包在 `Just` 中的函数。
 
@@ -311,7 +311,7 @@ class (Functor f) => Applicative f where
 
 这简简单单的三行可以让我们学到不少。首先来看第一行。他开启了 `Applicative` 的定义，并加上 class contraint。描述了一个类型构造子要是 `Applicative`，他必须也是 `Functor`。这就是为什么我们说一个类型构造子属于 `Applicative` 的话，他也会是 `Functor`，因此我们能对他使用 `fmap`。
 
-第一个定义的是 `pure`。他的类型宣告是 `pure :: a -> f a`。`f` 代表 applicative functor 的 instance。由于 Haskell 有一个优秀的类型系统，其中函数又是将一些参数映射成结果，我们可以从类型宣告中读出许多消息。`pure` 应该要接受一个值，然后回传一个包含那个值的 applicative functor。我们这边是用盒子来作比喻，即使有一些比喻不完全符合现实的情况。尽管这样，`a -> f a` 仍有许多丰富的信息，他确实告诉我们他会接受一个值并回传一个 applicative functor，里面装有结果。
+第一个定义的是 `pure`。他的类型宣告是 `pure :: a -> f a`。`f` 代表 applicative functor 的 instance。由于 Haskell 有一个优秀的类型系统，其中函数又是将一些参数映射成结果，我们可以从类型宣告中读出许多消息。`pure` 应该要接受一个值，然后返回一个包含那个值的 applicative functor。我们这边是用盒子来作比喻，即使有一些比喻不完全符合现实的情况。尽管这样，`a -> f a` 仍有许多丰富的信息，他确实告诉我们他会接受一个值并返回一个 applicative functor，里面装有结果。
 
 对于 `pure` 比较好的说法是把一个普通值放到一个缺省的 context 下，一个最小的 context 但仍然包含这个值。
 
@@ -330,7 +330,7 @@ instance Applicative Maybe where
 
 首先看到 `pure`。他只不过是接受一个东西然后包成 applicative functor。我们写成 `pure = Just` 是因为 `Just` 不过就是一个普通函数。我们其实也可以写成 `pure x = Just x`。
 
-接着我们定义了 `<*>`。我们无法从 `Nothing` 中抽出一个函数，因为 `Nothing` 并不包含一个函数。所以我们说如果我们要尝试从 `Nothing` 中取出一个函数，结果必定是 `Nothing`。如果你看看 `Applicative` 的定义，你会看到他有 `Functor` 的限制，他代表 `<*>` 的两个参数都会是 functors。如果第一个参数不是 `Nothing`，而是一个装了函数的 `Just`，而且我们希望将这个函数对第二个参数做 map。这个也考虑到第二个参数是 `Nothing` 的情况，因为 `fmap` 任何一个函数至 `Nothing` 会回传 `Nothing`。
+接着我们定义了 `<*>`。我们无法从 `Nothing` 中抽出一个函数，因为 `Nothing` 并不包含一个函数。所以我们说如果我们要尝试从 `Nothing` 中取出一个函数，结果必定是 `Nothing`。如果你看看 `Applicative` 的定义，你会看到他有 `Functor` 的限制，他代表 `<*>` 的两个参数都会是 functors。如果第一个参数不是 `Nothing`，而是一个装了函数的 `Just`，而且我们希望将这个函数对第二个参数做 map。这个也考虑到第二个参数是 `Nothing` 的情况，因为 `fmap` 任何一个函数至 `Nothing` 会返回 `Nothing`。
 
 对于 `Maybe` 而言，如果左边是 `Just`，那 `<*>` 会从其中抽出了一个函数来 map 右边的值。如果有任何一个参数是 `Nothing`。那结果便是 `Nothing`。
 
@@ -395,7 +395,7 @@ ghci> (++) "johntra" "volta"
 "johntravolta"
 ```
 
-可以将一个普通的函数套用在 applicative functor 上真不错。只要稍微写一些 `<$>` 跟 `<*>` 就可以把函数变成 applicative style，可以操作 applicatives 并回传 applicatives。
+可以将一个普通的函数套用在 applicative functor 上真不错。只要稍微写一些 `<$>` 跟 `<*>` 就可以把函数变成 applicative style，可以操作 applicatives 并返回 applicatives。
 
 总之当我们在做 `(++) <$> Just "johntra" <*> Just "volta"` 时，首先我们将 `(++)` map over 到 `Just "johntra"`，然后产生 `Just ("johntra"++)`，其中 `(++)` 的类型为 `(++) :: [a] -> [a] -> [a]`，`Just ("johntra"++)` 的类型为 `Maybe ([Char] -> [Char])`。注意到 `(++)` 是如何吃掉第一个参数，以及我们是怎么决定 `a` 是 `Char` 的。当我们做 `Just ("johntra"++) <*> Just "volta"`，他接受一个包在 `Just` 中的函数，然后 map over `Just "volta"`，产生了 `Just "johntravolta"`。如果两个值中有任意一个为 `Nothing`，那整个结果就会是 `Nothing`。
 
@@ -409,7 +409,7 @@ instance Applicative [] where
     fs <*> xs = [f x | f <- fs, x <- xs]
 ```
 
-早先我们说过 `pure` 是把一个值放进缺省的 context 中。换种说法就是一个会产生那个值的最小 context。而对 list 而言最小 context 就是 `[]`，但由于空的 list 并不包含一个值，所以我们没办法把他当作 `pure`。这也是为什么 `pure` 其实是接受一个值然后回传一个包含单元素的 list。同样的，`Maybe` 的最小 context 是 `Nothing`，但他其实表示的是没有值。所以 `pure` 其实是被实作成 `Just` 的。
+早先我们说过 `pure` 是把一个值放进缺省的 context 中。换种说法就是一个会产生那个值的最小 context。而对 list 而言最小 context 就是 `[]`，但由于空的 list 并不包含一个值，所以我们没办法把他当作 `pure`。这也是为什么 `pure` 其实是接受一个值然后返回一个包含单元素的 list。同样的，`Maybe` 的最小 context 是 `Nothing`，但他其实表示的是没有值。所以 `pure` 其实是被实作成 `Just` 的。
 
 ```haskell
 ghci> pure "Hey" :: [String]  
@@ -483,7 +483,7 @@ instance Applicative IO where
 
 由于 `pure` 是把一个值放进最小的 context 中，所以将 `return` 定义成 `pure` 是很合理的。因为 `return` 也是做同样的事情。他做了一个不做任何事情的 I/O action，他可以产生某些值来作为结果，但他实际上并没有做任何 I/O 的动作，例如说印出结果到终端或是文件。
 
-如果 `<*>` 被限定在 `IO` 上操作的话，他的类型会是 `(<*>) :: IO (a -> b) -> IO a -> IO b`。他接受一个产生函数的 I/O action，还有另一个 I/O action，并从以上两者创造一个新的 I/O action，也就是把第二个参数喂给第一个参数。而得到回传的结果，然后放到新的 I/O action 中。我们用 do 的语法来实作他。你还记得的话 do 就是把好几个 I/O action 黏在一起，变成一个大的 I/O action。
+如果 `<*>` 被限定在 `IO` 上操作的话，他的类型会是 `(<*>) :: IO (a -> b) -> IO a -> IO b`。他接受一个产生函数的 I/O action，还有另一个 I/O action，并从以上两者创造一个新的 I/O action，也就是把第二个参数喂给第一个参数。而得到返回的结果，然后放到新的 I/O action 中。我们用 do 的语法来实作他。你还记得的话 do 就是把好几个 I/O action 黏在一起，变成一个大的 I/O action。
 
 而对于 `Maybe` 跟 `[]` 而言，我们可以把 `<*>` 想做是从左边的参数取出一个函数，然后套用到右边的参数上。至于 `IO`，这种取出的模拟方式仍然适用，但我们必须多加一个 sequencing 的概念，因为我们是从两个 I/O action 中取值，也是在 sequencing，把他们黏成一个。我们从第一个 I/O action 中取值，但要取出 I/O action 的结果，他必须要先被执行过。
 
@@ -530,7 +530,7 @@ instance Applicative ((->) r) where
     f <*> g = \x -> f x (g x)
 ```
 
-当我们用 `pure` 将一个值包成 applicative functor 的时候，他产生的结果永远都会是那个值。也就是最小的 context。那也是为什么对于 function 的 `pure` 实作来讲，他就是接受一个值，然后造一个函数永远回传那个值，不管他被喂了什么参数。如果你限定 `pure` 的类型至 `(->) r` 上，他就会是 `pure :: a -> (r -> a)`。
+当我们用 `pure` 将一个值包成 applicative functor 的时候，他产生的结果永远都会是那个值。也就是最小的 context。那也是为什么对于 function 的 `pure` 实作来讲，他就是接受一个值，然后造一个函数永远返回那个值，不管他被喂了什么参数。如果你限定 `pure` 的类型至 `(->) r` 上，他就会是 `pure :: a -> (r -> a)`。
 
 ```haskell
 ghci> (pure 3) "blah"  
@@ -584,7 +584,7 @@ instance Applicative ZipList where
 
 `<*>` 做的就是我们之前说的。他将第一个函数套用至第一个值，第二个函数套用第二个值。这也是 `zipWith (\f x -> f x) fs xs` 做的事。由于 `zipWith` 的特性，所以结果会跟 list 中比较短的那个一样长。
 
-`pure` 也值得我们讨论一下。他接受一个值，把他重复地放进一个 list 中。`pure "haha"` 就会是 `ZipList (["haha","haha","haha"...`。这可能会造成些混淆，毕竟我们说过 `pure` 是把一个值放进一个最小的 context 中。而你会想说无限长的 list 不可能会是一个最小的 context。但对于 zip list 来说这是很合理的，因为他必须在 list 的每个位置都有值。这也遵守了 `pure f <*> xs` 必须要等价于 `fmap f xs` 的特性。如果 `pure 3` 只是回传 `ZipList [3]`，那 `pure (*2) <*> ZipList [1,5,10]` 就只会算出 `ZipList [2]`，因为两个 zip list 算出结果的长度会是比较短的那个的长度。如果我们 zip 一个有限长的 list 以及一个无限长的 list，那结果的长会是有限长的 list 的长度。
+`pure` 也值得我们讨论一下。他接受一个值，把他重复地放进一个 list 中。`pure "haha"` 就会是 `ZipList (["haha","haha","haha"...`。这可能会造成些混淆，毕竟我们说过 `pure` 是把一个值放进一个最小的 context 中。而你会想说无限长的 list 不可能会是一个最小的 context。但对于 zip list 来说这是很合理的，因为他必须在 list 的每个位置都有值。这也遵守了 `pure f <*> xs` 必须要等价于 `fmap f xs` 的特性。如果 `pure 3` 只是返回 `ZipList [3]`，那 `pure (*2) <*> ZipList [1,5,10]` 就只会算出 `ZipList [2]`，因为两个 zip list 算出结果的长度会是比较短的那个的长度。如果我们 zip 一个有限长的 list 以及一个无限长的 list，那结果的长会是有限长的 list 的长度。
 
 那 zip list 是怎么用 applicative style 操作的呢？我们来看看，`ZipList a` 类型并没有定义成 `Show` 的 instance，所以我们必须用 `getZipList` 函数来从 zip list 取出一个普通的 list。
 
@@ -630,7 +630,7 @@ ghci> (:) <$> Just 3 <*> Just [4]
 Just [3,4]
 ```
 
-还记得 `:` 是一个函数，他接受一个元素跟一个 list，并回传一个新的 list，其中那个元素已经接在前面。现在我们有了 `Just [3,4]`，我们能够将他跟 `Just 2` 绑在一起变成 `Just [2,3,4]` 吗？当然可以。我们可以将任意数量的 applicative 绑在一起变成一个 applicative，里面包含一个装有结果的 list。我们试着实作一个函数，他接受一串装有 applicative 的 list，然后回传一个 applicative 里面有一个装有结果的 list。我们称呼他为 `sequenceA`。
+还记得 `:` 是一个函数，他接受一个元素跟一个 list，并返回一个新的 list，其中那个元素已经接在前面。现在我们有了 `Just [3,4]`，我们能够将他跟 `Just 2` 绑在一起变成 `Just [2,3,4]` 吗？当然可以。我们可以将任意数量的 applicative 绑在一起变成一个 applicative，里面包含一个装有结果的 list。我们试着实作一个函数，他接受一串装有 applicative 的 list，然后返回一个 applicative 里面有一个装有结果的 list。我们称呼他为 `sequenceA`。
 
 ```haskell
 sequenceA :: (Applicative f) => [f a] -> f [a]  
@@ -668,7 +668,7 @@ ghci> sequenceA [[1,2,3],[4,5,6],[3,4,4],[]]
 
 很酷吧。当我们套用在 `Maybe` 上时，`sequenceA` 创造一个新的 `Maybe`，他包含了一个 list 装有所有结果。如果其中一个值是 `Nothing`，那整个结果就会是 `Nothing`。如果你有一串 `Maybe` 类型的值，但你只在乎当结果不包含任何 `Nothing` 的情况，这样的特性就很方便。
 
-当套用在函数时，`sequenceA` 接受装有一堆函数的 list，并回传一个回传 list 的函数。在我们的范例中，我们写了一个函数，他只接受一个数值作为参数，他会把他套用至 list 中的每一个函数，并回传一个包含结果的 list。`sequenceA [(+3),(+2),(+1)] 3` 会将 `3` 喂给 `(+3)`, `(+2)` 跟 `(+1)`，然后将所有结果装在一个 list 中。
+当套用在函数时，`sequenceA` 接受装有一堆函数的 list，并返回一个返回 list 的函数。在我们的范例中，我们写了一个函数，他只接受一个数值作为参数，他会把他套用至 list 中的每一个函数，并返回一个包含结果的 list。`sequenceA [(+3),(+2),(+1)] 3` 会将 `3` 喂给 `(+3)`, `(+2)` 跟 `(+1)`，然后将所有结果装在一个 list 中。
 
 而 `(+) <$> (+3) <*> (*2)` 会创见一个接受单一参数的一函数，将他同时喂给 `(+3)` 跟 `(*2)`，然后调用 `+` 来将两者加起来。同样的道理，`sequenceA [(+3),(*2)]` 是制造一个接受单一参数的函数，他会将他喂给所有包含在 list 中的函数。但他最后不是调用 `+`，而是调用 `:` 跟 `pure []` 来把结果接成一个 list，得到最后的结果。
 
@@ -681,7 +681,7 @@ ghci> and $ map (\f -> f 7) [(>4),(<10),odd]
 True
 ```
 
-记住 `and` 接受一串布尔值，并只有在全部都是 `True` 的时候才回传 `True`。 另一种实作方式是用 `sequenceA`：
+记住 `and` 接受一串布尔值，并只有在全部都是 `True` 的时候才返回 `True`。 另一种实作方式是用 `sequenceA`：
 
 ```haskell
 ghci> sequenceA [(>4),(<10),odd] 7  
@@ -690,11 +690,11 @@ ghci> and $ sequenceA [(>4),(<10),odd] 7
 True
 ```
 
-`sequenceA [(>4),(<10),odd]` 接受一个函数，他接受一个数值并将他喂给所有的 predicate，包含 `[(>4),(<10),odd]`。然后回传一串布尔值。他将一个类型为 `(Num a) => [a -> Bool]` 的 list 变成一个类型为 `(Num a) => a -> [Bool]` 的函数，很酷吧。
+`sequenceA [(>4),(<10),odd]` 接受一个函数，他接受一个数值并将他喂给所有的 predicate，包含 `[(>4),(<10),odd]`。然后返回一串布尔值。他将一个类型为 `(Num a) => [a -> Bool]` 的 list 变成一个类型为 `(Num a) => a -> [Bool]` 的函数，很酷吧。
 
-由于 list 要求里面元素的类型要一致，所以包含在 list 中的所有函数都是同样类型。你不能创造一个像是 `[ord, (+3)]` 这样的 list，因为 `ord` 接受一个字符并回传一个数值，然而 `(+3)` 接受一个数值并回传一个数值。
+由于 list 要求里面元素的类型要一致，所以包含在 list 中的所有函数都是同样类型。你不能创造一个像是 `[ord, (+3)]` 这样的 list，因为 `ord` 接受一个字符并返回一个数值，然而 `(+3)` 接受一个数值并返回一个数值。
 
-当跟 `[]` 一起使用的时候，`sequenceA` 接受一串 list，并回传另一串 list。他实际上是创建一个包含所有可能组合的 list。为了方便说明，我们比较一下使用 `sequenceA` 跟 list comprehension 的差异：
+当跟 `[]` 一起使用的时候，`sequenceA` 接受一串 list，并返回另一串 list。他实际上是创建一个包含所有可能组合的 list。为了方便说明，我们比较一下使用 `sequenceA` 跟 list comprehension 的差异：
 
 ```haskell
 ghci> sequenceA [[1,2,3],[4,5,6]]  
@@ -724,7 +724,7 @@ ghci> [[x,y,z] | x <- [1,2], y <- [3,4], z <- [5,6]]
 
 计算 `(+) <$> [1,2] <*> [4,5,6]` 会得到一个 non-deterministic 的结果 `x + y`，其中 `x` 代表 `[1,2]` 中的每一个值，而 `y` 代表 `[4,5,6]` 中的每一个值。我们用 list 来表示每一种可能的情形。同样的，当我们在做 `sequence [[1,2],[3,4],[5,6],[7,8]]`，他的结果会是 non-deterministic 的 `[x,y,z,w]`，其中 `x` 代表 `[1,2]` 中的每一个值，而 `y` 代表 `[3,4]` 中的每一个值。以此类推。我们用 list 代表 non-deterministic 的计算，每一个元素都是一个可能的情形。这也是为什么会用到 list of list。
 
-当使用在 I/O action 上的时候，`sequenceA` 跟 `sequence` 是等价的。他接受一串 I/O action 并回传一个 I/O action，这个 I/O action 会计算 list 中的每一个 I/O action，并把结果放在一个 list 中。要将类型为 `[IO a]` 的值转换成 `IO [a]` 的值，也就是会产生一串 list 的一个 I/O action，那这些 I/O action 必须要一个一个地被计算，毕竟对于这些 I/O action 你没办法不计算就得到结果。
+当使用在 I/O action 上的时候，`sequenceA` 跟 `sequence` 是等价的。他接受一串 I/O action 并返回一个 I/O action，这个 I/O action 会计算 list 中的每一个 I/O action，并把结果放在一个 list 中。要将类型为 `[IO a]` 的值转换成 `IO [a]` 的值，也就是会产生一串 list 的一个 I/O action，那这些 I/O action 必须要一个一个地被计算，毕竟对于这些 I/O action 你没办法不计算就得到结果。
 
 ```haskell
 ghci> sequenceA [getLine, getLine, getLine]  
@@ -824,7 +824,7 @@ False
 CharList :: [Char] -> CharList
 ```
 
-他接受一个 `[Char]` 的值，例如 `"my sharona"` 并回传一个 `CharList` 的值。从上面我们使用 `CharList` 的值构造子的范例中，我们可以看到的确是这样。相反地，`getCharList` 具有下列的类型。
+他接受一个 `[Char]` 的值，例如 `"my sharona"` 并返回一个 `CharList` 的值。从上面我们使用 `CharList` 的值构造子的范例中，我们可以看到的确是这样。相反地，`getCharList` 具有下列的类型。
 
 ```haskell
 getCharList :: CharList -> [Char]
@@ -914,7 +914,7 @@ ghci> head [3,4,5,undefined,2,undefined]
 data CoolBool = CoolBool { getCoolBool :: Bool }
 ```
 
-这是一个用 `data` 关键字定义的 algebraic data type。他有一个值建构子并只有一个类型为 `Bool` 的字段。我们写一个函数来对 `CoolBool` 做模式匹配，并回传一个 `"hello"` 的值。他并不会管 `CoolBool` 中装的究竟是 `True` 或 `False`。
+这是一个用 `data` 关键字定义的 algebraic data type。他有一个值建构子并只有一个类型为 `Bool` 的字段。我们写一个函数来对 `CoolBool` 做模式匹配，并返回一个 `"hello"` 的值。他并不会管 `CoolBool` 中装的究竟是 `True` 或 `False`。
 
 ```haskell
 helloMe :: CoolBool -> String  
@@ -988,7 +988,7 @@ Haskell 中 typeclass 是用来表示一个类型之间共有的行为，是一�
 
 当我们定义一个类型时，我们会想说他应该要支持的行为。也就是表现的行为是什么，并且要让他属于哪些 typeclass。如果希望他可以比较相等与否，那我们就应该定义他成为 `Eq` 的一个 instance。如果我们想要看看类型是否是一种 functor，我们可以定义他是 `Functor` 的一个 instance。以此类推。
 
-考虑 `*` 是一个将两个数值相乘的一个函数。如果我们将一个数值乘上 `1`，那就会得到自身的数值。我们实际上是做 `1 * x` 或 `x * 1` 并没有差别。结果永远会是 `x`。同样的，`++` 是一个接受两个参数并回传新的值的一个函数。只是他不是相乘而是将两个 list 接在一起。而类似 `*`，他也有一个特定的值，当他跟其他值使用 `++` 时会得到同样的值。那个值就是空的 list `[]`。
+考虑 `*` 是一个将两个数值相乘的一个函数。如果我们将一个数值乘上 `1`，那就会得到自身的数值。我们实际上是做 `1 * x` 或 `x * 1` 并没有差别。结果永远会是 `x`。同样的，`++` 是一个接受两个参数并返回新的值的一个函数。只是他不是相乘而是将两个 list 接在一起。而类似 `*`，他也有一个特定的值，当他跟其他值使用 `++` 时会得到同样的值。那个值就是空的 list `[]`。
 
 ```haskell
 ghci> 4 * 1  
@@ -1042,7 +1042,7 @@ class Monoid m where
 
 第一个函数是 `mempty`，由于他不接受任何参数，所以他并不是一个函数，而是一个 polymorphic 的常数。有点像是 `Bounded` 中的 `minBound` 一样。`mempty` 表示一个特定 monoid 的 identity。
 
-再来我们看到 `mappend`，你可能已经猜到，他是一个接受两个相同类型的值的二元函数，并回传同样的类型。不过要注意的是他的名字不太符合他真正的意思，他的名字隐含了我们要将两个东西接在一起。尽管在 list 的情况下 `++` 的确将两个 list 接起来，但 `*` 则否。他只不过将两个数值做相乘。当我们再看到其他 `Monoid` 的 instance 时，我们会看到他们大部分都没有接起来的做，所以不要用接起来的概念来想像 `mappend`，只要想像他们是接受两个 monoid 的值并回传另外一个就好了。
+再来我们看到 `mappend`，你可能已经猜到，他是一个接受两个相同类型的值的二元函数，并返回同样的类型。不过要注意的是他的名字不太符合他真正的意思，他的名字隐含了我们要将两个东西接在一起。尽管在 list 的情况下 `++` 的确将两个 list 接起来，但 `*` 则否。他只不过将两个数值做相乘。当我们再看到其他 `Monoid` 的 instance 时，我们会看到他们大部分都没有接起来的做，所以不要用接起来的概念来想像 `mappend`，只要想像他们是接受两个 monoid 的值并返回另外一个就好了。
 
 在 typeclass 定义中的最后一个函数是 `mconcat`。他接受一串 monoid 值，并将他们用 `mappend` 简化成单一的值。他有一个缺省的实作，就是从 `mempty` 作为起始值，然后用 `mappend` 来 fold。由于对于大部分的 instance 缺省的实作就没什么问题，我们不会想要实作自己的 `mconcat`。当我们定义一个类型属于 `Monoid` 的时候，多半实作 `mempty` 跟 `mappend` 就可以了。而 `mconcat` 就是因为对于一些 instance，有可能有比较有效率的方式来实作 `mconcat`。不过大多数情况都不需要。
 
@@ -1164,7 +1164,7 @@ ghci> getSum . mconcat . map Sum $ [1,2,3]
 
 ### Any and ALL
 
-另一种可以有两种表示成 monoid 方式的类型是 `Bool`。第一种方式是将 `||` 当作二元函数，而 `False` 作为 identity。这样的意思是只要有任何一个参数是 `True` 他就回传 `True`，否则回传 `False`。所以如果我们使用 `False` 作为 identity，他会在跟 `False` 做 OR 时回传 `False`，跟 `True` 做 OR 时回传 `True`。`Any` 这个 newtype 是 `Monoid` 的一个 instance，并定义如下：
+另一种可以有两种表示成 monoid 方式的类型是 `Bool`。第一种方式是将 `||` 当作二元函数，而 `False` 作为 identity。这样的意思是只要有任何一个参数是 `True` 他就返回 `True`，否则返回 `False`。所以如果我们使用 `False` 作为 identity，他会在跟 `False` 做 OR 时返回 `False`，跟 `True` 做 OR 时返回 `True`。`Any` 这个 newtype 是 `Monoid` 的一个 instance，并定义如下：
 
 ```haskell
 newtype Any = Any { getAny :: Bool }  
@@ -1179,7 +1179,7 @@ instance Monoid Any where
     Any x `mappend` Any y = Any (x || y)
 ```
 
-他叫做 `Any` 的理由是 ``x `mappend` y`` 当有任何一个是 `True` 时就会是 `True`。就算是更多个用 `mappend` 串起来的 `Any`，他也会在任何一个是 `True` 回传 `True`。
+他叫做 `Any` 的理由是 ``x `mappend` y`` 当有任何一个是 `True` 时就会是 `True`。就算是更多个用 `mappend` 串起来的 `Any`，他也会在任何一个是 `True` 返回 `True`。
 
 ```haskell
 ghci> getAny $ Any True `mappend` Any False  
@@ -1192,7 +1192,7 @@ ghci> getAny $ mempty `mappend` mempty
 False
 ```
 
-另一种 `Bool` 表现成 `Monoid` 的方式是用 `&&` 作为二元函数，而 `True` 作为 identity。只有当所有都是 `True` 的时候才会回传 `True`。下面是他的 newtype 定义：
+另一种 `Bool` 表现成 `Monoid` 的方式是用 `&&` 作为二元函数，而 `True` 作为 identity。只有当所有都是 `True` 的时候才会返回 `True`。下面是他的 newtype 定义：
 
 ```haskell
 newtype All = All { getAll :: Bool }  
@@ -1220,7 +1220,7 @@ ghci> getAll . mconcat . map All $ [True, True, False]
 False
 ```
 
-就如乘法跟加法一样，我们通常宁愿用二元函数来操作他们也不会用 newtype 来将他们包起来。不会将他们包成 `Any` 或 `All` 然后用 `mappend`，`mempty` 或 `mconcat` 来操作。通常使用 `or` 跟 `and`，他们接受一串 `Bool`，并只有当任意一个或是所有都是 `True` 的时候才回传 `True`。
+就如乘法跟加法一样，我们通常宁愿用二元函数来操作他们也不会用 newtype 来将他们包起来。不会将他们包成 `Any` 或 `All` 然后用 `mappend`，`mempty` 或 `mconcat` 来操作。通常使用 `or` 跟 `and`，他们接受一串 `Bool`，并只有当任意一个或是所有都是 `True` 的时候才返回 `True`。
 
 ### The Ordering monoid
 
@@ -1264,7 +1264,7 @@ ghci> mempty `mappend` GT
 GT
 ```
 
-所以这个 monoid 在什么情况下会有用呢？假设你要写一个比较两个字串长度的函数，并回传 `Ordering`。而且当字串一样长的时候，我们不直接回传 `EQ`，反而继续用字典顺序比较他们。一种实作的方式如下：
+所以这个 monoid 在什么情况下会有用呢？假设你要写一个比较两个字串长度的函数，并返回 `Ordering`。而且当字串一样长的时候，我们不直接返回 `EQ`，反而继续用字典顺序比较他们。一种实作的方式如下：
 
 ```haskell
 lengthCompare :: String -> String -> Ordering  
@@ -1273,7 +1273,7 @@ lengthCompare x y = let a = length x `compare` length y
                     in  if a == EQ then b else a
 ```
 
-我们称呼比较长度的结果为 `a`，而比较字典顺序的结果为 `b`，而当长度一样时，我们就回传字典顺序。
+我们称呼比较长度的结果为 `a`，而比较字典顺序的结果为 `b`，而当长度一样时，我们就返回字典顺序。
 
 如果善用我们 `Ordering` 是一种 monoid 这项知识，我们可以把我们的函数写得更简单些：
 
@@ -1294,7 +1294,7 @@ ghci> lengthCompare "zen" "ant"
 GT
 ```
 
-要记住当我们使用 `mappend`。他在左边不等于 `EQ` 的情况下都会回传左边的值。相反地则回传右边的值。这也是为什么我们将我们认为比较重要的顺序放在左边的参数。如果我们要继续延展这个函数，要让他们比较元音的顺序，并把这顺串行为第二重要，那我们可以这样修改他：
+要记住当我们使用 `mappend`。他在左边不等于 `EQ` 的情况下都会返回左边的值。相反地则返回右边的值。这也是为什么我们将我们认为比较重要的顺序放在左边的参数。如果我们要继续延展这个函数，要让他们比较元音的顺序，并把这顺串行为第二重要，那我们可以这样修改他：
 
 ```haskell
 import Data.Monoid  
@@ -1306,7 +1306,7 @@ lengthCompare x y = (length x `compare` length y) `mappend`
     where vowels = length . filter (`elem` "aeiou")
 ```
 
-我们写了一个辅助函数，他接受一个字串并回传他有多少元音。他是先用 filter 来把字母滤到剩下 `"aeiou"`，然后再用 `length` 计算长度。
+我们写了一个辅助函数，他接受一个字串并返回他有多少元音。他是先用 filter 来把字母滤到剩下 `"aeiou"`，然后再用 `length` 计算长度。
 
 ```haskell
 ghci> lengthCompare "zen" "anna"  
@@ -1317,7 +1317,7 @@ ghci> lengthCompare "zen" "ann"
 GT
 ```
 
-在第一个例子中我们看到长度不同所以回传 `LT`，明显地 `"zen"` 要短于 `"anna"`。在第二个例子中，长度是一样的，但第二个字串有比较多的元音，所以结果仍然是 `LT`。在第三个范例中，两个长度都相等，他们也有相同个数的元音，经由字典顺序比较后得到 `"zen"` 比较大。
+在第一个例子中我们看到长度不同所以返回 `LT`，明显地 `"zen"` 要短于 `"anna"`。在第二个例子中，长度是一样的，但第二个字串有比较多的元音，所以结果仍然是 `LT`。在第三个范例中，两个长度都相等，他们也有相同个数的元音，经由字典顺序比较后得到 `"zen"` 比较大。
 
 `Ordering` 的 monoid 允许我们用不同方式比较事物，并将这些顺序也定义了依重要度不同的一个顺序。
 
@@ -1440,7 +1440,7 @@ data Tree a = Empty | Node a (Tree a) (Tree a) deriving (Show, Read, Eq)
 foldMap :: (Monoid m, Foldable t) => (a -> m) -> t a -> m
 ```
 
-第一个参数是一个函数，这个函数接受 foldable 数据结构中包含的元素的类型，并回传一个 monoid。他第二个参数是一个 foldable 的结构，并包含类型 `a` 的元素。他将第一个函数来 map over 这个 foldable 的结构，因此得到一个包含 monoid 的 foldable 结构。然后用 `mappend` 来简化这些 monoid，最后得到单一的一个 monoid。这个函数听起来不太容易理解，但我们下面会看到他其实很容易实作。而且好消息是只要实作了这个函数就可以让我们的函数成为 `Foldable`。所以我们只要实作某个类型的 `foldMap`，我们就可以得到那个类型的 `foldr` 跟 `foldl`。
+第一个参数是一个函数，这个函数接受 foldable 数据结构中包含的元素的类型，并返回一个 monoid。他第二个参数是一个 foldable 的结构，并包含类型 `a` 的元素。他将第一个函数来 map over 这个 foldable 的结构，因此得到一个包含 monoid 的 foldable 结构。然后用 `mappend` 来简化这些 monoid，最后得到单一的一个 monoid。这个函数听起来不太容易理解，但我们下面会看到他其实很容易实作。而且好消息是只要实作了这个函数就可以让我们的函数成为 `Foldable`。所以我们只要实作某个类型的 `foldMap`，我们就可以得到那个类型的 `foldr` 跟 `foldl`。
 
 这就是我们如何定义 `Tree` 成为 `Foldable` 的：
 
@@ -1454,7 +1454,7 @@ instance F.Foldable Tree where
 
 ![](./accordion.png)
 
-我们是这样思考的：如果我们写一个函数，他接受树中的一个元素并回传一个 monoid，那我们要怎么简化整棵树到只有单一一个 monoid？当我们在对树做 `fmap` 的时候，我们将那函数套用至节点上，并递归地套用至左子树以及右子树。这边我们不只是 map 一个函数而已，我们还要求要把结果用 `mappend` 简化成只有单一一个 monoid 值。首先我们考虑树为空的情形，一棵没有值也没有子树的情形。由于没有值我们也没办法将他套用上面转换成 monoid 的函数，所以当树为空的时候，结果应该要是 `mempty`。
+我们是这样思考的：如果我们写一个函数，他接受树中的一个元素并返回一个 monoid，那我们要怎么简化整棵树到只有单一一个 monoid？当我们在对树做 `fmap` 的时候，我们将那函数套用至节点上，并递归地套用至左子树以及右子树。这边我们不只是 map 一个函数而已，我们还要求要把结果用 `mappend` 简化成只有单一一个 monoid 值。首先我们考虑树为空的情形，一棵没有值也没有子树的情形。由于没有值我们也没办法将他套用上面转换成 monoid 的函数，所以当树为空的时候，结果应该要是 `mempty`。
 
 在非空节点的情形下比较有趣，他包含一个值跟两棵子树。在这种情况下，我们递归地做 `foldMap`，用 `f` 来套用到左子树跟右子树上。要记住我们的 `foldMap` 只会得到单一的 monoid 值。我们也会套用 `f` 到节点中的值。这样我们就得到三个 monoid 值，有两个来自简化子树的结果，还有一个是套用 `f` 到节点中的值的结果。而我们需要将这三个值集成成单一个值。要达成这个目的我们使用 `mappend`，而且自然地会想到照左子树，节点值以及右子树的顺序来简化。
 
@@ -1490,7 +1490,7 @@ ghci> getAny $ F.foldMap (\x -> Any $ x == 3) testTree
 True
 ```
 
-这边 `\x -> Any $ x == 3` 是一个接受一个数值并回传一个 monoid 的函数，也就是一个包在 `Any` 中的 `Bool`。`foldMap` 将这个函数套用至树的每一个节点，并把结果用 `mappend` 简化成单一 monoid。如果我们这样做：
+这边 `\x -> Any $ x == 3` 是一个接受一个数值并返回一个 monoid 的函数，也就是一个包在 `Any` 中的 `Bool`。`foldMap` 将这个函数套用至树的每一个节点，并把结果用 `mappend` 简化成单一 monoid。如果我们这样做：
 
 ```haskell
 ghci> getAny $ F.foldMap (\x -> Any $ x > 15) testTree  

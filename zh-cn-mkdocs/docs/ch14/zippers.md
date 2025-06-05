@@ -65,7 +65,7 @@ changeToP (R:ds) (Node x l r) = Node x l (changeToP ds r)
 changeToP [] (Node _ l r) = Node 'P' l r
 ```
 
-如果在 list 中的第一个元素是 `L`，我们会建构一个左子树变成 `'P'` 的新树。当我们递归地调用 `changeToP`，我们只会传给他剩下的部份，因为前面的部份已经看过了。对于 `R` 的 case 也一样。如果 list 已经消耗完了，那表示我们已经走到我们的目的地，所以我们就回传一个新的树，他的 root 被修改成 `'P'`。
+如果在 list 中的第一个元素是 `L`，我们会建构一个左子树变成 `'P'` 的新树。当我们递归地调用 `changeToP`，我们只会传给他剩下的部份，因为前面的部份已经看过了。对于 `R` 的 case 也一样。如果 list 已经消耗完了，那表示我们已经走到我们的目的地，所以我们就返回一个新的树，他的 root 被修改成 `'P'`。
 
 要避免印出整棵树，我们要写一个函数告诉我们目的地究竟是什么元素。
 
@@ -109,7 +109,7 @@ goLeft :: (Tree a, Breadcrumbs) -> (Tree a, Breadcrumbs)
 goLeft (Node _ l _, bs) = (l, L:bs)
 ```
 
-我们忽略 root 跟右子树，直接回传左子树以及面包屑，只是在现有的面包屑前面加上 `L`。再来看看往右走的函数：
+我们忽略 root 跟右子树，直接返回左子树以及面包屑，只是在现有的面包屑前面加上 `L`。再来看看往右走的函数：
 
 ```haskell
 goRight :: (Tree a, Breadcrumbs) -> (Tree a, Breadcrumbs)  
@@ -247,7 +247,7 @@ attach :: Tree a -> Zipper a -> Zipper a
 attach t (_, bs) = (t, bs)
 ```
 
-我们接受一棵树跟一个 zipper，回传一个新的 zipper，锁定的目标被换成了提供的树。我们不只可以用这招把空的树换成新的树，我们也能把现有的子树给换掉。让我们来用一棵树换掉我们 `freeTree` 的最左边：
+我们接受一棵树跟一个 zipper，返回一个新的 zipper，锁定的目标被换成了提供的树。我们不只可以用这招把空的树换成新的树，我们也能把现有的子树给换掉。让我们来用一棵树换掉我们 `freeTree` 的最左边：
 
 ```haskell
 ghci> let farLeft = (freeTree,[]) -: goLeft -: goLeft -: goLeft -: goLeft  
@@ -266,7 +266,7 @@ topMost (t,[]) = (t,[])
 topMost z = topMost (goUp z)
 ```
 
-如果我们的面包屑都没了，就表示我们已经在树的 root，我们便回传目前的锁定目标。晡然，我们便往上走来锁定到父节点，然后递归地调用 `topMost`。我们现在可以在我们的树上四处移动，调用 `modify` 或 `attach` 进行我们要的修改。我们用 `topMost` 来锁定到 root，便可以满意地欣赏我们的成果。
+如果我们的面包屑都没了，就表示我们已经在树的 root，我们便返回目前的锁定目标。晡然，我们便往上走来锁定到父节点，然后递归地调用 `topMost`。我们现在可以在我们的树上四处移动，调用 `modify` 或 `attach` 进行我们要的修改。我们用 `topMost` 来锁定到 root，便可以满意地欣赏我们的成果。
 
 ## 来看串列
 
@@ -414,11 +414,11 @@ nameIs name (Folder folderName _) = name == folderName
 nameIs name (File fileName _) = name == fileName
 ```
 
-`fsTo` 接受一个 `Name` 跟 `FSZipper`，回传一个新的 `FSZipper` 锁定在某个文件上。那个文件必须在现在身处的文件夹才行。这函数不会四处找寻这文件，他只会看现在的文件夹。
+`fsTo` 接受一个 `Name` 跟 `FSZipper`，返回一个新的 `FSZipper` 锁定在某个文件上。那个文件必须在现在身处的文件夹才行。这函数不会四处找寻这文件，他只会看现在的文件夹。
 
 ![](./cool.png)
 
-首先我们用 `break` 来把身处文件夹中的文件们分成在我们要找的文件前的，跟之后的。如果记性好，`break` 会接受一个 predicate 跟一个 list，并回传两个 list 组成的 pair。第一个 list 装有 predicate 会回传 `False` 的元素，而一旦碰到一个元素回传 `True`，他就把剩下的所有元素都放进第二个 list 中。我们用了一个辅助函数叫做 `nameIs`，他接受一个名字跟一个文件系统的元素，如果名字相符的话他就会回传 `True`。
+首先我们用 `break` 来把身处文件夹中的文件们分成在我们要找的文件前的，跟之后的。如果记性好，`break` 会接受一个 predicate 跟一个 list，并返回两个 list 组成的 pair。第一个 list 装有 predicate 会返回 `False` 的元素，而一旦碰到一个元素返回 `True`，他就把剩下的所有元素都放进第二个 list 中。我们用了一个辅助函数叫做 `nameIs`，他接受一个名字跟一个文件系统的元素，如果名字相符的话他就会返回 `True`。
 
 现在 `ls` 一个包含我们要找的元素之前元素的 list。`item` 就是我们要找的元素，而 `rs` 是剩下的部份。有了这些，我们不过就是把 `break` 传回来的东西当作锁定的目标，来建造一个面包屑来包含所有必须的信息。
 
@@ -479,7 +479,7 @@ fsNewFile item (Folder folderName items, bs) =
 ghci> let newFocus = (myDisk,[]) -: fsTo "pics" -: fsNewFile (File "heh.jpg" "lol") -: fsUp
 ```
 
-当我们修改我们的文件系统，他不会真的修改原本的文件系统，而是回传一份新的文件系统。这样我们就可以访问我们旧有的系统（也就是 `myDisk`）跟新的系统（`newFocus` 的第一个部份）使用一个 Zippers，我们就能自动获得版本控制，代表我们能访问到旧的数据结构。这也不仅限于 Zippers，也是由于 Haskell 的数据结构有 immutable 的特性。但有了 Zipper，对于操作会变得更容易，我们可以自由地在数据结构中走动。
+当我们修改我们的文件系统，他不会真的修改原本的文件系统，而是返回一份新的文件系统。这样我们就可以访问我们旧有的系统（也就是 `myDisk`）跟新的系统（`newFocus` 的第一个部份）使用一个 Zippers，我们就能自动获得版本控制，代表我们能访问到旧的数据结构。这也不仅限于 Zippers，也是由于 Haskell 的数据结构有 immutable 的特性。但有了 Zipper，对于操作会变得更容易，我们可以自由地在数据结构中走动。
 
 ## 小心每一步
 
@@ -536,13 +536,13 @@ goUp (_, []) = Nothing
 
 如果我们有面包屑，那我们就能成功锁定新的节点，如果没有，就造成一个失败。
 
-之前这些函数是接受 Zipper 并回传 Zipper，这代表我们可以这样操作：
+之前这些函数是接受 Zipper 并返回 Zipper，这代表我们可以这样操作：
 
 ```haskell
 gchi> let newFocus = (freeTree,[]) -: goLeft -: goRight
 ```
 
-但现在我们不回传 `Zipper a` 而回传 `Maybe (Zipper a)`。所以没办法像上面串起来。我们在之前章节也有类似的问题。他是每次走一步，而他的每一步都有可能失败。
+但现在我们不返回 `Zipper a` 而返回 `Maybe (Zipper a)`。所以没办法像上面串起来。我们在之前章节也有类似的问题。他是每次走一步，而他的每一步都有可能失败。
 
 幸运的是我们可以从之前的经验中学习，也就是使用 `>>=`，他接受一个有 context 的值（也就是 `Maybe (Zipper a)`），会把值喂进函数并保持其他 context 的。所以就像之前的例子，我们把 `-:` 换成 `>>=`。
 

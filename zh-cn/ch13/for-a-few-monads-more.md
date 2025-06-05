@@ -23,14 +23,14 @@ isBigGang :: Int -> Bool
 isBigGang x = x > 9
 ```
 
-现在我们希望他不只是回传 `True` 或 `False`，我们还希望他能够多回传一个字串代表 log。这很容易，只要多加一个 `String` 在 `Bool` 旁边就好了。
+现在我们希望他不只是返回 `True` 或 `False`，我们还希望他能够多返回一个字串代表 log。这很容易，只要多加一个 `String` 在 `Bool` 旁边就好了。
 
 ```haskell
 isBigGang :: Int -> (Bool, String)  
 isBigGang x = (x > 9, "Compared gang size to 9.")
 ```
 
-我们现在回传了一个 Tuple，第一个元素是原来的布尔值，第二个元素是一个 String。现在我们的值有了一个 context。
+我们现在返回了一个 Tuple，第一个元素是原来的布尔值，第二个元素是一个 String。现在我们的值有了一个 context。
 
 ```haskell
 ghci> isBigGang 3  
@@ -41,7 +41,7 @@ ghci> isBigGang 30
 
 ![](./tuco.png)
 
-到目前为止都还不错，`isBigGang` 回传一个值跟他的 context。对于正常的数值来说这样的写法都能运作良好。但如果我们想要把一个已经具有 context 的值，像是 `(3, "Smallish gang.")`，喂给 `isBigGang` 呢？我们又面对了同样的问题：如果我们有一个能接受正常数值并回传一个具有 context 值的 function，那我们要如何喂给他一个具有 context 的值？
+到目前为止都还不错，`isBigGang` 返回一个值跟他的 context。对于正常的数值来说这样的写法都能运作良好。但如果我们想要把一个已经具有 context 的值，像是 `(3, "Smallish gang.")`，喂给 `isBigGang` 呢？我们又面对了同样的问题：如果我们有一个能接受正常数值并返回一个具有 context 值的 function，那我们要如何喂给他一个具有 context 的值？
 
 当我们在研究 `Maybe` monad 的时候，我们写了一个 `applyMaybe`。他接受一个 `Maybe a` 值跟一个 `a -> Maybe b` 型态的函数，他会把 `Maybe a` 喂给这个 function，即便这个 function 其实是接受 `a` 而非 `Maybe a`。`applyMaybe` 有针对这样的 context 做处理，也就是会留意有可能发生的失败情况。但在 `a -> Maybe b` 里面，我们可以只专心处理正常数值即可。因为 `applyMaybe` \(之后变成了 `>>=`\)会帮我们处理需要检查 `Nothing` 或 `Just` 的情况。
 
@@ -52,7 +52,7 @@ applyLog :: (a,String) -> (a -> (b,String)) -> (b,String)
 applyLog (x,log) f = let (y,newLog) = f x in (y,log ++ newLog)
 ```
 
-当我们想把一个具有 context 的值喂给一个函数的时候，我们会尝试把值跟他的 context 分开，然后把值喂给函数再重新接回 context。在 `Maybe` monad 的情况，我们检查值是否为 `Just x`，如果是，便将 `x` 喂给函数。而在 log 的情况，我们知道 pair 的其中一个 component 是 log 而另一个是值。所以我们先取出值 `x`，将 `f` apply 到 `x`，便获取 `(y,newLog)`，其中 `y` 是新的值而 `newLog` 则是新的 log。但如果我们回传 `newLog`，旧的 log 便不会包含进去，所以我们要回传的是 `(y, log ++ newLog)`。我们用 `++` 来把新的 log 接到旧的上面。
+当我们想把一个具有 context 的值喂给一个函数的时候，我们会尝试把值跟他的 context 分开，然后把值喂给函数再重新接回 context。在 `Maybe` monad 的情况，我们检查值是否为 `Just x`，如果是，便将 `x` 喂给函数。而在 log 的情况，我们知道 pair 的其中一个 component 是 log 而另一个是值。所以我们先取出值 `x`，将 `f` apply 到 `x`，便获取 `(y,newLog)`，其中 `y` 是新的值而 `newLog` 则是新的 log。但如果我们返回 `newLog`，旧的 log 便不会包含进去，所以我们要返回的是 `(y, log ++ newLog)`。我们用 `++` 来把新的 log 接到旧的上面。
 
 来看看 `applyLog` 运作的情形：
 
@@ -86,7 +86,7 @@ ghci> ("Bathcat","Got outlaw name.") `applyLog` (\x -> (length x, "Applied lengt
 applyLog :: (a,[c]) -> (a -> (b,[c])) -> (b,[c])
 ```
 
-我们用一个 List 来代表 Log。包含在 List 中的元素型态必须跟原有的 List 跟回传的 List 型态相同，否则我们没办法用 `++` 来把他们接起来。
+我们用一个 List 来代表 Log。包含在 List 中的元素型态必须跟原有的 List 跟返回的 List 型态相同，否则我们没办法用 `++` 来把他们接起来。
 
 这能够运作在 bytestring 上吗？绝对没问题。只是我们现在的型态只对 List 有效。我们必须要另外做一个 bytestring 版本的 `applyLog`。但我们注意到 List 跟 bytestring 都是 monoids。因此他们都是 `Monoid` type class 的 instance，那代表他们都有实作 `mappend`。对 List 以及 bytestring 而言，`mappend` 都是拿来串接的。
 
@@ -125,7 +125,7 @@ ghci> Sum 3 `mappend` Sum 9
 Sum {getSum = 12}
 ```
 
-`addDrink` 的实作很简单，如果我们想吃豆子，他会回传 `"milk"` 以及伴随的 `Sum 25`，同样的如果我们要吃 "jerky"，他就会回传 "whiskey"，要吃其他东西的话，就会回传 "beer"。乍看之下这个函数没什么特别，但如果用 `applyLog` 的话就会有趣些。
+`addDrink` 的实作很简单，如果我们想吃豆子，他会返回 `"milk"` 以及伴随的 `Sum 25`，同样的如果我们要吃 "jerky"，他就会返回 "whiskey"，要吃其他东西的话，就会返回 "beer"。乍看之下这个函数没什么特别，但如果用 `applyLog` 的话就会有趣些。
 
 ```haskell
 ghci> ("beans", Sum 10) `applyLog` addDrink  
@@ -138,7 +138,7 @@ ghci> ("dogmeat", Sum 5) `applyLog` addDrink
 
 牛奶价值 `25` 美分，但如果我们也吃了价值 `10` 美分的豆子的话，总共需要付 `35` 美分。这样很清楚地展示了伴随的值不一定需要是 log，他可以是任何 monoid。至于两个值要如何结合，那要看 monoid 中怎么定义。当我们需要的是 log 的时候，他们是串接，但这个 case 里面，数字是被加起来。
 
-由于 `addDrink` 回传一个 `(Food,Price)`，我们可以再把结果重新喂给 `addDrink`，这可以很容易告诉我们总共喝了多少钱：
+由于 `addDrink` 返回一个 `(Food,Price)`，我们可以再把结果重新喂给 `addDrink`，这可以很容易告诉我们总共喝了多少钱：
 
 ```haskell
 ghci> ("dogmeat", Sum 5) `applyLog` addDrink `applyLog` addDrink  
@@ -171,7 +171,7 @@ instance (Monoid w) => Monad (Writer w) where
 
 首先，我们来看看 `>>=`。他的实作基本上就是 `applyLog`，只是我们的 tuple 现在是包在一个 `Writer` 的 `newtype` 中，我们可以用 pattern matching 的方式把他给 unwrap。我们将 `x` 喂给 `f`。这会回给我们 `Writer w a`。接着可以用 `let` expression 来做 pattern matching。把结果绑定到 `y` 这个名字上，然后用 `mappend` 来结合旧的 monoid 值跟新的 monoid 值。最后把结果跟 monoid 值用 `Writer` constructor 包起来，形成我们最后的 `Writer` value。
 
-那 `return` 呢？回想 `return` 的作用是接受一个值，并回传一个具有意义的最小 context 来装我们的值。那究竟什么样的 context 可以代表我们的 `Writer` 呢？如果我们希望 monoid 值所造成的影响愈小愈好，那 `mempty` 是个合理的选择。`mempty` 是被当作 identity monoid value，像是 `""` 或 `Sum 0`，或是空的 bytestring。当我们对 `mempty` 用 `mappend` 跟其他 monoid 值结合，结果会是其他的 monoid 值。所以如果我们用 `return` 来做一个 `Writer`，然后用 `>>=` 来喂给其他的函数，那函数回传的便是算出来的 monoid。下面我们试着用 `return` 搭配不同 context 来回传 `3`：
+那 `return` 呢？回想 `return` 的作用是接受一个值，并返回一个具有意义的最小 context 来装我们的值。那究竟什么样的 context 可以代表我们的 `Writer` 呢？如果我们希望 monoid 值所造成的影响愈小愈好，那 `mempty` 是个合理的选择。`mempty` 是被当作 identity monoid value，像是 `""` 或 `Sum 0`，或是空的 bytestring。当我们对 `mempty` 用 `mappend` 跟其他 monoid 值结合，结果会是其他的 monoid 值。所以如果我们用 `return` 来做一个 `Writer`，然后用 `>>=` 来喂给其他的函数，那函数返回的便是算出来的 monoid。下面我们试着用 `return` 搭配不同 context 来返回 `3`：
 
 ```haskell
 ghci> runWriter (return 3 :: Writer String Int)  
@@ -239,7 +239,7 @@ gcd' a b
     | otherwise = gcd' b (a `mod` b)
 ```
 
-算法的内容很简单。首先他检查第二个数字是否为零。如果是零，那就回传第一个数字。如果不是，那结果就是第二个数字跟将第一个数字除以第二个数字的余数两个数字的最大公因数。举例来说，如果我们想知道 8 跟 3 的最大公因数，首先可以注意到 3 不是 0。所以我们要求的是 3 跟 2 的最大公因数\(8 除以 3 余二\)。接下去我可以看到 2 不是 0，所以我们要再找 2 跟 1 的最大公因数。同样的，第二个数不是 0，所以我们再找 1 跟 0 的最大公因数。最后第二个数终于是 0 了，所以我们得到最大公因数是 1。
+算法的内容很简单。首先他检查第二个数字是否为零。如果是零，那就返回第一个数字。如果不是，那结果就是第二个数字跟将第一个数字除以第二个数字的余数两个数字的最大公因数。举例来说，如果我们想知道 8 跟 3 的最大公因数，首先可以注意到 3 不是 0。所以我们要求的是 3 跟 2 的最大公因数\(8 除以 3 余二\)。接下去我可以看到 2 不是 0，所以我们要再找 2 跟 1 的最大公因数。同样的，第二个数不是 0，所以我们再找 1 跟 0 的最大公因数。最后第二个数终于是 0 了，所以我们得到最大公因数是 1。
 
 ```haskell
 ghci> gcd' 8 3  
@@ -267,13 +267,13 @@ gcd' a b
       gcd' b (a `mod` b)
 ```
 
-这个函数接受两个 `Int` 并回传一个 `Writer [String] Int`，也就是说是一个有 log context 的 `Int`。当 `b` 等于 `0` 的时候，我们用一个 `do` 来组成一个 `Writer` 的值。我们先用 `tell` 来写入我们的 log，然后用 `return` 来当作 `do` 的结果。当然我们也可以这样写：
+这个函数接受两个 `Int` 并返回一个 `Writer [String] Int`，也就是说是一个有 log context 的 `Int`。当 `b` 等于 `0` 的时候，我们用一个 `do` 来组成一个 `Writer` 的值。我们先用 `tell` 来写入我们的 log，然后用 `return` 来当作 `do` 的结果。当然我们也可以这样写：
 
 ```haskell
 Writer (a, ["Finished with " ++ show a])
 ```
 
-但我想 `do` 的表达方式是比较容易阅读的。接下来我们看看当 `b` 不等于 `0` 的时候。我们会把 `mod` 的使用情况写进 log。然后在 `do` 当中的第二行递归调用 `gcd'`。`gcd'` 现在是回传一个 `Writer` 的型态，所以 ``gcd' b (a `mod` b)`` 这样的写法是完全没问题的。
+但我想 `do` 的表达方式是比较容易阅读的。接下来我们看看当 `b` 不等于 `0` 的时候。我们会把 `mod` 的使用情况写进 log。然后在 `do` 当中的第二行递归调用 `gcd'`。`gcd'` 现在是返回一个 `Writer` 的型态，所以 ``gcd' b (a `mod` b)`` 这样的写法是完全没问题的。
 
 尽管去 trace 这个 `gcd'` 对于理解十分有帮助，但我想了解整个大概念，把值视为具有 context 是更加有用的。
 
@@ -502,7 +502,7 @@ instance Monad ((->) r) where
 
 我们之前已经看过函数的 `pure` 实作了，而 `return` 差不多就是 `pure`。他接受一个值并把他放进一个 minimal context 里面。而要让一个函数能够是某个定值的唯一方法就是让他完全忽略他的参数。
 
-而 `>>=` 的实作看起来有点难以理解，我们可以仔细来看看。当我们使用 `>>=` 的时候，喂进去的是一个 monadic value，处理他的是一个函数，而吐出来的也是一个 monadic value。在这个情况下，当我们将一个函数喂进一个函数，吐出来的也是一个函数。这就是为什么我们在最外层使用了一个 lambda。在我们目前看过的实作中，`>>=` 几乎都是用 lambda 将内部跟外部隔开来，然后在内部来使用 `f`。这边也是一样的道理。要从一个函数得到一个结果，我们必须喂给他一些东西，这也是为什么我们先用 `(h w)` 取得结果，然后将他丢给 `f`。而 `f` 回传一个 monadic value，在这边这个 monadic value 也就是一个函数。我们再把 `w` 喂给他。
+而 `>>=` 的实作看起来有点难以理解，我们可以仔细来看看。当我们使用 `>>=` 的时候，喂进去的是一个 monadic value，处理他的是一个函数，而吐出来的也是一个 monadic value。在这个情况下，当我们将一个函数喂进一个函数，吐出来的也是一个函数。这就是为什么我们在最外层使用了一个 lambda。在我们目前看过的实作中，`>>=` 几乎都是用 lambda 将内部跟外部隔开来，然后在内部来使用 `f`。这边也是一样的道理。要从一个函数得到一个结果，我们必须喂给他一些东西，这也是为什么我们先用 `(h w)` 取得结果，然后将他丢给 `f`。而 `f` 返回一个 monadic value，在这边这个 monadic value 也就是一个函数。我们再把 `w` 喂给他。
 
 如果你还不太懂 `>>=` 怎么写出来的，不要担心，因为接下来的范例会让你晓得这真的是一个简单的 Monad。我们造一个 `do` expression 来使用这个 Monad。
 
@@ -523,7 +523,7 @@ ghci> addStuff 3
 19
 ```
 
-其中 `3` 会被喂给 `(*2)` 跟 `(+10)`。而且他也会被喂给 `return (a+b)`，只是他会忽略掉 `3` 而永远回传 `a+b` 正因为如此，function monad 也被称作 reader monad。所有函数都从一个固定的地方读取。要写得更清楚一些，可以把 `addStuff` 改写如下：
+其中 `3` 会被喂给 `(*2)` 跟 `(+10)`。而且他也会被喂给 `return (a+b)`，只是他会忽略掉 `3` 而永远返回 `a+b` 正因为如此，function monad 也被称作 reader monad。所有函数都从一个固定的地方读取。要写得更清楚一些，可以把 `addStuff` 改写如下：
 
 ```haskell
 addStuff :: Int -> Int  
@@ -533,15 +533,15 @@ addStuff x = let
     in a+b
 ```
 
-我们见识了把函数视作具有 context 的值很自然的可以表达成 reader monad。只要我们当作我们知道函数会回传什么值就好。他作的就是把所有的函数都黏在一起做成一个大的函数，然后把这个函数的参数都喂给全部组成的函数，这有点取出他们未来的值的意味。实作做完了然后 `>>=` 就会保证一切都能正常运作。
+我们见识了把函数视作具有 context 的值很自然的可以表达成 reader monad。只要我们当作我们知道函数会返回什么值就好。他作的就是把所有的函数都黏在一起做成一个大的函数，然后把这个函数的参数都喂给全部组成的函数，这有点取出他们未来的值的意味。实作做完了然后 `>>=` 就会保证一切都能正常运作。
 
 ## State Monad
 
 ![](./texas.png)
 
-Haskell 是一个纯粹的语言，正因为如此，我们的程序是有一堆没办法改变全域状态或变量的函数所组成，他们只会作些处理并回传结果。这样的性质让我们很容易思考我们的程序在干嘛，因为我们不需要担心变量在某一个时间点的值是什么。然而，有一些领域的问题根本上就是依赖于随着时间而改变的状态。虽然我们也可以用 Haskell 写出这样的程序，但有时候写起来蛮痛苦的。这也是为什么 Haskell 要加进 State Monad 这个特性。这让我们在 Haskell 中可以容易地处理状态性的问题，并让其他部份的程序还是保持纯粹性。
+Haskell 是一个纯粹的语言，正因为如此，我们的程序是有一堆没办法改变全域状态或变量的函数所组成，他们只会作些处理并返回结果。这样的性质让我们很容易思考我们的程序在干嘛，因为我们不需要担心变量在某一个时间点的值是什么。然而，有一些领域的问题根本上就是依赖于随着时间而改变的状态。虽然我们也可以用 Haskell 写出这样的程序，但有时候写起来蛮痛苦的。这也是为什么 Haskell 要加进 State Monad 这个特性。这让我们在 Haskell 中可以容易地处理状态性的问题，并让其他部份的程序还是保持纯粹性。
 
-当我们处理乱数的时候，我们的函数接受一个 random generator 并回传一个新的乱数跟一个新的 random generator。如果我们需要很多个乱数，我们可以用前一个函数回传的 random generator 继续做下去。当我们要写一个接受 `StdGen` 的函数并产生丢三个硬币结果的函数，我们会这样写：
+当我们处理乱数的时候，我们的函数接受一个 random generator 并返回一个新的乱数跟一个新的 random generator。如果我们需要很多个乱数，我们可以用前一个函数返回的 random generator 继续做下去。当我们要写一个接受 `StdGen` 的函数并产生丢三个硬币结果的函数，我们会这样写：
 
 ```haskell
 threeCoins :: StdGen -> (Bool, Bool, Bool)  
@@ -552,11 +552,11 @@ threeCoins gen =
     in  (firstCoin, secondCoin, thirdCoin)
 ```
 
-他接受一个 `gen` 然后用 `random gen` 产生一个 `Bool` 型态的值以及新的 generator。要仿真丢第二个硬币的话，便使用新的 generator。在其他语言中，多半除了乱数之外不需要多回传一个 generator。那是因为我们可以对现有的进行修改。但 Haskell 是纯粹的语言，我们没办法那么做，所以我们必须要接受一个状态，产生结果然后回传一个新的状态，然后用新的状态来继续做下去。
+他接受一个 `gen` 然后用 `random gen` 产生一个 `Bool` 型态的值以及新的 generator。要仿真丢第二个硬币的话，便使用新的 generator。在其他语言中，多半除了乱数之外不需要多返回一个 generator。那是因为我们可以对现有的进行修改。但 Haskell 是纯粹的语言，我们没办法那么做，所以我们必须要接受一个状态，产生结果然后返回一个新的状态，然后用新的状态来继续做下去。
 
 一般来讲你应该不会喜欢这么写，在程序中有赤裸裸的状态，但我们又不想放弃 Haskell 的纯粹性质。这就是 State Monad 的好处了，他可以帮我们处理这些琐碎的事情，又让我们保持 Haskell 的纯粹性。
 
-为了深入理解状态性的计算，我们先来看看应该给他们什么样的型态。我们会说一个状态性的计算是一个函数，他接受一个状态，回传一个值跟一个新的状态。写起来会像这样：
+为了深入理解状态性的计算，我们先来看看应该给他们什么样的型态。我们会说一个状态性的计算是一个函数，他接受一个状态，返回一个值跟一个新的状态。写起来会像这样：
 
 ```haskell
 s -> (a,s)
@@ -567,16 +567,16 @@ s -> (a,s)
 ```text
 在其他的语言中，赋值大多是被当作会改变状态的操作。举例来说，当我们在命令式语言写 ``x = 5``，这通常代表的是把 ``5`` 指定给 ``x`` 这变量。而且这边 ``5`` 是一个 expression。
 
-如果你用函数语言的角度去思考，你可以把他想做是一个函数，接受一个状态，并回传结果跟新的状态。那新的状态代表所有已指定的值与新加入的变量。
+如果你用函数语言的角度去思考，你可以把他想做是一个函数，接受一个状态，并返回结果跟新的状态。那新的状态代表所有已指定的值与新加入的变量。
 ```
 
-这种改变状态的计算，除了想做是一个接受状态并回传结果跟新状态的函数外，也可以想做是具有 context 的值。 实际的值是结果。然而要得到结果，我们必须要给一个初始的状态，才能得到结果跟最后的状态。
+这种改变状态的计算，除了想做是一个接受状态并返回结果跟新状态的函数外，也可以想做是具有 context 的值。 实际的值是结果。然而要得到结果，我们必须要给一个初始的状态，才能得到结果跟最后的状态。
 
 ### Stack and Stones
 
 考虑现在我们要对一个堆叠的操作建立模型。你可以把东西推上堆叠顶端，或是把东西从顶端拿下来。如果你要的元素是在堆叠的底层的话，你必须要把他上面的东西都拿下来才能拿到他。
 
-我们用一个 list 来代表我们的堆叠。而我们把 list 的头当作堆叠的顶端。为了正确的建立模型，我们要写两个函数：`pop` 跟 `push`。`pop` 会接受一个堆叠，取下一个元素并回传一个新的堆叠，这个新的堆叠不包含取下的元素。`push` 会接受一个元素，把他堆到堆叠中，并回传一个新的堆叠，其包含这个新的元素。
+我们用一个 list 来代表我们的堆叠。而我们把 list 的头当作堆叠的顶端。为了正确的建立模型，我们要写两个函数：`pop` 跟 `push`。`pop` 会接受一个堆叠，取下一个元素并返回一个新的堆叠，这个新的堆叠不包含取下的元素。`push` 会接受一个元素，把他堆到堆叠中，并返回一个新的堆叠，其包含这个新的元素。
 
 ```haskell
 type Stack = [Int]  
@@ -600,7 +600,7 @@ stackManip stack = let
     in pop newStack2
 ```
 
-我们拿一个 `stack` 来作 `push 3 stack` 的动作，其结果是一个 tuple。tuple 的第一个部份是 `()`，而第二个部份是新的堆叠，我们把他命名成 `newStack1`。然后我们从 `newStack1` 上 pop 出一个数字。其结果是我们之前 push 上去的一个数字 `a`，然后把这个更新的堆叠叫做 `newStack2`。然后我们从 `newStack2` 上再 pop 出一个数字 `b`，并得到 `newStack3`。我们回传一个 tuple 跟最终的堆叠。
+我们拿一个 `stack` 来作 `push 3 stack` 的动作，其结果是一个 tuple。tuple 的第一个部份是 `()`，而第二个部份是新的堆叠，我们把他命名成 `newStack1`。然后我们从 `newStack1` 上 pop 出一个数字。其结果是我们之前 push 上去的一个数字 `a`，然后把这个更新的堆叠叫做 `newStack2`。然后我们从 `newStack2` 上再 pop 出一个数字 `b`，并得到 `newStack3`。我们返回一个 tuple 跟最终的堆叠。
 
 ```haskell
 ghci> stackManip [5,8,2,1]  
@@ -640,7 +640,7 @@ instance Monad (State s) where
                                     in  g newState
 ```
 
-我们先来看看 `return` 那一行。我们 `return` 要作的事是接受一个值，并做出一个改变状态的操作，让他永远回传那个值。所以我们才做了一个 lambda 函数，`\s -> (x,s)`。我们把 `x` 当成是结果，并且状态仍然是 `s`。这就是 `return` 要完成的 minimal context。
+我们先来看看 `return` 那一行。我们 `return` 要作的事是接受一个值，并做出一个改变状态的操作，让他永远返回那个值。所以我们才做了一个 lambda 函数，`\s -> (x,s)`。我们把 `x` 当成是结果，并且状态仍然是 `s`。这就是 `return` 要完成的 minimal context。
 
 ![](./badge.png)
 
@@ -658,7 +658,7 @@ push :: Int -> State Stack ()
 push a = State $ \xs -> ((),a:xs)
 ```
 
-`pop` 已经满足我们的条件，而 `push` 要先接受一个 `Int` 才会回传我们要的操作。所以我们可以改写先前的范例如下：
+`pop` 已经满足我们的条件，而 `push` 要先接受一个 `Int` 才会返回我们要的操作。所以我们可以改写先前的范例如下：
 
 ```haskell
 import Control.Monad.State  
@@ -759,7 +759,7 @@ stackyStack = do
 
 ### 随机性与 state monad
 
-在章节的一开始，我们知道了在 Haskell 中要产生乱数的不方便。我们要拿一个产生器，并回传一个乱数跟一个新的产生器。接下来我们还一定要用新的产生器不可。但 State Monad 让我们可以方便一些。
+在章节的一开始，我们知道了在 Haskell 中要产生乱数的不方便。我们要拿一个产生器，并返回一个乱数跟一个新的产生器。接下来我们还一定要用新的产生器不可。但 State Monad 让我们可以方便一些。
 
 `System.Random` 中的 `random` 函数有下列的型态：
 
@@ -829,7 +829,7 @@ instance (Error e) => Monad (Either e) where
 
 `>>=` 会检查两种可能的情况：也就是 `Left` 跟 `Right`。如果进来的是 `Right`，那我们就调用 `f`，就像我们在写 `Just` 的时候一样，只是调用对应的函数。而在错误的情况下，`Left` 会被传出来，而且里面保有描述失败的值。
 
-`Either e` 的 `Monad` instance 有一项额外的要求，就是包在 `Left` 中的型态，也就是 `e`，必须是 `Error` typeclass 的 instance。`Error` 这个 typeclass 描述一个可以被当作错误消息的型态。他定义了 `strMsg` 这个函数，他接受一个用字串表达的错误。一个明显的范例就是 `String` 型态，当他是 `String` 的时候，`strMsg` 只不过回传他接受到的字串。
+`Either e` 的 `Monad` instance 有一项额外的要求，就是包在 `Left` 中的型态，也就是 `e`，必须是 `Error` typeclass 的 instance。`Error` 这个 typeclass 描述一个可以被当作错误消息的型态。他定义了 `strMsg` 这个函数，他接受一个用字串表达的错误。一个明显的范例就是 `String` 型态，当他是 `String` 的时候，`strMsg` 只不过返回他接受到的字串。
 
 ```haskell
 ghci> :t strMsg  
@@ -849,7 +849,7 @@ ghci> Right 100 >>= \x -> Left "no way!"
 Left "no way!"
 ```
 
-当我们用 `>>=` 来把一个 `Left` 喂进一个函数，函数的运算会被忽略而直接回传丢进去的 `Left` 值。当我们喂 `Right` 值给函数，函数就会被计算而得到结果，但函数还是产生了一个 `Left` 值。
+当我们用 `>>=` 来把一个 `Left` 喂进一个函数，函数的运算会被忽略而直接返回丢进去的 `Left` 值。当我们喂 `Right` 值给函数，函数就会被计算而得到结果，但函数还是产生了一个 `Left` 值。
 
 当我们试着喂一个 `Right` 值给函数，而且函数也成功地计算，我们却碰到了一个奇怪的 type error。
 
@@ -1065,19 +1065,19 @@ joinedMaybes = do
 
 ![](./tipi.png)
 
-最有趣的是对于一个 monadic value 而言，用 `>>=` 把他喂进一个函数其实等价于对 monad 做 mapping over 的动作，然后用 `join` 来把值从 nested 的状态变成扁平的状态。也就是说 `m >>= f` 其实就是 `join (fmap f m)`。如果你仔细想想的话其实很明显。`>>=` 的使用方式是，把一个 monadic value 喂进一个接受普通值的函数，但他却会回传 monadic value。如果我们 map over 一个 monadic value，我们会做成一个 monadic value 包了另外一个 monadic value。例如说，我们现在手上有 `Just 9` 跟 `\x -> Just (x+1)`。如果我们把这个函数 map over `Just 9`，我们会得到 `Just (Just 10)`
+最有趣的是对于一个 monadic value 而言，用 `>>=` 把他喂进一个函数其实等价于对 monad 做 mapping over 的动作，然后用 `join` 来把值从 nested 的状态变成扁平的状态。也就是说 `m >>= f` 其实就是 `join (fmap f m)`。如果你仔细想想的话其实很明显。`>>=` 的使用方式是，把一个 monadic value 喂进一个接受普通值的函数，但他却会返回 monadic value。如果我们 map over 一个 monadic value，我们会做成一个 monadic value 包了另外一个 monadic value。例如说，我们现在手上有 `Just 9` 跟 `\x -> Just (x+1)`。如果我们把这个函数 map over `Just 9`，我们会得到 `Just (Just 10)`
 
 事实上 `m >>= f` 永远等价于 `join (fmap f m)` 这性质非常有用。如果我们要定义自己的 `Monad` instance，要知道怎么把 nested monadic value 变成扁平比起要定义 `>>=` 是比较容易的一件事。
 
 ### filterM
 
-`filter` 函数是 Haskell 中不可或缺的要素。他接受一个断言\(predicate\)跟一个 list 来过滤掉断言为否的部份并回传一个新的 list。他的型态是这样：
+`filter` 函数是 Haskell 中不可或缺的要素。他接受一个断言\(predicate\)跟一个 list 来过滤掉断言为否的部份并返回一个新的 list。他的型态是这样：
 
 ```haskell
 filter :: (a -> Bool) -> [a] -> [a]
 ```
 
-predicate 能接 list 中的一个元素并回传一个 `Bool` 型态的值。但如果 `Bool` 型态其实是一个 monadic value 呢？也就是他有一个 context。例如说除了 `True` 跟 `False` 之外还伴随一个 monoid，像是 `["Accepted the number 5"]`，或 `["3 is too small"]`。照前面所学的听起来是没问题，而且产出的 list 也会跟随 context，在这个例子中就是 log。所以如果 `Bool` 会回传伴随 context 的布尔值，我们会认为最终的结果也会具有 context。要不然这些 context 都会在处理过程中遗失。
+predicate 能接 list 中的一个元素并返回一个 `Bool` 型态的值。但如果 `Bool` 型态其实是一个 monadic value 呢？也就是他有一个 context。例如说除了 `True` 跟 `False` 之外还伴随一个 monoid，像是 `["Accepted the number 5"]`，或 `["3 is too small"]`。照前面所学的听起来是没问题，而且产出的 list 也会跟随 context，在这个例子中就是 log。所以如果 `Bool` 会返回伴随 context 的布尔值，我们会认为最终的结果也会具有 context。要不然这些 context 都会在处理过程中遗失。
 
 在 `Control.Monad` 中的 `filterM` 函数正是我们所需要的，他的型态如下：
 
@@ -1085,7 +1085,7 @@ predicate 能接 list 中的一个元素并回传一个 `Bool` 型态的值。�
 filterM :: (Monad m) => (a -> m Bool) -> [a] -> m [a]
 ```
 
-predicate 会回传一个 monadic value，他的结果会是 `Bool` 型态，由于他是 monadic value，他的 context 有可能会是任何 context，譬如说可能的失败，non-determinism，甚至其他的 context。一旦我们能保证 context 也会被保存在最后的结果中，结果也就是一个 monadic value。
+predicate 会返回一个 monadic value，他的结果会是 `Bool` 型态，由于他是 monadic value，他的 context 有可能会是任何 context，譬如说可能的失败，non-determinism，甚至其他的 context。一旦我们能保证 context 也会被保存在最后的结果中，结果也就是一个 monadic value。
 
 我们来写一个接受 list 然后过滤掉小于 4 的函数。先尝试使用 `filter` 函数：
 
@@ -1107,9 +1107,9 @@ keepSmall x
         return False
 ```
 
-这个函数会回传 `Writer [String] Bool` 而不是一个单纯的 `Bool`。他是一个 monadic predicate。如果扫到的数字小于 `4` 的话，我们就会回报要保存他，而且回传 `return True`。
+这个函数会返回 `Writer [String] Bool` 而不是一个单纯的 `Bool`。他是一个 monadic predicate。如果扫到的数字小于 `4` 的话，我们就会回报要保存他，而且返回 `return True`。
 
-接着，我们把他跟一个 list 喂给 `filterM`。由于 predicate 会回传 `Writer`，所以结果仍会是一个 `Writer` 值。
+接着，我们把他跟一个 list 喂给 `filterM`。由于 predicate 会返回 `Writer`，所以结果仍会是一个 `Writer` 值。
 
 ```haskell
 ghci> fst $ runWriter $ filterM keepSmall [9,1,5,2,10,3]  
@@ -1184,7 +1184,7 @@ ghci> foldl (\acc x -> acc + x) 0 [2,8,3,1]
 
 这边起始的累加值是 `0`，首先 `2` 会被加进去，变成 `2`。然后 `8` 被加进去变成 `10`，直到我们没有值可以再加，那便是最终的结果。
 
-但如果我们想额外加一个条件，也就是当碰到一个数字大于 `9` 时候，整个运算就算失败呢？一种合理的修改就是用一个 binary 函数，他会检查现在这个数是否大于 `9`，如果是便引发失败，如果不是就继续。由于有失败的可能性，我们便需要这个 binary 函数回传一个 `Maybe`，而不是一个普通的值。我们来看看这个函数：
+但如果我们想额外加一个条件，也就是当碰到一个数字大于 `9` 时候，整个运算就算失败呢？一种合理的修改就是用一个 binary 函数，他会检查现在这个数是否大于 `9`，如果是便引发失败，如果不是就继续。由于有失败的可能性，我们便需要这个 binary 函数返回一个 `Maybe`，而不是一个普通的值。我们来看看这个函数：
 
 ```haskell
 binSmalls :: Int -> Int -> Maybe Int  
@@ -1202,7 +1202,7 @@ ghci> foldM binSmalls 0 [2,11,3,1]
 Nothing
 ```
 
-由于这串 list 中有一个数值大于 `9`，所以整个结果会是 `Nothing`。另外你也可以尝试 fold 一个回传 `Writer` 的 binary 函数，他会在 fold 的过程中纪录你想纪录的信息。
+由于这串 list 中有一个数值大于 `9`，所以整个结果会是 `Nothing`。另外你也可以尝试 fold 一个返回 `Writer` 的 binary 函数，他会在 fold 的过程中纪录你想纪录的信息。
 
 ### Making a safe RPN calculator
 
@@ -1231,7 +1231,7 @@ foldingFunction (x:y:ys) "-" = (y - x):ys
 foldingFunction xs numberString = read numberString:xs
 ```
 
-这边我们的累加元素是一个堆叠，我们用一个 `Double` 的 list 来表示他。当我们在做 folding 的过程，如果当前的元素是一个 operator，他会从堆叠上拿下两个元素，用 operator 施行运算然后把结果放回堆叠。如果当前的元素是一个表示成字串的数字，他会把字串转换成数字，并回传一个新的堆叠包含了转换后的数字。
+这边我们的累加元素是一个堆叠，我们用一个 `Double` 的 list 来表示他。当我们在做 folding 的过程，如果当前的元素是一个 operator，他会从堆叠上拿下两个元素，用 operator 施行运算然后把结果放回堆叠。如果当前的元素是一个表示成字串的数字，他会把字串转换成数字，并返回一个新的堆叠包含了转换后的数字。
 
 我们首先把我们的 folding 函数加上处理错误的 case，所以他的型态会变成这样：
 
@@ -1239,9 +1239,9 @@ foldingFunction xs numberString = read numberString:xs
 foldingFunction :: [Double] -> String -> Maybe [Double]
 ```
 
-他不是回传一个 `Just` 的堆叠就是回传 `Nothing`。
+他不是返回一个 `Just` 的堆叠就是返回 `Nothing`。
 
-`reads` 函数就像 `read` 一样，差别在于他回传一个 list。在成功读取的情况下 list 中只包含读取的那个元素。如果他失败了，他会回传一个空的 list。除了回传读取的元素，他也回传剩下读取失败的元素。他必须要看完整串输入，我们想把他弄成一个 `readMaybe` 的函数，好方便我们进行。
+`reads` 函数就像 `read` 一样，差别在于他返回一个 list。在成功读取的情况下 list 中只包含读取的那个元素。如果他失败了，他会返回一个空的 list。除了返回读取的元素，他也返回剩下读取失败的元素。他必须要看完整串输入，我们想把他弄成一个 `readMaybe` 的函数，好方便我们进行。
 
 ```haskell
 readMaybe :: (Read a) => String -> Maybe a  
@@ -1294,7 +1294,7 @@ solveRPN st = do
   return result
 ```
 
-我们仍是接受一个字串把他断成一串 word。然后我们用一个空的堆叠来作 folding 的动作，只差在我们用的是 `foldM` 而不是 `foldl`。`foldM` 的结果会是 `Maybe`，`Maybe` 里面包含了一个只有一个元素的 list。我们用 `do` expression 来取出值，把他绑定到 `result` 上。当 `foldM` 回传 `Nothing` 的时候，整个结果就变成 `Nothing`。也特别注意我们有在 `do` 里面做 pattern match 的动作，所以如果 list 中不是只有一个元素的话，最后结果便会是 `Nothing`。最后一行我们用 `return result` 来展示 RPN 计算的结果，把他包在一个 `Maybe` 里面。
+我们仍是接受一个字串把他断成一串 word。然后我们用一个空的堆叠来作 folding 的动作，只差在我们用的是 `foldM` 而不是 `foldl`。`foldM` 的结果会是 `Maybe`，`Maybe` 里面包含了一个只有一个元素的 list。我们用 `do` expression 来取出值，把他绑定到 `result` 上。当 `foldM` 返回 `Nothing` 的时候，整个结果就变成 `Nothing`。也特别注意我们有在 `do` 里面做 pattern match 的动作，所以如果 list 中不是只有一个元素的话，最后结果便会是 `Nothing`。最后一行我们用 `return result` 来展示 RPN 计算的结果，把他包在一个 `Maybe` 里面。
 
 ```haskell
 ghci> solveRPN "1 2 * 4 +"  
@@ -1307,7 +1307,7 @@ ghci> solveRPN "1 8 wharglbllargh"
 Nothing
 ```
 
-第一个例子会失败是因为 list 中不是只有一个元素，所以 `do` 里面的 pattern matching 失败了。第二个例子会失败是因为 `readMaybe` 回传了 `Nothing`。
+第一个例子会失败是因为 list 中不是只有一个元素，所以 `do` 里面的 pattern matching 失败了。第二个例子会失败是因为 `readMaybe` 返回了 `Nothing`。
 
 ### Composing monadic functions
 
@@ -1334,7 +1334,7 @@ ghci> f 1
 
 `f` 接受一个数字，然后会帮他加 `1`，乘以 `100`，再加 `1`。我们也可以将 monadic 函数用同样的方式做合成，只是不用 `.` 而用 `<=<`，不用 `id` 而用 `return`。我们不需要 `foldM`，由于 `<=<` 只用 `foldr` 就足够了。
 
-当我们在之前的章节介绍 list monad 的时候， 我们用他来解决一个骑士是否能在三步内走到另一点的问题。 那个函数叫做 `moveKnight`， 他接受一个座标然后回传所有可能的下一步。 然后产生出所有可能三步的移动。
+当我们在之前的章节介绍 list monad 的时候， 我们用他来解决一个骑士是否能在三步内走到另一点的问题。 那个函数叫做 `moveKnight`， 他接受一个座标然后返回所有可能的下一步。 然后产生出所有可能三步的移动。
 
 ```haskell
 in3 start = return start >>= moveKnight >>= moveKnight >>= moveKnight
@@ -1369,7 +1369,7 @@ canReachIn x start end = end `elem` inMany x start
 
 ![](./spearhead.png)
 
-在这一章节，我们会带你看看究竟一个型态是怎么被辨认，确认是一个 monad 而且正确定义出 `Monad` 的 instance。我们通常不会为了定义 monad 而定义。比较常发生的是，我们想要针对一个问题建立模型，却稍后发现我们定义的型态其实是一个 Monad，所以就定义一个 `Monad` 的 instance。
+在这一章节，我们会带你看看究竟一个型态是怎么被识别，确认是一个 monad 而且正确定义出 `Monad` 的 instance。我们通常不会为了定义 monad 而定义。比较常发生的是，我们想要针对一个问题建立模型，却稍后发现我们定义的型态其实是一个 Monad，所以就定义一个 `Monad` 的 instance。
 
 正如我们看到的，list 是被拿来当作 non-deterministic values。对于 `[3,5,9]`，我们可以看作是一个 non-deterministic value，我们不能知道究竟是哪一个。当我们把一个 list 用 `>>=` 喂给一个函数，他就是把一串可能的选择都丢给函数，函数一个个去计算在那种情况下的结果，结果也便是一个 list。
 
@@ -1451,7 +1451,7 @@ flatten (Prob xs) = Prob $ concat $ map multAll xs
     where multAll (Prob innerxs,p) = map (\(x,r) -> (x,p*r)) innerxs
 ```
 
-`multAll` 接受一个 tuple，里面包含一个 probability list 跟一个伴随的机率值 `p`，所以我们要作的事是把 list 里面的机率值都乘以 `p`，并回传一个新的 tuple 包含新的 list 跟新的机率值。我们将 `multAll` map over 到我们的 probability list 上，我们就成功地打平了我们的 list。
+`multAll` 接受一个 tuple，里面包含一个 probability list 跟一个伴随的机率值 `p`，所以我们要作的事是把 list 里面的机率值都乘以 `p`，并返回一个新的 tuple 包含新的 list 跟新的机率值。我们将 `multAll` map over 到我们的 probability list 上，我们就成功地打平了我们的 list。
 
 现在我们就能定义我们的 `Monad` instance。
 

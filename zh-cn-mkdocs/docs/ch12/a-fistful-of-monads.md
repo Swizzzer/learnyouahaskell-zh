@@ -37,13 +37,13 @@ ghci> (-) <$> [3,4] <*> [1,2,3]
 
 所以我们可以视他们为 applicative values，`Maybe a` 代表可能会失败的 computation，`[a]` 代表同时有好多结果的 computation \(non-deterministic computation\)，而 `IO a` 代表会有 side-effects 的 computation。
 
-Monad 是一个从 Applicative functors 很自然的一个演进结果。对于他们我们主要考量的点是：如果你有一个具有 context 的值 `m a`，你能如何把他丢进一个只接受普通值 `a` 的函数中，并回传一个具有 context 的值？也就是说，你如何套用一个型态为 `a -> m b` 的函数至 `m a`？基本上，我们要求的函数是：
+Monad 是一个从 Applicative functors 很自然的一个演进结果。对于他们我们主要考量的点是：如果你有一个具有 context 的值 `m a`，你能如何把他丢进一个只接受普通值 `a` 的函数中，并返回一个具有 context 的值？也就是说，你如何套用一个型态为 `a -> m b` 的函数至 `m a`？基本上，我们要求的函数是：
 
 ```haskell
 (>>=) :: (Monad m) => m a -> (a -> m b) -> m b
 ```
 
-如果我们有一个漂亮的值跟一个函数接受普通的值但回传漂亮的值，那我们要如何要把漂亮的值丢进函数中？这就是我们使用 Monad 时所要考量的事情。我们不写成 `f a` 而写成 `m a` 是因为 `m` 代表的是 `Monad`，但 monad 不过就是支持 `>>=` 操作的 applicative functors。`>>=` 我们称呼他为 bind。
+如果我们有一个漂亮的值跟一个函数接受普通的值但返回漂亮的值，那我们要如何要把漂亮的值丢进函数中？这就是我们使用 Monad 时所要考量的事情。我们不写成 `f a` 而写成 `m a` 是因为 `m` 代表的是 `Monad`，但 monad 不过就是支持 `>>=` 操作的 applicative functors。`>>=` 我们称呼他为 bind。
 
 当我们有一个普通值 `a` 跟一个普通函数 `a -> b`，要套用函数是一件很简单的事。但当你在处理具有 context 的值时，就需要多考虑些东西，要如何把漂亮的值喂进函数中，并如何考虑他们的行为，但你将会了解到他们其实不难。
 
@@ -90,7 +90,7 @@ ghci> max <$> Just 3 <*> Nothing
 Nothing
 ```
 
-我们来思考一下要怎么为 `Maybe` 实作 `>>=`。正如我们之前提到的，`>>=` 接受一个 monadic value，以及一个接受普通值的函数，这函数会回传一个 monadic value。`>>=` 会帮我们套用这个函数到这个 monadic value。在函数只接受普通值的情况侠，函数是如何作到这件事的呢？要作到这件事，他必须要考虑到 monadic value 的 context。
+我们来思考一下要怎么为 `Maybe` 实作 `>>=`。正如我们之前提到的，`>>=` 接受一个 monadic value，以及一个接受普通值的函数，这函数会返回一个 monadic value。`>>=` 会帮我们套用这个函数到这个 monadic value。在函数只接受普通值的情况侠，函数是如何作到这件事的呢？要作到这件事，他必须要考虑到 monadic value 的 context。
 
 在这个案例中，`>>=` 会接受一个 `Maybe a` 以及一个型态为 `a -> Maybe b` 的函数。他会套用函数到 `Maybe a`。要厘清他怎么作到的，首先我们注意到 `Maybe` 的 applicative functor 特性。假设我们有一个函数 `\x -> Just (x+1)`。他接受一个数字，把他加 `1` 后再包回 `Just`。
 
@@ -103,7 +103,7 @@ Just 101
 
 如果我们喂给函数 `1`，他会计算成 `Just 2`。如果我们喂给函数 `100`，那结果便是 `Just 101`。但假如我们喂一个 `Maybe` 的值给函数呢？如果我们把 `Maybe` 想成一个 applicative functor，那答案便很清楚。如果我们拿到一个 `Just`，就把包在 `Just` 里面的值喂给函数。如果我们拿到一个 `Nothing`，我们就说结果是 `Nothing`。
 
-我们调用 `applyMaybe` 而不调用 `>>=`。他接受 `Maybe a` 跟一个回传 `Maybe b` 的函数，并套用函数至 `Maybe a`。
+我们调用 `applyMaybe` 而不调用 `>>=`。他接受 `Maybe a` 跟一个返回 `Maybe b` 的函数，并套用函数至 `Maybe a`。
 
 ```haskell
 applyMaybe :: Maybe a -> (a -> Maybe b) -> Maybe b  
@@ -124,7 +124,7 @@ ghci> Nothing `applyMaybe` \x -> Just (x ++ " :")")
 Nothing
 ```
 
-在上述的范例中，我们看到在套用 `applyMaybe` 的时候，函数是套用在 `Just` 里面的值。当我们试图套用到 `Nothing`，那整个结果便是 `Nothing`。假如函数回传 `Nothing` 呢？
+在上述的范例中，我们看到在套用 `applyMaybe` 的时候，函数是套用在 `Just` 里面的值。当我们试图套用到 `Nothing`，那整个结果便是 `Nothing`。假如函数返回 `Nothing` 呢？
 
 ```haskell
 ghci> Just 3 `applyMaybe` \x -> if x > 2 then Just x else Nothing  
@@ -170,7 +170,7 @@ class Monad m where
 
 ![](./tur2.png)
 
-接下来定义的函数是 bind: `>>=`。他就像是函数套用一样，只差在他不接受普通值，他是接受一个 monadic value（也就是具有 context 的值）并且把他喂给一个接受普通值的函数，并回传一个 monadic value。
+接下来定义的函数是 bind: `>>=`。他就像是函数套用一样，只差在他不接受普通值，他是接受一个 monadic value（也就是具有 context 的值）并且把他喂给一个接受普通值的函数，并返回一个 monadic value。
 
 接下来，我们定义了 `>>`。我们不会介绍他，因为他有一个事先定义好的实作，基本上我们在实作 `Monad` typeclass 的时候都不会去理他。
 
@@ -188,7 +188,7 @@ instance Monad Maybe where
 
 `return`跟`pure`是等价的。这没什么困难的。我们跟我们在定义`Applicative`的时候做一样的事，只是把他用`Just`包起来。
 
-`>>=`跟我们的`applyMaybe`是一样的。当我们将`Maybe a`塞给我们的函数，我们保留住context，并且在输入是`Nothing`的时候回传`Nothing`。毕竟当没有值的时候套用我们的函数是没有意义的。当输入是`Just`的时候则套用`f`并将他包在`Just`里面。
+`>>=`跟我们的`applyMaybe`是一样的。当我们将`Maybe a`塞给我们的函数，我们保留住context，并且在输入是`Nothing`的时候返回`Nothing`。毕竟当没有值的时候套用我们的函数是没有意义的。当输入是`Just`的时候则套用`f`并将他包在`Just`里面。
 
 我们可以试着感觉一下`Maybe`是怎样表现成Monad的。
 
@@ -247,7 +247,7 @@ ghci> landRight (-1) (1,2)
 (1,1)
 ```
 
-要仿真鸟飞走的话我们只要给定一个负数就好了。 由于这些操作是接受 `Pole` 并回传 `Pole`， 所以我们可以把函数串在一起。
+要仿真鸟飞走的话我们只要给定一个负数就好了。 由于这些操作是接受 `Pole` 并返回 `Pole`， 所以我们可以把函数串在一起。
 
 ```haskell
 ghci> landLeft 2 (landRight 1 (landLeft 1 (0,0)))  
@@ -294,7 +294,7 @@ ghci> (0,0) -: landLeft 1 -: landRight 4 -: landLeft (-1) -: landRight (-2)
 (0,2)
 ```
 
-表面看起来没什么问题，但如果你仔细看的话，有一瞬间是右边有四只，但左边没有鸟。要修正这个错误，我们要重新查看 `landLeft` 跟 `landRight`。我们其实是希望这些函数产生失败的情况。那就是在维持平衡的时候回传新的 pole，但失败的时候告诉我们失败了。这时候 `Maybe` 就刚刚好是我们要的 context 了。我们用 `Maybe` 重新写一次：
+表面看起来没什么问题，但如果你仔细看的话，有一瞬间是右边有四只，但左边没有鸟。要修正这个错误，我们要重新查看 `landLeft` 跟 `landRight`。我们其实是希望这些函数产生失败的情况。那就是在维持平衡的时候返回新的 pole，但失败的时候告诉我们失败了。这时候 `Maybe` 就刚刚好是我们要的 context 了。我们用 `Maybe` 重新写一次：
 
 ```haskell
 landLeft :: Birds -> Pole -> Maybe Pole  
@@ -308,7 +308,7 @@ landRight n (left,right)
     | otherwise                    = Nothing
 ```
 
-现在这些函数不回传 `Pole` 而回传 `Maybe Pole` 了。他们仍接受鸟的数量跟旧的的 pole，但他们现在会检查是否有太多鸟会造成皮尔斯失去平衡。我们用 guards 来检查是否有差异超过三的情况。如果没有，那就包一个在 `Just` 中的新的 pole，如果是，那就回传 `Nothing`。
+现在这些函数不返回 `Pole` 而返回 `Maybe Pole` 了。他们仍接受鸟的数量跟旧的的 pole，但他们现在会检查是否有太多鸟会造成皮尔斯失去平衡。我们用 guards 来检查是否有差异超过三的情况。如果没有，那就包一个在 `Just` 中的新的 pole，如果是，那就返回 `Nothing`。
 
 再来执行看看：
 
@@ -321,7 +321,7 @@ Nothing
 
 一如预期，当皮尔斯不会掉下去的时候，我们就得到一个包在 `Just` 中的新 pole。当太多鸟停在同一边的时候，我们就会拿到 `Nothing`。这样很棒，但我们却不知道怎么把东西串在一起了。我们不能做 `landLeft 1 (landRight 1 (0,0))`，因为当我们对 `(0,0)` 使用 `landRight 1` 时，我们不是拿到 `Pole` 而是拿到 `Maybe Pole`。`landLeft 1` 会拿到 `Pole` 而不是拿到 `Maybe Pole`。
 
-我们需要一种方法可以把拿到的 `Maybe Pole` 塞到拿 `Pole` 的函数中，然后回传 `Maybe Pole`。而我们有 `>>=`，他对 `Maybe` 做的事就是我们要的
+我们需要一种方法可以把拿到的 `Maybe Pole` 塞到拿 `Pole` 的函数中，然后返回 `Maybe Pole`。而我们有 `>>=`，他对 `Maybe` 做的事就是我们要的
 
 ```haskell
 ghci> landRight 1 (0,0) >>= landLeft 2  
@@ -344,7 +344,7 @@ ghci> return (0,0) >>= landRight 2 >>= landLeft 2 >>= landRight 2
 Just (2,4)
 ```
 
-我们最开始用 `return` 回传一个 pole 并把他包在 `Just` 里面。我们可以像往常套用 `landRight 2`，不过我们不那么做，我们改用 `>>=`。`Just (0,0)` 被喂到 `landRight 2`，得到 `Just (0,2)`。接着被喂到 `landLeft 2`，得到 `Just (2,2)`。
+我们最开始用 `return` 返回一个 pole 并把他包在 `Just` 里面。我们可以像往常套用 `landRight 2`，不过我们不那么做，我们改用 `>>=`。`Just (0,0)` 被喂到 `landRight 2`，得到 `Just (0,2)`。接着被喂到 `landLeft 2`，得到 `Just (2,2)`。
 
 还记得我们之前引入失败情况的例子吗？
 
@@ -389,7 +389,7 @@ Nothing
 m >> n = m >>= \_ -> n
 ```
 
-一般来讲，碰到一个完全忽略前面状态的函数，他就应该只会回传他想回传的值而已。但碰到 Monad，他们的 context 还是必须要被考虑到。来看一下 `>>` 串接 `Maybe` 的情况。
+一般来讲，碰到一个完全忽略前面状态的函数，他就应该只会返回他想返回的值而已。但碰到 Monad，他们的 context 还是必须要被考虑到。来看一下 `>>` 串接 `Maybe` 的情况。
 
 ```haskell
 ghci> Nothing >> Just 3  
@@ -426,7 +426,7 @@ routine = case landLeft 1 (0,0) of
 
 ![](./centaur.png)
 
-左边先停了一只鸟，然后我们停下来检查有没有失败。当失败的时候我们回传 `Nothing`。当成功的时候，我们在右边停一只鸟，然后再重复前面做的事情。把这些琐事转换成 `>>=` 证明了 `Maybe` Monad 的力量，可以省去我们不少的时间。
+左边先停了一只鸟，然后我们停下来检查有没有失败。当失败的时候我们返回 `Nothing`。当成功的时候，我们在右边停一只鸟，然后再重复前面做的事情。把这些琐事转换成 `>>=` 证明了 `Maybe` Monad 的力量，可以省去我们不少的时间。
 
 注意到 `Maybe` 对 `>>=` 的实作，他其实就是在做碰到 `Nothing` 就会传 `Nothing`，碰到正确值就继续用 `Just` 传递值。
 
@@ -468,7 +468,7 @@ ghci> Just 3 >>= (\x -> Just "!" >>= (\y -> Nothing))
 Nothing
 ```
 
-第一行中，把 `Nothing` 喂给一个函数，很自然地会回传 `Nothing`。第二行里，我们把 `Just 3` 喂给一个函数，所以 `x` 就成了 `3`。但我们把 `Nothing` 喂给内层的 lambda 所有的结果就成了 `Nothing`，这也进一步使得外层的 lambda 成了 `Nothing`。这就好比我们在 `let` expression 中来把值指定给变量一般。只差在我们这边的值是 monadic value。
+第一行中，把 `Nothing` 喂给一个函数，很自然地会返回 `Nothing`。第二行里，我们把 `Just 3` 喂给一个函数，所以 `x` 就成了 `3`。但我们把 `Nothing` 喂给内层的 lambda 所有的结果就成了 `Nothing`，这也进一步使得外层的 lambda 成了 `Nothing`。这就好比我们在 `let` expression 中来把值指定给变量一般。只差在我们这边的值是 monadic value。
 
 要再说得更清楚点，我们来把 script 改写成每行都处理一个 `Maybe`：
 
@@ -576,7 +576,7 @@ justH = do
     return x
 ```
 
-我们用模式匹配来取得 `"hello"` 的第一个字符，然后回传结果。所以 `justH` 计算会得到 `Just 'h'`。
+我们用模式匹配来取得 `"hello"` 的第一个字符，然后返回结果。所以 `justH` 计算会得到 `Just 'h'`。
 
 如果模式匹配失败怎么办？当定义一个函数的时候，一个模式不匹配就会跳到下一个模式。如果所有都不匹配，那就会造成错误，整个程序就当掉。另一方面，如果在 `let` 中进行模式匹配失败会直接造成错误。毕竟在 `let` 表达式的情况下并没有失败就跳下一个的设计。至于在 `do` 表示法中模式匹配失败的话，那就会调用 `fail` 函数。他定义在 `Monad` 的 type class 定义猪。他允许在现在的 monad context 底下，失败只会造成失败而不会让整个程序当掉。他缺省的实作如下：
 
@@ -591,7 +591,7 @@ fail msg = error msg
 fail _ = Nothing
 ```
 
-他忽略错误消息，并直接回传 `Nothing`。所以当在 `do` 表示法中的 `Maybe` 模式匹配失败的时候，整个结果就会是 `Nothing`。这种方式比起让程序挂掉要好多了。这边来看一下 `Maybe` 模式匹配失败的范例：
+他忽略错误消息，并直接返回 `Nothing`。所以当在 `do` 表示法中的 `Maybe` 模式匹配失败的时候，整个结果就会是 `Nothing`。这种方式比起让程序挂掉要好多了。这边来看一下 `Maybe` 模式匹配失败的范例：
 
 ```haskell
 wopwop :: Maybe Char  
@@ -635,14 +635,14 @@ instance Monad [] where
 
 `return` 跟 `pure` 是做同样的事，所以我们应该算已经理解了 `return` 的部份。他接受一个值，并把他放进一个最小的一个 context 中。换种说法，就是他做了一个只包含一个元素的 list。这样对于我们想要操作普通值的时候很有用，可以直接把他包起来变成 non-deterministic value。
 
-要理解 `>>=` 在 list monad 的情形下是怎么运作的，让我们先来回归基本。`>>=` 基本上就是接受一个有 context 的值，把他喂进一个只接受普通值的函数，并回传一个具有 context 的值。如果操作的函数只会回传普通值而不是具有 context 的值，那 `>>=` 在操作一次后就会失效，因为 context 不见了。让我们来试着把一个 non-deterministic value 塞到一个函数中：
+要理解 `>>=` 在 list monad 的情形下是怎么运作的，让我们先来回归基本。`>>=` 基本上就是接受一个有 context 的值，把他喂进一个只接受普通值的函数，并返回一个具有 context 的值。如果操作的函数只会返回普通值而不是具有 context 的值，那 `>>=` 在操作一次后就会失效，因为 context 不见了。让我们来试着把一个 non-deterministic value 塞到一个函数中：
 
 ```haskell
 ghci> [3,4,5] >>= \x -> [x,-x]  
 [3,-3,4,-4,5,-5]
 ```
 
-当我们对 `Maybe` 使用 `>>=`，是有考虑到可能失败的 context。在这边 `>>=` 则是有考虑到 non-determinism。`[3,4,5]` 是一个 non-deterministic value，我们把他喂给一个回传 non-deterministic value 的函数。那结果也会是 non-deterministic。而且他包含了所有从 `[3,4,5]` 取值，套用 `\x -> [x,-x]` 后的结果。这个函数他接受一个数值并产生两个数值，一个原来的数值与取过负号的数值。当我们用 `>>=` 来把一个 list 喂给这个函数，所有在 list 中的数值都保留了原有的跟取负号过的版本。`x` 会针对 list 中的每个元素走过一遍。
+当我们对 `Maybe` 使用 `>>=`，是有考虑到可能失败的 context。在这边 `>>=` 则是有考虑到 non-determinism。`[3,4,5]` 是一个 non-deterministic value，我们把他喂给一个返回 non-deterministic value 的函数。那结果也会是 non-deterministic。而且他包含了所有从 `[3,4,5]` 取值，套用 `\x -> [x,-x]` 后的结果。这个函数他接受一个数值并产生两个数值，一个原来的数值与取过负号的数值。当我们用 `>>=` 来把一个 list 喂给这个函数，所有在 list 中的数值都保留了原有的跟取负号过的版本。`x` 会针对 list 中的每个元素走过一遍。
 
 要看看结果是如何算出来的，只要看看实作就好了。首先我们从 `[3,4,5]` 开始。然后我们用 lambda 映射过所有元素得到：
 
@@ -652,7 +652,7 @@ ghci> [3,4,5] >>= \x -> [x,-x]
 
 lambda 会扫过每个元素，所以我们有一串包含一堆 list 的 list，最后我们在把这些 list 压扁，得到一层的 list。这就是我们得到 non-deterministic value 的过程。
 
-non-determinism 也有考虑到失败的可能性。`[]` 其实等价于 `Nothing`，因为他什么结果也没有。所以失败等同于回传一个空的 list。所有的错误消息都不用。让我们来看看范例：
+non-determinism 也有考虑到失败的可能性。`[]` 其实等价于 `Nothing`，因为他什么结果也没有。所以失败等同于返回一个空的 list。所有的错误消息都不用。让我们来看看范例：
 
 ```haskell
 ghci> [] >>= \x -> ["bad","mad","rad"]  
@@ -661,7 +661,7 @@ ghci> [1,2,3] >>= \x -> []
 []
 ```
 
-第一行里面，一个空的 list 被丢给 lambda。因为 list 没有任何元素，所以函数收不到任何东西而产生空的 list。这跟把 `Nothing` 喂给函数一样。第二行中，每一个元素都被喂给函数，但所有元素都被丢掉，而只回传一个空的 list。因为所有的元素都造成了失败，所以整个结果也代表失败。
+第一行里面，一个空的 list 被丢给 lambda。因为 list 没有任何元素，所以函数收不到任何东西而产生空的 list。这跟把 `Nothing` 喂给函数一样。第二行中，每一个元素都被喂给函数，但所有元素都被丢掉，而只返回一个空的 list。因为所有的元素都造成了失败，所以整个结果也代表失败。
 
 就像 `Maybe` 一样，我们可以用 `>>=` 把他们串起来：
 
@@ -734,7 +734,7 @@ guard True = return ()
 guard False = mzero
 ```
 
-这函数接受一个布尔值，如果他是 `True` 就回传一个包在缺省 context 中的 `()`。如果他失败就产生 mzero。
+这函数接受一个布尔值，如果他是 `True` 就返回一个包在缺省 context 中的 `()`。如果他失败就产生 mzero。
 
 ```haskell
 ghci> guard (5 > 2) :: Maybe ()  
@@ -763,7 +763,7 @@ ghci> guard (1 > 2) >> return "cool" :: [String]
 []
 ```
 
-如果 `guard` 成功的话，结果就会是一个空的 tuple。接着我们用 `>>` 来忽略掉空的 tuple，而呈现不同的结果。另一方面，如果 `guard` 失败的话，后面的 `return` 也会失败。这是因为用 `>>=` 把空的 list 喂给函数总是会回传空的 list。基本上 `guard` 的意思就是：如果一个布尔值是 `False` 那就产生一个失败状态，不然的话就回传一个基本的 `()`。这样计算就可以继续进行。
+如果 `guard` 成功的话，结果就会是一个空的 tuple。接着我们用 `>>` 来忽略掉空的 tuple，而呈现不同的结果。另一方面，如果 `guard` 失败的话，后面的 `return` 也会失败。这是因为用 `>>=` 把空的 list 喂给函数总是会返回空的 list。基本上 `guard` 的意思就是：如果一个布尔值是 `False` 那就产生一个失败状态，不然的话就返回一个基本的 `()`。这样计算就可以继续进行。
 
 这边我们把先前的范例用 `do` 改写：
 
@@ -798,7 +798,7 @@ ghci> [ x | x <- [1..50], '7' `elem` show x ]
 type KnightPos = (Int,Int)
 ```
 
-假设骑士现在是在 `(6,2)`。究竟他能不能够在三步内移动到 `(6,1)` 呢？你可能会先考虑究竟哪一步是最佳的一步。但不如全部一起考虑吧！要好好利用所谓的 non-determinism。所以我们不是只选择一步，而是选择全部。我们先写一个函数回传所有可能的下一步：
+假设骑士现在是在 `(6,2)`。究竟他能不能够在三步内移动到 `(6,1)` 呢？你可能会先考虑究竟哪一步是最佳的一步。但不如全部一起考虑吧！要好好利用所谓的 non-determinism。所以我们不是只选择一步，而是选择全部。我们先写一个函数返回所有可能的下一步：
 
 ```haskell
 moveKnight :: KnightPos -> [KnightPos]  
@@ -915,7 +915,7 @@ ghci> (\x -> [x,x,x]) "WoM"
 
 * `m >>= return` 会等于 `m`
 
-这一个可能不像第一定律那么明显，但我们还是来看看为什么会遵守这条。当我们把一个 monadic value 用 `>>=` 喂给函数，那些函数是接受普通值并回传具有 context 的值。`return` 也是在他们其中。如果你仔细看他的型态，`return` 是把一个普通值放进一个最小 context 中。这就表示，对于 `Maybe` 他并没有造成任何失败的状态，而对于 list 他也没有多加 non-determinism。
+这一个可能不像第一定律那么明显，但我们还是来看看为什么会遵守这条。当我们把一个 monadic value 用 `>>=` 喂给函数，那些函数是接受普通值并返回具有 context 的值。`return` 也是在他们其中。如果你仔细看他的型态，`return` 是把一个普通值放进一个最小 context 中。这就表示，对于 `Maybe` 他并没有造成任何失败的状态，而对于 list 他也没有多加 non-determinism。
 
 ```haskell
 ghci> Just "move on up" >>= (\x -> return x)  

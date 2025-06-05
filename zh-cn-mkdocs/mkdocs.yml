@@ -8,8 +8,18 @@ theme:
     - navigation.indexes
 nav:
   - 目录: index.md
-  - Chapter 01. 简介: ch01/introduction.md
-  - Chapter 02. 从零开始: ch02/ready-go.md
-  - Chapter 03. 类型和类型类: ch03/type-and-typeclass.md
-  - Chapter 04. 函数的语法: ch04/syntax-in-function.md
+  - 01. Introduction: ch01/introduction.md
+  - 02. Getting Started: ch02/ready-go.md
+  - 03. Types and Type Classes: ch03/type-and-typeclass.md
+  - 04. Function Syntax: ch04/syntax-in-function.md
+  - 05. Recursion: ch05/recursion.md
+  - 06. Higher-Order Functions: ch06/high-order-function.md
+  - 07. Modules: ch07/module.md
+  - 08. Building Our Own Types and Type Classes: ch08/build-our-own-type-and-typeclass.md
+  - 09. Input and Output: ch09/input-and-output.md
+  - 10. Functionally Solving Problems: ch10/functionally-solving-problems.md
+  - 11. Functors, Applicative Functors, and Monoids: ch11/functors-applicative-functors-and-monoids.md
+  - 12. A Fistful of Monad: ch12/a-fistful-of-monads.md
+  - 13. For a Few Monad More: ch13/for-a-few-monads-more.md
+  - 14. Zippers: ch14/zippers.md
   - About: about.md

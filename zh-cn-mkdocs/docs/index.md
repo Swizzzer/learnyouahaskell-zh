@@ -1,9 +1,9 @@
 # Index
 
-* [Chap 01 - 入门介绍](ch01/introduction.md)
-* [Chap 02 - 从零开始](ch02/ready-go.md)
-* [Chap 03 - 类型和类型类](ch03/type-and-typeclass.md)
-* [Chap 04 - 函数的语法](ch04/syntax-in-function.md)
+* [Chap 01 - Introduction](ch01/introduction.md)
+* [Chap 02 - Ready Go](ch02/ready-go.md)
+* [Chap 03 - Type And Typeclass](ch03/type-and-typeclass.md)
+* [Chap 04 - Syntax in Function](ch04/syntax-in-function.md)
 * [Chap 05 - Recursion](ch05/recursion.md)
 * [Chap 06 - High Order Function](ch06/high-order-function.md)
 * [Chap 07 - Module](ch07/module.md)
