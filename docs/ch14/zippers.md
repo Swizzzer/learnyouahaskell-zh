@@ -12,7 +12,7 @@
 data Tree a = Empty | Node a (Tree a) (Tree a) deriving (Show)
 ```
 
-这边我们的树不是空的就是有两棵子树。来看看一个范例：
+所以我们的树要么是空的，要么有两棵子树。来看看一个范例：
 
 ```haskell
 freeTree :: Tree Char  
