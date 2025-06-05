@@ -13,4 +13,4 @@
 - `pip install mkdocs-material`
 - `mkdocs serve`
 
-之后你就可以访问localhost阅读本书了 🥰
+之后你就可以访问`localhost:8000`阅读本书了 🥰
