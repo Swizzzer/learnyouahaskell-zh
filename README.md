@@ -10,7 +10,7 @@
 > Requirements: Python >= 3.7
 
 - `git clone https://github.com/Swizzzer/learnyouahaskell-zh.git && cd learnyouahaskell-zh`
-- `pip install mkdocs-material`
+- `pip install -r requirements.txt`
 - `mkdocs serve`
 
 之后你就可以访问`localhost:8000`阅读本书了 🥰
