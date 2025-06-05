@@ -882,7 +882,7 @@ Right 103
 
 ![](./wolf.png)
 
-当我们开始学习 Monad 的时候，我们是先学习 functors，他代表可以被 map over 的事物。接着我们学了 functors 的加强版，也就是 applicative functors，他可以对 applicative values 做函数的套用，也可以把一个一般值放到一个缺省的 context 中。最后，我们介绍在 applicative functors 上更进一步的 monad，他让这些具有 context 的值可以被喂进一般函数中。
+当我们开始学习 Monad 的时候，我们是先学习 functors，他代表可以被 map over 的事物。接着我们学了 functors 的加强版，也就是 applicative functors，他可以对 applicative values 做函数的套用，也可以把一个一般值放到一个默认的 context 中。最后，我们介绍在 applicative functors 上更进一步的 monad，他让这些具有 context 的值可以被喂进一般函数中。
 
 也就是说每一个 monad 都是个 applicative functor，而每一个 applicative functor 也都是一个 functor。`Applicative` typeclass 中有加入限制，让每一个 `Applicative` 都是 `Functor`。但 `Monad` 却没有这样的限制，让每个 `Monad` 都是 `Applicative`。这是因为 `Monad` 这个 typeclass 是在 `Applicative` 引入前就存在的缘故。
 
@@ -933,7 +933,7 @@ liftM f m = do
     return (f x)
 ```
 
-我们喂一个 monadic value `m` 给函数，我们套用那个函数然后把结果放进一个缺省的 context。由于遵守 monad laws，这保证这操作不会改变 context，只会呈现最后的结果。我们可以看到实作中 `liftM` 也没有用到 `Functor` 的性质。这代表我们能只用 monad 提供给我们的就实作完 `fmap`。这特性让我们可以得到 monad 比 functor 性质要强的结论。
+我们喂一个 monadic value `m` 给函数，我们套用那个函数然后把结果放进一个默认的 context。由于遵守 monad laws，这保证这操作不会改变 context，只会呈现最后的结果。我们可以看到实作中 `liftM` 也没有用到 `Functor` 的性质。这代表我们能只用 monad 提供给我们的就实作完 `fmap`。这特性让我们可以得到 monad 比 functor 性质要强的结论。
 
 `Applicative` 让我们可以操作具有 context 的值就像操作一般的值一样。 就像这样：
 
@@ -950,7 +950,7 @@ Nothing
 (<*>) :: (Applicative f) => f (a -> b) -> f a -> f b
 ```
 
-他有点像 `fmap`，只是函数本身有一个 context。我们必须把他从 context 中抽出，对 `f a` 做 map over 的东做，然后再放回 context 中。由于在 Haskel 中函数缺省都是 curried，我们便能用 `<$>` 以及 `<*>` 来让接受多个参数的函数也能接受 applicative 种类的值。
+他有点像 `fmap`，只是函数本身有一个 context。我们必须把他从 context 中抽出，对 `f a` 做 map over 的东做，然后再放回 context 中。由于在 Haskel 中函数默认都是 curried，我们便能用 `<$>` 以及 `<*>` 来让接受多个参数的函数也能接受 applicative 种类的值。
 
 总之 `<*>` 跟 `fmap` 很类似，他也能只用 `Monad` 保证的性质实作出来。`ap` 这个函数基本上就是 `<*>`，只是他是限制在 `Monad` 上而不是 `Applicative` 上。这边是他的定义：
 

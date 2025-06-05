@@ -973,7 +973,7 @@ class (Eq a) => Num a where
    ...
 ```
 
-正如我们先前提到的，我们可以在很多地方加上 class constraints。这不过就是在 `class Num a where` 中的 `a` 上，加上他必须要是 `Eq` 的 instance 的限制。这基本上就是在说我们在定义一个类型为 `Num` 之前，必须先为他定义 `Eq` 的 instance。在某个类型可以被视作 `Number` 之前，必须先能被比较相不相等其实是蛮合理的。这就是 subclass 在做的事：帮 class declaration 加上限制。也就是说当我们定义 typeclass 中的函数本体时，我们可以缺省 `a` 是属于 `Eq`，因此能使用 `==`。
+正如我们先前提到的，我们可以在很多地方加上 class constraints。这不过就是在 `class Num a where` 中的 `a` 上，加上他必须要是 `Eq` 的 instance 的限制。这基本上就是在说我们在定义一个类型为 `Num` 之前，必须先为他定义 `Eq` 的 instance。在某个类型可以被视作 `Number` 之前，必须先能被比较相不相等其实是蛮合理的。这就是 subclass 在做的事：帮 class declaration 加上限制。也就是说当我们定义 typeclass 中的函数本体时，我们可以默认 `a` 是属于 `Eq`，因此能使用 `==`。
 
 但像是 `Maybe` 或是 List 是如何被定义成 typeclass 的 instance 呢？`Maybe` 的特别之处在于他跟 `TrafficLight` 不一样，他不是一个具体的类型。他是一个类型构造子，接受一个类型参数（像是 `Char` 之类的）而构造出一个具体的类型（像是 `Maybe Char` ）。让我们再回顾一下 `Eq` 这个 typeclass：
 
@@ -1141,7 +1141,7 @@ class Functor f where
     fmap :: (a -> b) -> f a -> f b
 ```
 
-我们看到他定义了一个函数 `fmap`，而且并没有提供一个缺省的实作。`fmap` 的类型蛮有趣的。到目前为止的我们看过的 typeclass 中的类型变量都是具体类型。就像是 `(==) :: (Eq a) => a -> a -> Bool` 中的 `a` 一样。但现在碰到的 `f` 并不是一个具体类型（一个像是 `Int`, `Bool` 或 `Maybe String`的类型），而是接受一个类型参数的类型构造子。如果要快速回顾的话可以看一下 `Maybe Int` 是一个具体类型，而 `Maybe` 是一个类型构造子，可接受一个类型作为参数。总之，我们知道 `fmap` 接受一个函数，这个函数从一个类型映射到另一个类型，还接受一个 functor 装有原始的类型，然后会返回一个 functor 装有映射后的类型。
+我们看到他定义了一个函数 `fmap`，而且并没有提供一个默认的实作。`fmap` 的类型蛮有趣的。到目前为止的我们看过的 typeclass 中的类型变量都是具体类型。就像是 `(==) :: (Eq a) => a -> a -> Bool` 中的 `a` 一样。但现在碰到的 `f` 并不是一个具体类型（一个像是 `Int`, `Bool` 或 `Maybe String`的类型），而是接受一个类型参数的类型构造子。如果要快速回顾的话可以看一下 `Maybe Int` 是一个具体类型，而 `Maybe` 是一个类型构造子，可接受一个类型作为参数。总之，我们知道 `fmap` 接受一个函数，这个函数从一个类型映射到另一个类型，还接受一个 functor 装有原始的类型，然后会返回一个 functor 装有映射后的类型。
 
 如果听不太懂也没关系。当我们看几个范例之后会比较好懂。不过这边 `fmap` 的类型宣告让我们想起类似的东西，就是 `map :: (a -> b) -> [a] -> [b]`。
 

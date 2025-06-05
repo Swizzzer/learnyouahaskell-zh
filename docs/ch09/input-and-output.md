@@ -780,7 +780,7 @@ main = do
         putStr contents)
 ```
 
-实际上像是用一个 pipe 把文件弄到标准输出。正如你可以把 list 想成 stream 一样，你也可以把文件想成 stream。他会每次读一行然后打印到终端上。你也许会问这个 pipe 究竟一次可以塞多少东西，读去硬盘的频率究竟是多少？对于文本档而言，缺省的 buffer 通常是 line-buffering。这代表一次被读进来的大小是一行。这也是为什么在这个 case 我们是一行一行处理。对于 binary file 而言，缺省的 buffer 是 block-buffering。这代表我们是一个 chunk 一个 chunk 去读得。而一个 chunk 的大小是根据操作系统不同而不同。
+实际上像是用一个 pipe 把文件弄到标准输出。正如你可以把 list 想成 stream 一样，你也可以把文件想成 stream。他会每次读一行然后打印到终端上。你也许会问这个 pipe 究竟一次可以塞多少东西，读去硬盘的频率究竟是多少？对于文本档而言，默认的 buffer 通常是 line-buffering。这代表一次被读进来的大小是一行。这也是为什么在这个 case 我们是一行一行处理。对于 binary file 而言，默认的 buffer 是 block-buffering。这代表我们是一个 chunk 一个 chunk 去读得。而一个 chunk 的大小是根据操作系统不同而不同。
 
 你能用 `hSetBuffering` 来控制 buffer 的行为。他接受一个 handle 跟一个 `BufferMode`，返回一个会设置 buffer 行为的 I/O action。`BufferMode` 是一个 enumeration 型态，他可能的值有：`NoBuffering`, `LineBuffering` 或 `BlockBuffering (Maybe Int)`。其中 `Maybe Int` 是表示一个 chunck 有几个 byte。如果他的值是 `Nothing`，则操作系统会帮你决定 chunk 的大小。`NoBuffering` 代表我们一次读一个 character。一般来说 `NoBuffering` 的表现很差，因为他访问硬盘的频率很高。
 
@@ -1477,7 +1477,7 @@ ghci> head []
 
 pure code 能丢出 Exception，但 Exception 只能在 I/O section 中被接到（也就是在 `main` 的 do block 中）这是因为在 pure code 中你不知道什么东西什么时候会被 evaluate。因为 lazy 特性的缘故，程序没有一个特定的执行顺序，但 I/O code 有。
 
-先前我们谈过为什么在 I/O 部份的程序要越少越好。程序的逻辑部份尽量都放在 pure 的部份，因为 pure 的特性就是他们的结果只会根据函数的参数不同而改变。当思考 pure function 的时候，你只需要考虑他返回什么，因为除此之外他不会有任何副作用。这会让事情简单许多。尽管 I/O 的部份是难以避免的（像是打开文件之类），但最好是把 I/O 部份降到最低。Pure functions 缺省是 lazy，那代表我们不知道他什么时候会被 evaluate，不过我们也不该知道。然而，一旦 pure functions 需要丢出 Exception，他们何时被 evaluate 就很重要了。那是因为我们只有在 I/O 的部份才能接到 Exception。这很糟糕，因为我们说过希望 I/O 的部份越少越好。但如果我们不接 Exception，我们的程序就会当掉。这问题有解决办法吗？答案是不要在 pure code 里面使用 Exception。利用 Haskell 的型态系统，尽量使用 `Either` 或 `Maybe` 之类的型态来表示可能失败的计算。
+先前我们谈过为什么在 I/O 部份的程序要越少越好。程序的逻辑部份尽量都放在 pure 的部份，因为 pure 的特性就是他们的结果只会根据函数的参数不同而改变。当思考 pure function 的时候，你只需要考虑他返回什么，因为除此之外他不会有任何副作用。这会让事情简单许多。尽管 I/O 的部份是难以避免的（像是打开文件之类），但最好是把 I/O 部份降到最低。Pure functions 默认是 lazy，那代表我们不知道他什么时候会被 evaluate，不过我们也不该知道。然而，一旦 pure functions 需要丢出 Exception，他们何时被 evaluate 就很重要了。那是因为我们只有在 I/O 的部份才能接到 Exception。这很糟糕，因为我们说过希望 I/O 的部份越少越好。但如果我们不接 Exception，我们的程序就会当掉。这问题有解决办法吗？答案是不要在 pure code 里面使用 Exception。利用 Haskell 的型态系统，尽量使用 `Either` 或 `Maybe` 之类的型态来表示可能失败的计算。
 
 这也是为什么我们要来看看怎么使用 I/O Excetion。I/O Exception 是当我们在 `main` 里面跟外界沟通失败而丢出的 Exception。例如我们尝试打开一个文件，结果发现他已经被删掉或是其他状况。来看看一个尝试打开命令行参数所指定文件名称，并计算里面有多少行的程序。
 

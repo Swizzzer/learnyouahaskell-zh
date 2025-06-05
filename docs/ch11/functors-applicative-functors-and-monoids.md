@@ -272,7 +272,7 @@ CJust 0 "haha"
 
 在这个章节中，我们会学到 applicative functors，也就是加强版的 functors，在 Haskell 中是用在 `Control.Applicative` 中的 `Applicative` 这个 typeclass 来定义的。
 
-你还记得 Haskell 中函数缺省就是 Curried 的，那代表接受多个参数的函数实际上是接受一个参数然后返回一个接受剩余参数的函数，以此类推。如果一个函数的类型是 `a -> b -> c`，我们通常会说这个函数接受两个参数并返回 `c`，但他实际上是接受 `a` 并返回一个 `b -> c` 的函数。这也是为什么我们可以用 `(f x) y` 的方式调用 `f x y`。这个机制让我们可以 partially apply 一个函数，可以用比较少的参数调用他们。可以做成一个函数再喂给其他函数。
+你还记得 Haskell 中函数默认就是 Curried 的，那代表接受多个参数的函数实际上是接受一个参数然后返回一个接受剩余参数的函数，以此类推。如果一个函数的类型是 `a -> b -> c`，我们通常会说这个函数接受两个参数并返回 `c`，但他实际上是接受 `a` 并返回一个 `b -> c` 的函数。这也是为什么我们可以用 `(f x) y` 的方式调用 `f x y`。这个机制让我们可以 partially apply 一个函数，可以用比较少的参数调用他们。可以做成一个函数再喂给其他函数。
 
 到目前为止，当我们要对 functor map over 一个函数的时候，我们用的函数都是只接受一个参数的。但如果我们要 map 一个接受两个参数的函数呢？我们来看几个具体的例子。如果我们有 `Just 3` 然后我们做 `fmap (*) (Just 3)`，那我们会获得什么样的结果？从 `Maybe` 对 `Functor` 的 instance 实作来看，我们知道如果他是 `Just something`，他会对在 `Just` 中的 `something` 做映射。因此当 `fmap (*) (Just 3)` 会得到 `Just ((*) 3)`，也可以写做 `Just (* 3)`。我们得到了一个包在 `Just` 中的函数。
 
@@ -301,7 +301,7 @@ ghci> fmap (\f -> f 9) a
 
 但如果我们的有一个 functor 里面是 `Just (3 *)` 还有另一个 functor 里面是 `Just 5`，但我们想要把第一个 `Just (3 *)` map over `Just 5` 呢？如果是普通的 functor，那就没救了。因为他们只允许 map 一个普通的函数。即使我们用 `\f -> f 9` 来 map 一个装了很多函数的 functor，我们也是使用了普通的函数。我们是无法单纯用 `fmap` 来把包在一个 functor 的函数 map 另一个包在 functor 中的值。我们能用模式匹配 `Just` 来把函数从里面抽出来，然后再 map `Just 5`，但我们是希望有一个一般化的作法，对任何 functor 都有效。
 
-我们来看看 `Applicative` 这个 typeclass。他位在 `Control.Applicative` 中，在其中定义了两个函数 `pure` 跟 `<*>`。他并没有提供缺省的实作，如果我们想使用他必须要为他们 applicative functor 的实作。typeclass 定义如下：
+我们来看看 `Applicative` 这个 typeclass。他位在 `Control.Applicative` 中，在其中定义了两个函数 `pure` 跟 `<*>`。他并没有提供默认的实作，如果我们想使用他必须要为他们 applicative functor 的实作。typeclass 定义如下：
 
 ```haskell
 class (Functor f) => Applicative f where  
@@ -313,7 +313,7 @@ class (Functor f) => Applicative f where
 
 第一个定义的是 `pure`。他的类型宣告是 `pure :: a -> f a`。`f` 代表 applicative functor 的 instance。由于 Haskell 有一个优秀的类型系统，其中函数又是将一些参数映射成结果，我们可以从类型宣告中读出许多消息。`pure` 应该要接受一个值，然后返回一个包含那个值的 applicative functor。我们这边是用盒子来作比喻，即使有一些比喻不完全符合现实的情况。尽管这样，`a -> f a` 仍有许多丰富的信息，他确实告诉我们他会接受一个值并返回一个 applicative functor，里面装有结果。
 
-对于 `pure` 比较好的说法是把一个普通值放到一个缺省的 context 下，一个最小的 context 但仍然包含这个值。
+对于 `pure` 比较好的说法是把一个普通值放到一个默认的 context 下，一个最小的 context 但仍然包含这个值。
 
 `<*>` 也非常有趣。他的类型是 `f (a -> b) -> f a -> f b`。这有让你联想到什么吗？没错！就是 `fmap :: (a -> b) -> f a -> f b`。他有点像加强版的 `fmap`。然而 `fmap` 接受一个函数跟一个 functor，然后套用 functor 之中的函数。`<*>` 则是接受一个装有函数的 functor 跟另一个 functor，然后取出第一个 functor 中的函数将他对第二个 functor 中的值做 map。
 
@@ -368,7 +368,7 @@ Nothing
 
 这样很棒吧！用 applicative style 的方式来使用 applicative functors。像是 `pure f <*> x <*> y <*> ...` 就让我们可以拿一个接受多个参数的函数，而且这些参数不一定是被包在 functor 中。就这样来套用在多个在 functor context 的值。这个函数可以吃任意多的参数，毕竟 `<*>` 只是做 partial application 而已。
 
-如果我们考虑到 `pure f <*> x` 等于 `fmap f x` 的话，这样的用法就更方便了。这是 applicative laws 的其中一条。我们稍后会更仔细地查看这条定律。现在我们先依直觉来使用他。就像我们先前所说的，`pure` 把一个值放进一个缺省的 context 中。如果我们要把一个函数放在一个缺省的 context，然后把他取出并套用在放在另一个 applicative functor 的值。我们会做的事就是把函数 map over 那个 applicative functor。但我们不会写成 `pure f <*> x <*> y <*> ...`，而是写成 `fmap f x <*> y <*> ...`。这也是为什么 `Control.Applicative` 会 export 一个函数 `<$>`，他基本上就是中缀版的 `fmap`。他是这么被定义的：
+如果我们考虑到 `pure f <*> x` 等于 `fmap f x` 的话，这样的用法就更方便了。这是 applicative laws 的其中一条。我们稍后会更仔细地查看这条定律。现在我们先依直觉来使用他。就像我们先前所说的，`pure` 把一个值放进一个默认的 context 中。如果我们要把一个函数放在一个默认的 context，然后把他取出并套用在放在另一个 applicative functor 的值。我们会做的事就是把函数 map over 那个 applicative functor。但我们不会写成 `pure f <*> x <*> y <*> ...`，而是写成 `fmap f x <*> y <*> ...`。这也是为什么 `Control.Applicative` 会 export 一个函数 `<$>`，他基本上就是中缀版的 `fmap`。他是这么被定义的：
 
 ```haskell
 (<$>) :: (Functor f) => (a -> b) -> f a -> f b  
@@ -409,7 +409,7 @@ instance Applicative [] where
     fs <*> xs = [f x | f <- fs, x <- xs]
 ```
 
-早先我们说过 `pure` 是把一个值放进缺省的 context 中。换种说法就是一个会产生那个值的最小 context。而对 list 而言最小 context 就是 `[]`，但由于空的 list 并不包含一个值，所以我们没办法把他当作 `pure`。这也是为什么 `pure` 其实是接受一个值然后返回一个包含单元素的 list。同样的，`Maybe` 的最小 context 是 `Nothing`，但他其实表示的是没有值。所以 `pure` 其实是被实作成 `Just` 的。
+早先我们说过 `pure` 是把一个值放进默认的 context 中。换种说法就是一个会产生那个值的最小 context。而对 list 而言最小 context 就是 `[]`，但由于空的 list 并不包含一个值，所以我们没办法把他当作 `pure`。这也是为什么 `pure` 其实是接受一个值然后返回一个包含单元素的 list。同样的，`Maybe` 的最小 context 是 `Nothing`，但他其实表示的是没有值。所以 `pure` 其实是被实作成 `Just` 的。
 
 ```haskell
 ghci> pure "Hey" :: [String]  
@@ -638,7 +638,7 @@ sequenceA [] = pure []
 sequenceA (x:xs) = (:) <$> x <*> sequenceA xs
 ```
 
-居然用到了递归！首先我们来看一下他的类型。他将一串 applicative 的 list 转换成一个 applicative 装有一个 list。从这个信息我们可以推测出边界条件。如果我们要将一个空的 list 变成一个装有 list 的 applicative。我们只要把这个空的 list 放进一个缺省的 context。现在来看一下我们怎么用递归的。如果们有一个可以分成头跟尾的 list（`x` 是一个 applicative 而 `xs` 是一串 applicatve），我们可以对尾巴调用 `sequenceA`，便会得到一个装有 list 的 applicative。然后我们只要将在 `x` 中的值把他接到装有 list 的 applicative 前面就可以了。
+居然用到了递归！首先我们来看一下他的类型。他将一串 applicative 的 list 转换成一个 applicative 装有一个 list。从这个信息我们可以推测出边界条件。如果我们要将一个空的 list 变成一个装有 list 的 applicative。我们只要把这个空的 list 放进一个默认的 context。现在来看一下我们怎么用递归的。如果们有一个可以分成头跟尾的 list（`x` 是一个 applicative 而 `xs` 是一串 applicatve），我们可以对尾巴调用 `sequenceA`，便会得到一个装有 list 的 applicative。然后我们只要将在 `x` 中的值把他接到装有 list 的 applicative 前面就可以了。
 
 所以如果我们做 `sequenceA [Just 1, Just 2]`，也就是 `(:) <$> Just 1 <*> sequenceA [Just 2]`。那会等价于 `(:) <$> Just 1 <*> ((:) <$> Just 2 <*> sequenceA [])`。我们知道 `sequenceA []` 算出来会是 `Just []`，所以运算式就变成 `(:) <$> Just 1 <*> ((:) <$> Just 2 <*> Just [])`，也就是 `(:) <$> Just 1 <*> Just [2]`，算出来就是 `Just [1,2]`。
 
@@ -894,7 +894,7 @@ ghci> getPair $ fmap reverse (Pair ("london calling", 3))
 
 我们提到 `newtype` 一般来讲比 `data` 来得有效率。`newtype` 能做的唯一一件事就是将现有的类型包成新的类型。这样 Haskell 在内部就能将新的类型的值用旧的方式来操作。只是要记住他们还是不同的类型。这代表 `newtype` 并不只是有效率，他也具备 lazy 的特性。我们来说明一下这是什么意思。
 
-就像我们之前说得，Haskell 缺省是具备 lazy 的特性，这代表只有当我们要将函数的结果印出来的时候计算才会发生。或者说，只有当我们真的需要结果的时候计算才会发生。在 Haskell 中 `undefined` 代表会造成错误的计算。如果我们试着计算他，也就是将他印到终端中，Haskell 会丢出错误。
+就像我们之前说得，Haskell 默认是具备 lazy 的特性，这代表只有当我们要将函数的结果印出来的时候计算才会发生。或者说，只有当我们真的需要结果的时候计算才会发生。在 Haskell 中 `undefined` 代表会造成错误的计算。如果我们试着计算他，也就是将他印到终端中，Haskell 会丢出错误。
 
 ```haskell
 ghci> undefined  
@@ -1044,7 +1044,7 @@ class Monoid m where
 
 再来我们看到 `mappend`，你可能已经猜到，他是一个接受两个相同类型的值的二元函数，并返回同样的类型。不过要注意的是他的名字不太符合他真正的意思，他的名字隐含了我们要将两个东西接在一起。尽管在 list 的情况下 `++` 的确将两个 list 接起来，但 `*` 则否。他只不过将两个数值做相乘。当我们再看到其他 `Monoid` 的 instance 时，我们会看到他们大部分都没有接起来的做，所以不要用接起来的概念来想像 `mappend`，只要想像他们是接受两个 monoid 的值并返回另外一个就好了。
 
-在 typeclass 定义中的最后一个函数是 `mconcat`。他接受一串 monoid 值，并将他们用 `mappend` 简化成单一的值。他有一个缺省的实作，就是从 `mempty` 作为起始值，然后用 `mappend` 来 fold。由于对于大部分的 instance 缺省的实作就没什么问题，我们不会想要实作自己的 `mconcat`。当我们定义一个类型属于 `Monoid` 的时候，多半实作 `mempty` 跟 `mappend` 就可以了。而 `mconcat` 就是因为对于一些 instance，有可能有比较有效率的方式来实作 `mconcat`。不过大多数情况都不需要。
+在 typeclass 定义中的最后一个函数是 `mconcat`。他接受一串 monoid 值，并将他们用 `mappend` 简化成单一的值。他有一个默认的实作，就是从 `mempty` 作为起始值，然后用 `mappend` 来 fold。由于对于大部分的 instance 默认的实作就没什么问题，我们不会想要实作自己的 `mconcat`。当我们定义一个类型属于 `Monoid` 的时候，多半实作 `mempty` 跟 `mappend` 就可以了。而 `mconcat` 就是因为对于一些 instance，有可能有比较有效率的方式来实作 `mconcat`。不过大多数情况都不需要。
 
 在我们继续接下去看几个 `Monoid` 的例子前，我们来看一下 monoid law。我们提过必须有一个值作为 identity 以及一个遵守结合律的二元函数当作前提。我们是可以定义一个 `Monoid` 的 instance 却不遵守这些定律的，但这样写出来的 instance 就没有用了，因为我们在使用 `Monoid` 的时候都是依靠这些定律才可以称作实质上的 monoid。所以我们必须确保他们遵守：
 
@@ -1091,7 +1091,7 @@ ghci> mempty :: [a]
 
 注意到最后一行我们明白地标记出类型。这是因为如果只些 `mempty` 的话，GHCi 不会知道他是哪一个 instance 的 `mempty`，所以我们必须清楚说出他是 list instance 的 mempty。我们可以使用一般化的类型 `[a]`，因为空的 list 可以看作是属于任何类型。
 
-由于 `mconcat` 有一个缺省的实作，我们将某个类型定义成 `Monoid` 的类型时就可以自动地得到缺省的实作。但对于 list 而言，`mconcat` 其实就是 `concat`。他接受一个装有 list 的 list，并把他用 `++` 来扁平化他。
+由于 `mconcat` 有一个默认的实作，我们将某个类型定义成 `Monoid` 的类型时就可以自动地得到默认的实作。但对于 list 而言，`mconcat` 其实就是 `concat`。他接受一个装有 list 的 list，并把他用 `++` 来扁平化他。
 
 list 的 instance 也遵守 monoid law。当我们有好几个 list 并且用 `mappend` 来把他们串起来，先后顺序并不是很重要，因为他们都是接在最后面。而且空的 list 也表现得如 identity 一样。注意到 monoid 并不要求 ``a `mappend` b`` 等于 ``b `mappend` a``。在 list 的情况下，他们明显不相等。
 
@@ -1460,7 +1460,7 @@ instance F.Foldable Tree where
 
 注意到我们并不一定要提供一个将普通值转成 monoid 的函数。我们只是把他当作是 `foldMap` 的参数，我们要决定的只是如何套用那个函数，来把得到的 monoid 们简化成单一结果。
 
-现在我们有树的 `Foldable` instance，而 `foldr` 跟 `foldl` 也有缺省的实作了。考虑下面这棵树：
+现在我们有树的 `Foldable` instance，而 `foldr` 跟 `foldl` 也有默认的实作了。考虑下面这棵树：
 
 ```haskell
 testTree = Node 5  
