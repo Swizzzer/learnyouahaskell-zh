@@ -1,7 +1,5 @@
 # FAQ
 
-![](https://github.com/MnO2/learnyouahaskell-zh/tree/e47e717ed1af92c4e38a596af5347e7d1434c454/zh-cn/faq/$img/turtle.png)
-
 ## 我能把这份教学放在我的网站吗？我可以更改里面的内容吗？
 
 当然。它受[creative commons attribution noncommercial blah blah blah...](http://creativecommons.org/licenses/by-nc-sa/3.0/)许可证的保护，因此你可以分享或修改它。只要你是发自内心想要这么作，并且只将教学用于非商业目的。
