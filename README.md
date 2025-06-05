@@ -14,3 +14,7 @@
 - `mkdocs serve`
 
 之后你就可以访问`localhost:8000`阅读本书了 🥰
+
+## 🫡 Thanks
+
+- [MnO2原项目](https://github.com/MnO2/learnyouahaskell-zh)的所有Contributors
