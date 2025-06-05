@@ -441,7 +441,7 @@ ghci> (++) <$> ["ha","heh","hmm"] <*> ["?","!","."]
 ["ha?","ha!","ha.","heh?","heh!","heh.","hmm?","hmm!","hmm."]
 ```
 
-看看我们是如何将一个接受两个字串参数的函数套用到两个 applicative functor 上的，只要用适当的 applicative 运算子就可以达成。
+看看我们是如何将一个接受两个字串参数的函数套用到两个 applicative functor 上的，只要用适当的 applicative 运算符就可以达成。
 
 你可以将 list 看作是一个 non-deterministic 的计算。而对于像 `100` 或是 `"what"` 这样的值则是 deterministic 的计算，只会有一个结果。而 `[1,2,3]` 则可以看作是没有确定究竟是哪一种结果。所以他代表的是所有可能的结果。当你在做 `(+) <$> [1,2,3] <*> [4,5,6]`，你可以想做是把两个 non-deterministic 的计算做 `+`，只是他会产生另一个 non-deterministic 的计算，而且结果更加不确定。
 
