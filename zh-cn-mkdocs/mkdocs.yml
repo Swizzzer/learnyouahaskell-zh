@@ -2,10 +2,12 @@ site_name: Learn You A Haskell for Great Good!
 site_description: A beginner's guide to Haskell programming language.
 site_author: Miran Lipovača
 copyright: Creative Commons Attribution-Noncommercial-Share Alike 3.0 Unported License
+theme:
+  name: material
+  features:
+    - navigation.indexes
 nav:
-  - Index: index.md
-  - Page 1: page1.md
-  - Page Group:
-    - Sub Page 1: subpage/page1.md
-    - Sub Page 2: subpage/page2.md
+  - 目录: index.md
+  - 入门介绍: ch01/introduction.md
+  - 从零开始: ch02/ready-go.md
   - About: about.md
