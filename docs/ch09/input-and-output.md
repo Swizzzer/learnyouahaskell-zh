@@ -93,7 +93,7 @@ main = do
 nameTag = "Hello, my name is " ++ getLine
 ```
 
-如果你回答不是，恭喜你。如果你说是，你答错了。这么做不对的理由是 `++` 要求两个参数都必须是串列。他左边的参数是 `String`，也就是 `[Char]`。然而 `getLine` 的型态是 `IO String`。你不能串接一个字串跟 I/O action。我们必须先把 `String` 的值从 I/O action 中取出，而唯一可行的方法就是在 I/O action 中使用 `name <- getLine`。如果我们需要处理一些非纯粹的数据，那我们就要在非纯粹的环境中做。所以我们最好把 I/O 的部分缩减到最小的比例。
+如果你回答不是，恭喜你。如果你说是，你答错了。这么做不对的理由是 `++` 要求两个参数都必须是序列。他左边的参数是 `String`，也就是 `[Char]`。然而 `getLine` 的型态是 `IO String`。你不能串接一个字串跟 I/O action。我们必须先把 `String` 的值从 I/O action 中取出，而唯一可行的方法就是在 I/O action 中使用 `name <- getLine`。如果我们需要处理一些非纯粹的数据，那我们就要在非纯粹的环境中做。所以我们最好把 I/O 的部分缩减到最小的比例。
 
 每个 I/O action 都有一个值封装在里面。这也是为什么我们之前的程序可以这么写：
 
@@ -163,7 +163,7 @@ reverseWords = unwords . map reverse . words
 
 在分析这段程序前，你可以执行看看来感受一下程序的运行。
 
-首先，我们来看一下 `reverseWords`。他不过是一个普通的函数，假如接受了个字串 `"hey there man"`，他会先调用 `words` 来产生一个字的串列 `["hey", "there", "man"]`。然后用 `reverse` 来 map 整个串列，得到 `["yeh", "ereht", "nam"]`，接着用 `unwords` 来得到最终的结果 `"yeh ereht nam"`。这些用函数合成来简洁的表达。如果没有用函数合成，那就会写成丑丑的样子 `reverseWords st = unwords (map reverse (words st))`
+首先，我们来看一下 `reverseWords`。他不过是一个普通的函数，假如接受了个字串 `"hey there man"`，他会先调用 `words` 来产生一个字的序列 `["hey", "there", "man"]`。然后用 `reverse` 来 map 整个序列，得到 `["yeh", "ereht", "nam"]`，接着用 `unwords` 来得到最终的结果 `"yeh ereht nam"`。这些用函数合成来简洁的表达。如果没有用函数合成，那就会写成丑丑的样子 `reverseWords st = unwords (map reverse (words st))`
 
 那 `main` 又是怎么一回事呢？首先，我们用 `getLine` 从终端读取了一行，并把这行输入取名叫 `line`。然后接着一个条件式 expression。记住，在 Haskell 中 if 永远要伴随一个 else，这样每个 expression 才会有值。当 if 的条件是 true （也就是输入了一个空白行），我们便执行一个 I/O action，如果 if 的条件是 false，那 else 底下的 I/O action 被执行。这也就是说当 if 在一个 I/O do block 中的时候，长的样子是 `if condition then I/O action else I/O action`。
 
@@ -341,9 +341,9 @@ main = do
     print rs
 ```
 
-所以 `sequence [getLine, getLine, getLine]` 作成了一个执行 `getLine` 三次的 I/O action。如果我们对他绑定一个名字，结果便是这串结果的串列。也就是说，三个用户输入的东西组成的串列。
+所以 `sequence [getLine, getLine, getLine]` 作成了一个执行 `getLine` 三次的 I/O action。如果我们对他绑定一个名字，结果便是这串结果的序列。也就是说，三个用户输入的东西组成的序列。
 
-一个常见的使用方式是我们将 `print` 或 `putStrLn` 之类的函数 map 到串列上。`map print [1,2,3,4]` 这个动作并不会产生一个 I/O action，而是一串 I/O action，就像是 `[print 1, print 2, print 3, print 4]`。如果我们将一串 I/O action 变成一个 I/O action，我们必须用 `sequence`
+一个常见的使用方式是我们将 `print` 或 `putStrLn` 之类的函数 map 到序列上。`map print [1,2,3,4]` 这个动作并不会产生一个 I/O action，而是一串 I/O action，就像是 `[print 1, print 2, print 3, print 4]`。如果我们将一串 I/O action 变成一个 I/O action，我们必须用 `sequence`
 
 ```haskell
 ghci> sequence (map print [1,2,3,4,5])
@@ -357,7 +357,7 @@ ghci> sequence (map print [1,2,3,4,5])
 
 那 `[(),(),(),(),()]` 是怎么回事？当我们在 GHCI 中运算 I/O action，他会被执行并把结果打印出来，唯一例外是结果是 `()` 的时候不会被打印出。这也是为什么 `putStrLn "hehe"` 在 GHCI 中只会打印出 `hehe`（因为 `putStrLn "hehe"` 的结果是 `()`）。但当我们使用 `getLine` 时，由于 `getLine` 的型态是 `IO String`，所以结果会被打印出来。
 
-由于对一个串列 map 一个返回 I/O action 的函数，然后再 sequence 他这个动作太常用了。所以有一些函数在函式库中 `mapM` 跟 `mapM_`。`mapM` 接受一个函数跟一个串列，将对串列用函数 map 然后 sequence 结果。`mapM_` 也作同样的事，只是他把运算的结果丢掉而已。在我们不关心 I/O action 结果的情况下，`mapM_` 是最常被使用的。
+由于对一个序列 map 一个返回 I/O action 的函数，然后再 sequence 他这个动作太常用了。所以有一些函数在函式库中 `mapM` 跟 `mapM_`。`mapM` 接受一个函数跟一个序列，将对序列用函数 map 然后 sequence 结果。`mapM_` 也作同样的事，只是他把运算的结果丢掉而已。在我们不关心 I/O action 结果的情况下，`mapM_` 是最常被使用的。
 
 ```haskell
 ghci> mapM print [1,2,3]
@@ -383,7 +383,7 @@ main = forever $ do
     putStrLn $ map toUpper l
 ```
 
-在 `Control.Monad` 中的 `forM` 跟 `mapM` 的作用一样，只是参数的顺序相反而已。第一个参数是串列，而第二个则是函数。这有什么用？在一些有趣的情况下还是有用的：
+在 `Control.Monad` 中的 `forM` 跟 `mapM` 的作用一样，只是参数的顺序相反而已。第一个参数是序列，而第二个则是函数。这有什么用？在一些有趣的情况下还是有用的：
 
 ```haskell
 import Control.Monad
@@ -397,9 +397,9 @@ main = do
     mapM putStrLn colors
 ```
 
-`(\a -> do ...)` 是接受一个数字并返回一个 I/O action 的函数。我们必须用括号括住他，不然 lambda 会贪心 match 的策略会把最后两个 I/O action 也算进去。注意我们在 do block 里面 `return color`。我们那么作是让 do block 的结果是我们选的颜色。实际上我们并不需那么作，因为 `getLine` 已经达到我们的目的。先 `color <- getLine` 再 `return color` 只不过是把值取出再包起来，其实是跟 `getLine` 效果相当。`forM` 产生一个 I/O action，我们把结果绑定到 `colors` 这名称。`colors` 是一个普通包含字串的串列。最后，我们用 `mapM putStrLn colors` 打印出所有颜色。
+`(\a -> do ...)` 是接受一个数字并返回一个 I/O action 的函数。我们必须用括号括住他，不然 lambda 会贪心 match 的策略会把最后两个 I/O action 也算进去。注意我们在 do block 里面 `return color`。我们那么作是让 do block 的结果是我们选的颜色。实际上我们并不需那么作，因为 `getLine` 已经达到我们的目的。先 `color <- getLine` 再 `return color` 只不过是把值取出再包起来，其实是跟 `getLine` 效果相当。`forM` 产生一个 I/O action，我们把结果绑定到 `colors` 这名称。`colors` 是一个普通包含字串的序列。最后，我们用 `mapM putStrLn colors` 打印出所有颜色。
 
-你可以把 `forM` 的意思想成将串列中的每个元素作成一个 I/O action。至于每个 I/O action 实际作什么就要看原本的元素是什么。然后，执行这些 I/O action 并将结果绑定到某个名称上。或是直接将结果忽略掉。
+你可以把 `forM` 的意思想成将序列中的每个元素作成一个 I/O action。至于每个 I/O action 实际作什么就要看原本的元素是什么。然后，执行这些 I/O action 并将结果绑定到某个名称上。或是直接将结果忽略掉。
 
 ```haskell
 $ runhaskell from_test.hs
@@ -479,7 +479,7 @@ main = do
     putStr (map toUpper contents)
 ```
 
-我们将 `getContents` 取回的字串绑定到 `contents`。然后用 `toUpper` map 到整个字串后打印到终端上。记住字串基本上就是一串惰性的串列 \(list\)，同时 `getContents` 也是惰性 I/O，他不会一口气读入内容然后将内容存在内存中。实际上，他会一行一行读入并输出大写的版本，这是因为输出才是真的需要输入的数据的时候。
+我们将 `getContents` 取回的字串绑定到 `contents`。然后用 `toUpper` map 到整个字串后打印到终端上。记住字串基本上就是一串惰性的序列 \(list\)，同时 `getContents` 也是惰性 I/O，他不会一口气读入内容然后将内容存在内存中。实际上，他会一行一行读入并输出大写的版本，这是因为输出才是真的需要输入的数据的时候。
 
 ```haskell
 $ cat haiku.txt | ./capslocker
@@ -834,11 +834,11 @@ main = do
 
 我们不用 `getCurrentDirectory` 的来拿到现在所在文件夹而用 `"."` 的原因是 `.` 在 unix-like 系统跟 Windows 中都表示现在的文件夹。
 
-然后，我们绑定 todo.txt 的内容成 `contents`。把字串断成一串字串，每个字串代表一行。`todoTasks` 就变成 `["Iron the dishes", "Dust the dog", "Take salad out of the oven"]`。我们用一个会把 3 跟 `"hey"` 变成 `"3 - hey"` 的函数，然后从 0 开始把这个串列 zip 起来。所以 `numberedTasks` 就是 `["0 - Iron the dishes", "1 - Dust the dog" ...`。我们用 `unlines` 把这个串列变成一行，然后打印到终端上。注意我们也有另一种作法，就是用 `mapM putStrLn numberedTasks`。
+然后，我们绑定 todo.txt 的内容成 `contents`。把字串断成一串字串，每个字串代表一行。`todoTasks` 就变成 `["Iron the dishes", "Dust the dog", "Take salad out of the oven"]`。我们用一个会把 3 跟 `"hey"` 变成 `"3 - hey"` 的函数，然后从 0 开始把这个序列 zip 起来。所以 `numberedTasks` 就是 `["0 - Iron the dishes", "1 - Dust the dog" ...`。我们用 `unlines` 把这个序列变成一行，然后打印到终端上。注意我们也有另一种作法，就是用 `mapM putStrLn numberedTasks`。
 
 我们问用户他们想要删除哪一个并且等着他们输入一个数字。假设他们想要删除 1 号，那代表 `Dust the dog`，所以他们输入 `1`。于是 `numberString` 就代表 `"1"`。由于我们想要一个数字，而不是一个字串，所以我们用对 `1` 使用 `read`，并且绑定到 `number`。
 
-还记得在 `Data.List` 中的 `delete` 跟 `!!` 吗？`!!` 返回某个 index 的元素，而 `delete` 删除在串列中第一个发现的元素，然后返回一个新的没有那个元素的串列。`(todoTasks !! number)` （number 代表 `1`） 返回 `"Dust the dog"`。我们把 `todoTasks` 去掉第一个 `"Dust the dog"` 后的串列绑定到 `newTodoItems`，然后用 `unlines` 变成一行然后写到我们所打开的暂存盘。旧有的文件并没有变动，而暂存盘包含砍掉那一行后的所有内容。
+还记得在 `Data.List` 中的 `delete` 跟 `!!` 吗？`!!` 返回某个 index 的元素，而 `delete` 删除在序列中第一个发现的元素，然后返回一个新的没有那个元素的序列。`(todoTasks !! number)` （number 代表 `1`） 返回 `"Dust the dog"`。我们把 `todoTasks` 去掉第一个 `"Dust the dog"` 后的序列绑定到 `newTodoItems`，然后用 `unlines` 变成一行然后写到我们所打开的暂存盘。旧有的文件并没有变动，而暂存盘包含砍掉那一行后的所有内容。
 
 在我们关掉源文件跟暂存盘之后我们用 **removeFile** 来移除原本的文件。他接受一个文件路径并且删除文件。删除旧得 todo.txt 之后，我们用 **renameFile** 来将暂存盘重命名成 todo.txt。特别留意 `removeFile` 跟 `renameFile`（两个都在 `System.Directory` 中）接受的是文件路径，而不是 handle。
 
@@ -880,7 +880,7 @@ Take salad out of the oven
 
 这也是为什么有时候让用户在执行的时候就告诉程序他们要什么会比较好，而不是让程序去问用户要什么。比较好的方式是让用户透过命令行参数告诉程序他们想要什么。
 
-在 `System.Environment` 模块当中有两个很酷的 I/O actions，一个是 **getArgs**，他的 type 是 `getArgs :: IO [String]`，他是一个拿取命令行参数的 I/O action，并把结果放在包含的一个串列中。**getProgName** 的型态是 `getProgName :: IO String`，他则是一个 I/O action 包含了程序的名称。
+在 `System.Environment` 模块当中有两个很酷的 I/O actions，一个是 **getArgs**，他的 type 是 `getArgs :: IO [String]`，他是一个拿取命令行参数的 I/O action，并把结果放在包含的一个序列中。**getProgName** 的型态是 `getProgName :: IO String`，他则是一个 I/O action 包含了程序的名称。
 
 我们来看一个展现他们功能的程序。
 
@@ -924,7 +924,7 @@ arg-test
 
 我们的程序要像这样运作：假如我们要加入 `Find the magic sword of power`，则我们会打 `todo add todo.txt "Find the magic sword of power"`。要查看事项我们则会打 `todo view todo.txt`，如果要移除事项二则会打 `todo remove todo.txt 2`
 
-我们先作一个分发的 association list。他会把命令行参数当作 key，而对应的处理函数当作 value。这些函数的型态都是 `[String] -> IO ()`。他们会接受命令行参数的串列并返回对应的查看，加入以及删除的 I/O action。
+我们先作一个分发的 association list。他会把命令行参数当作 key，而对应的处理函数当作 value。这些函数的型态都是 `[String] -> IO ()`。他们会接受命令行参数的序列并返回对应的查看，加入以及删除的 I/O action。
 
 ```haskell
 import System.Environment
@@ -950,7 +950,7 @@ main = do
 
 首先，我们取出参数并把他们绑定到 `(command:args)`。如果你还记得 pattern matching，这么做会把第一个参数绑定到 `command`，把其他的绑定到 `args`。如果我们像这样执行程序 `todo add todo.txt "Spank the monkey"`，`command` 会变成 `"add"`，而 `args` 会变成 `["todo.txt", "Spank the monkey"]`。
 
-在下一行，我们在一个分派的串列中寻到我们的指令是哪个。由于 `"add"` 指向 `add`，我们的结果便是 `Just add`。我们再度使用了 pattern matching 来把我们的函数从 `Maybe` 中取出。但如果我们想要的指令不在分派的串列中呢？那样 lookup 就会返回 `Nothing`，但我们这边并不特别处理失败的情况，所以 pattern matching 会失败然后我们的程序就会当掉。
+在下一行，我们在一个分派的序列中寻到我们的指令是哪个。由于 `"add"` 指向 `add`，我们的结果便是 `Just add`。我们再度使用了 pattern matching 来把我们的函数从 `Maybe` 中取出。但如果我们想要的指令不在分派的序列中呢？那样 lookup 就会返回 `Nothing`，但我们这边并不特别处理失败的情况，所以 pattern matching 会失败然后我们的程序就会当掉。
 
 最后，我们用剩下的参数调用 `action` 这个函数。他会还传一个加入 item，显示所有 items 或者删除 item 的 I/O action。由于这个 I/O action 是在 `main` 的 do block 中，他最后会被执行。如果我们的 `action` 函数是 `add`，他就会被喂 `args` 然后返回一个加入 `Spank the monkey` 到 todo.txt 中的 I/O action。
 
@@ -965,7 +965,7 @@ add [fileName, todoItem] = appendFile fileName (todoItem ++ "\n")
 
 由于我们不处理不合法的输入，我们只针对这两项作 pattern matching，然后返回一个附加一行到文件末尾的 I/O action。
 
-接着，我们来实作查看串列。如果我们想要查看所有 items，我们会 `todo view todo.txt`。所以 `command` 会是 `"view"`，而 `args` 会是 `["todo.txt"]`。
+接着，我们来实作查看序列。如果我们想要查看所有 items，我们会 `todo view todo.txt`。所以 `command` 会是 `"view"`，而 `args` 会是 `["todo.txt"]`。
 
 ```haskell
 view :: [String] -> IO ()
