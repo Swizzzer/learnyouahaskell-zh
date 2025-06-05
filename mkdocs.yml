@@ -6,6 +6,10 @@ theme:
   name: material
   features:
     - navigation.indexes
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
 nav:
   - 目录: index.md
   - 01. Introduction: ch01/introduction.md

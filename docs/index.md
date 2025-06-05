@@ -1,4 +1,4 @@
-# Index
+# 目录
 
 * [Chap 01 - Introduction](ch01/introduction.md)
 * [Chap 02 - Ready Go](ch02/ready-go.md)

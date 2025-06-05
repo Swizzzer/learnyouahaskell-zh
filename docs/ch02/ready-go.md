@@ -14,6 +14,10 @@ Prelude>
 
 恭喜您已经进入了 ghci 了！目前它的命令行提示是 `prelude>`，不过它在你装载一些模块之后会变的比较长。为了美观起见，我们会输入指令 `:set prompt "ghci> "` 把它改成 `ghci>`。
 
+!!! note "Swizzer按"
+
+    在比较新的GHC版本中默认的提示已经是ghci了
+
 首先来看一些简单的运算
 
 ```haskell
