@@ -11,4 +11,5 @@ nav:
   - Chapter 01. 简介: ch01/introduction.md
   - Chapter 02. 从零开始: ch02/ready-go.md
   - Chapter 03. 类型和类型类: ch03/type-and-typeclass.md
+  - Chapter 04. 函数的语法: ch04/syntax-in-function.md
   - About: about.md
