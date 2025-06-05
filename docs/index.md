@@ -16,4 +16,5 @@
 * [Chap 14 - Zippers](ch14/zippers.md)
 * [FAQ](faq/faq.md)
 * [Resource](resource/resource.md)
+* [About](about.md)
 
