@@ -4,9 +4,9 @@
 
 ![](./modules.png)
 
-Haskell 中的模块是含有一组相关的函数，类别和类别类的组合。而 Haskell 进程的本质便是从主模块中引用其它模块并调用其中的函数来执行操作。这样可以把代码分成多块，只要一个模块足够的独立，它里面的函数便可以被不同的进程反复重用。这就让不同的代码各司其职，提高了代码的健壮性。
+Haskell 中的模块是含有一组相关的函数，类型和类型类的组合。而 Haskell 进程的本质便是从主模块中引用其它模块并调用其中的函数来执行操作。这样可以把代码分成多块，只要一个模块足够的独立，它里面的函数便可以被不同的进程反复重用。这就让不同的代码各司其职，提高了代码的健壮性。
 
-Haskell 的标准库就是一组模块，每个模块都含有一组功能相近或相关的函数和类别。有处理 List 的模块，有处理并发的模块，也有处理复数的模块，等等。目前为止我们谈及的所有函数,类别以及类别类都是 `Prelude` 模块的一部分，它缺省自动装载。在本章，我们看一下几个常用的模块，在开始浏览其中的函数之前，我们先得知道如何装载模块.
+Haskell 的标准库就是一组模块，每个模块都含有一组功能相近或相关的函数和类型。有处理 List 的模块，有处理并发的模块，也有处理复数的模块，等等。目前为止我们谈及的所有函数,类型以及类型类都是 `Prelude` 模块的一部分，它缺省自动装载。在本章，我们看一下几个常用的模块，在开始浏览其中的函数之前，我们先得知道如何装载模块.
 
 在 Haskell中，装载模块的语法为 `import`，这必须得在函数的定义之前，所以一般都是将它置于代码的顶部。无疑，一段代码中可以装载很多模块，只要将 `import` 语句分行写开即可。装载 `Data.List` 试下，它里面有很多实用的 List 处理函数.
 
@@ -61,7 +61,7 @@ import qualified Data.Map as M
 
 要浏览所有的标准库模块，参考这个手册。翻阅标准库中的模块和函数是提升个人 Haskell 水平的重要途径。你也可以各个模块的源代码，这对 Haskell 的深入学习及掌握都是大有好处的.
 
-检索函数或搜索函数字置就用 \[[http://www.Haskell.org/hoogle/](http://www.Haskell.org/hoogle/) Hoogle\]，相当了不起的 Haskell 搜索引擎! 你可以用函数名，模块名甚至类别声明来作为检索的条件.
+检索函数或搜索函数字置就用 \[[http://www.Haskell.org/hoogle/](http://www.Haskell.org/hoogle/) Hoogle\]，相当了不起的 Haskell 搜索引擎! 你可以用函数名，模块名甚至类型声明来作为检索的条件.
 
 ## Data.List
 
@@ -231,7 +231,7 @@ ghci> span (/=4) [1,2,3,4,5,6,7]
 
 **break** 返回的第二个 List 就会以第一个符合条件的元素开头。
 
-**sort** 可以排序一个 List，因为只有能够作比较的元素才可以被排序，所以这一 List 的元素必须是 Ord 类别类的实例类别。
+**sort** 可以排序一个 List，因为只有能够作比较的元素才可以被排序，所以这一 List 的元素必须是 Ord 类型类的实例类型。
 
 ```haskell
 ghci> sort [8,5,3,2,1,6,4,2]  
@@ -331,7 +331,7 @@ ghci> :t find
 find :: (a -> Bool) -> [a] -> Maybe a
 ```
 
-注意一下 `find` 的类别，它的返回结果为 `Maybe a`，这与 `[a]` 的写法有点像，只是 `Maybe` 型的值只能为空或者单一元素，而 List 可以为空,一个元素，也可以是多个元素.
+注意一下 `find` 的类型，它的返回结果为 `Maybe a`，这与 `[a]` 的写法有点像，只是 `Maybe` 型的值只能为空或者单一元素，而 List 可以为空,一个元素，也可以是多个元素.
 
 想想前面那段找股票的代码，`head (dropWhile (\(val,y,m,d) -> val < 1000) stock)` 。但 `head` 并不安全! 如果我们的股票没涨过 $1000 会怎样? `dropWhile` 会返回一个空 List，而对空 List 取 `head` 就会引发一个错误。把它改成 `find (\(val,y,m,d) -> val > 1000) stock` 就安全多啦，若存在合适的结果就得到它, 像 `Just (1001.4,2008,9,4)`，若不存在合适的元素\(即我们的股票没有涨到过 $1000\)，就会得到一个 `Nothing`.
 
@@ -458,7 +458,7 @@ ghci> insert 3 [1,2,4,3,2,1]
 [1,2,3,4,3,2,1]
 ```
 
-`length`，`take`，`drop`，`splitAt`，`!!` 和 `replicate` 之类的函数有个共同点。那就是它们的参数中都有个 Int 值（或者返回Int值），我觉得使用 Intergal 或 Num 类别类会更好，但出于历史原因，修改这些会破坏掉许多既有的代码。在 `Data.List` 中包含了更通用的替代版，如: `genericLength，genericTake，genericDrop，genericSplitAt，genericIndex` 和 `genericReplicate`。`length` 的类别声明为 `length :: [a] -> Int`，而我们若要像这样求它的平均值，`let xs = [1..6] in sum xs / length xs` ，就会得到一个类别错误，因为 `/` 运算符不能对 Int 型使用! 而 `genericLength` 的类别声明则为 `genericLength :: (Num a) => [b] -> a`，Num 既可以是整数又可以是浮点数，`let xs = [1..6] in sum xs / genericLength xs` 这样再求平均数就不会有问题了.
+`length`，`take`，`drop`，`splitAt`，`!!` 和 `replicate` 之类的函数有个共同点。那就是它们的参数中都有个 Int 值（或者返回Int值），我觉得使用 Intergal 或 Num 类型类会更好，但出于历史原因，修改这些会破坏掉许多既有的代码。在 `Data.List` 中包含了更通用的替代版，如: `genericLength，genericTake，genericDrop，genericSplitAt，genericIndex` 和 `genericReplicate`。`length` 的类型声明为 `length :: [a] -> Int`，而我们若要像这样求它的平均值，`let xs = [1..6] in sum xs / length xs` ，就会得到一个类型错误，因为 `/` 运算符不能对 Int 型使用! 而 `genericLength` 的类型声明则为 `genericLength :: (Num a) => [b] -> a`，Num 既可以是整数又可以是浮点数，`let xs = [1..6] in sum xs / genericLength xs` 这样再求平均数就不会有问题了.
 
 `nub`, `delete`, `union`, `intsect` 和 `group` 函数也有各自的通用替代版 `nubBy`，`deleteBy`，`unionBy`，`intersectBy` 和 `groupBy`，它们的区别就是前一组函数使用 `(==)` 来测试是否相等，而带 `By` 的那组则取一个函数作参数来判定相等性，`group` 就与 `groupBy (==)` 等价.
 
@@ -486,7 +486,7 @@ ghci> groupBy ((==) `on` (> 0)) values
 
 可读性很高! 你可以大声念出来: 按照元素是否大于零，给它分类！
 
-同样，`sort`，`insert`，`maximum` 和 `min` 都有各自的通用版本。如 `groupBy` 类似，**sortBy**，**insertBy**，**maximumBy** 和 **minimumBy** 都取一个函数来比较两个元素的大小。像 `sortBy` 的类别声明为: `sortBy :: (a -> a -> Ordering) -> [a] -> [a]`。前面提过，`Ordering` 类别可以有三个值,`LT`，`EQ` 和 `GT`。`compare` 取两个 `Ord` 类别类的元素作参数，所以 `sort` 与 `sortBy compare` 等价.
+同样，`sort`，`insert`，`maximum` 和 `min` 都有各自的通用版本。如 `groupBy` 类似，**sortBy**，**insertBy**，**maximumBy** 和 **minimumBy** 都取一个函数来比较两个元素的大小。像 `sortBy` 的类型声明为: `sortBy :: (a -> a -> Ordering) -> [a] -> [a]`。前面提过，`Ordering` 类型可以有三个值,`LT`，`EQ` 和 `GT`。`compare` 取两个 `Ord` 类型类的元素作参数，所以 `sort` 与 `sortBy compare` 等价.
 
 List 是可以比较大小的，且比较的依据就是其中元素的大小。如果按照其子 List 的长度为标准当如何? 很好，你可能已经猜到了，`sortBy` 函数.
 
@@ -508,7 +508,7 @@ ghci> sortBy (compare `on` length) xs
 
 **isControl** 判断一个字符是否是控制字符。 **isSpace** 判断一个字符是否是空格字符，包括空格，tab，换行符等. **isLower** 判断一个字符是否为小写. **isUper** 判断一个字符是否为大写。 **isAlpha** 判断一个字符是否为字母. **isAlphaNum** 判断一个字符是否为字母或数字. **isPrint** 判断一个字符是否是可打印的. **isDigit** 判断一个字符是否为数字. **isOctDigit** 判断一个字符是否为八进制数字. **isHexDigit** 判断一个字符是否为十六进制数字. **isLetter** 判断一个字符是否为字母. **isMark** 判断是否为 unicode 注音字符，你如果是法国人就会经常用到的. **isNumber** 判断一个字符是否为数字. **isPunctuation** 判断一个字符是否为标点符号. **isSymbol**判断一个字符是否为货币符号. **isSeperater** 判断一个字符是否为 unicode 空格或分隔符. **isAscii** 判断一个字符是否在 unicode 字母表的前 128 位。 **isLatin1** 判断一个字符是否在 unicode 字母表的前 256 位. **isAsciiUpper** 判断一个字符是否为大写的 ascii 字符. **isAsciiLower** 判断一个字符是否为小写的 ascii 字符.
 
-以上所有判断函数的类别声明皆为 `Char -> Bool`，用到它们的绝大多数情况都无非就是过滤字串或类似操作。假设我们在写个进程，它需要一个由字符和数字组成的用户名。要实现对用户名的检验，我们可以结合使用 `Data.List` 模块的 `all` 函数与 `Data.Char` 的判断函数.
+以上所有判断函数的类型声明皆为 `Char -> Bool`，用到它们的绝大多数情况都无非就是过滤字串或类似操作。假设我们在写个进程，它需要一个由字符和数字组成的用户名。要实现对用户名的检验，我们可以结合使用 `Data.List` 模块的 `all` 函数与 `Data.Char` 的判断函数.
 
 ```haskell
 ghci> all isAlphaNum "bobby283"  
@@ -538,7 +538,7 @@ ghci> filter (not . any isSpace) . groupBy ((==) `on` isSpace) $ "hey guys its m
 
 啊哈.
 
-`Data.Char` 中也含有与 `Ordering` 相似的类别。`Ordering` 可以有三个值，`LT`，`GT` 和 `EQ`。这就是个枚举，它表示了两个元素作比较可能的结果. `GeneralCategory` 类别也是个枚举，它表示了一个字符可能所在的分类。而得到一个字符所在分类的主要方法就是使用 `generalCategory` 函数.它的类别为: `generalCategory :: Char -> GeneralCategory`。那 31 个分类就不在此一一列出了，试下这个函数先:
+`Data.Char` 中也含有与 `Ordering` 相似的类型。`Ordering` 可以有三个值，`LT`，`GT` 和 `EQ`。这就是个枚举，它表示了两个元素作比较可能的结果. `GeneralCategory` 类型也是个枚举，它表示了一个字符可能所在的分类。而得到一个字符所在分类的主要方法就是使用 `generalCategory` 函数.它的类型为: `generalCategory :: Char -> GeneralCategory`。那 31 个分类就不在此一一列出了，试下这个函数先:
 
 ```haskell
 ghci> generalCategory ' '  
@@ -555,7 +555,7 @@ ghci> map generalCategory " \t\nA9?|"
 [Space,Control,Control,UppercaseLetter,DecimalNumber,OtherPunctuation,MathSymbol]
 ```
 
-由于 `GeneralCategory` 类别是 `Eq` 类别类的一部分，使用类似 `generalCategory c == Space` 的代码也是可以的.
+由于 `GeneralCategory` 类型是 `Eq` 类型类的一部分，使用类似 `generalCategory c == Space` 的代码也是可以的.
 
 **toUpper** 将一个字符转为大写字母，若该字符不是小写字母，就按原值返回. **toLower** 将一个字符转为小写字母，若该字符不是大写字母，就按原值返回. **toTitle** 将一个字符转为 title-case，对大多数字元而言，title-case 就是大写. **digitToInt** 将一个字符转为 Int 值，而这一字符必须得在 `'1'..'9','a'..'f'`或`'A'..'F'` 的范围之内.
 
@@ -649,7 +649,7 @@ findKey key xs = snd . head . filter (\(k,v) -> key == k) $ xs
 
 ![](./legomap.png)
 
-简洁漂亮。这个函数取一个键和 List 做参数，过滤这一 List 仅保留键匹配的项，并返回首个键值对。但若该关联列表中不存在这个键那会怎样? 哼，那就会在试图从空 List 中取 `head` 时引发一个运行时错误。无论如何也不能让进程就这么轻易地崩溃吧，所以就应该用 `Maybe` 类别。如果没找到相应的键，就返回 `Nothing`。而找到了就返回 `Just something`。而这 `something` 就是键对应的值。
+简洁漂亮。这个函数取一个键和 List 做参数，过滤这一 List 仅保留键匹配的项，并返回首个键值对。但若该关联列表中不存在这个键那会怎样? 哼，那就会在试图从空 List 中取 `head` 时引发一个运行时错误。无论如何也不能让进程就这么轻易地崩溃吧，所以就应该用 `Maybe` 类型。如果没找到相应的键，就返回 `Nothing`。而找到了就返回 `Just something`。而这 `something` 就是键对应的值。
 
 ```haskell
 findKey :: (Eq k) => k -> [(k,v)] -> Maybe v 
@@ -661,7 +661,7 @@ findKey key ((k,v):xs) =
          findKey key xs
 ```
 
-看这类别声明，它取一个可判断相等性的键和一个关联列表做参数，可能 \(Maybe\) 得到一个值。听起来不错.这便是个标准的处理 List 的递归函数，边界条件，分割 List，递归调用，都有了 -- 经典的 `fold` 模式。 看看用 `fold` 怎样实现吧。
+看这类型声明，它取一个可判断相等性的键和一个关联列表做参数，可能 \(Maybe\) 得到一个值。听起来不错.这便是个标准的处理 List 的递归函数，边界条件，分割 List，递归调用，都有了 -- 经典的 `fold` 模式。 看看用 `fold` 怎样实现吧。
 
 ```haskell
 findKey :: (Eq k) => k -> [(k,v)] -> Maybe v 
@@ -692,13 +692,13 @@ ghci> Map.fromList [(1,2),(3,4),(3,2),(5,5)]
 fromList [(1,2),(3,2),(5,5)]
 ```
 
-若其中存在重复的键,就将其忽略。如下即 `fromList` 的类别声明。
+若其中存在重复的键,就将其忽略。如下即 `fromList` 的类型声明。
 
 ```haskell
 Map.fromList :: (Ord k) => [(k,v)] -> Map.Map k v
 ```
 
-这表示它取一组键值对的 List，并返回一个将 `k` 映射为 `v` 的 `map`。注意一下，当使用普通的关联列表时，只需要键的可判断相等性就行了。而在这里，它还必须得是可排序的。这在 `Data.Map` 模块中是强制的。因为它会按照某顺序将其组织在一棵树中.在处理键值对时，只要键的类别属于 `Ord` 类别类，就应该尽量使用`Data.Map`.`empty` 返回一个空 `map`.
+这表示它取一组键值对的 List，并返回一个将 `k` 映射为 `v` 的 `map`。注意一下，当使用普通的关联列表时，只需要键的可判断相等性就行了。而在这里，它还必须得是可排序的。这在 `Data.Map` 模块中是强制的。因为它会按照某顺序将其组织在一棵树中.在处理键值对时，只要键的类型属于 `Ord` 类型类，就应该尽量使用`Data.Map`.`empty` 返回一个空 `map`.
 
 ```haskell
 ghci> Map.empty 
@@ -944,7 +944,7 @@ ghci> Set.map (+1) $ Set.fromList [3,4,5,6,7,2,3,4]
 fromList [3,4,5,6,7,8]
 ```
 
-集合有一常见用途，那就是先 `fromList` 删掉重复元素后再 `toList` 转回去。尽管 `Data.List` 模块的 `nub` 函数完全可以完成这一工作，但在对付大 List 时则会明显的力不从心。使用集合则会快很多，`nub` 函数只需 List 中的元素属于 `Eq` 类别类就行了，而若要使用集合，它必须得属于 `Ord` 类别类
+集合有一常见用途，那就是先 `fromList` 删掉重复元素后再 `toList` 转回去。尽管 `Data.List` 模块的 `nub` 函数完全可以完成这一工作，但在对付大 List 时则会明显的力不从心。使用集合则会快很多，`nub` 函数只需 List 中的元素属于 `Eq` 类型类就行了，而若要使用集合，它必须得属于 `Ord` 类型类
 
 ```haskell
 ghci> let setNub xs = Set.toList $ Set.fromList xs  
@@ -958,7 +958,7 @@ ghci> nub "HEY WHATS CRACKALACKIN"
 
 ## 建立自己的模块
 
-我们已经见识过了几个很酷的模块，但怎样才能构造自己的模块呢? 几乎所有的编程语言都允许你将代码分成多个文件，Haskell 也不例外。在编程时，将功能相近的函数和类别至于同一模块中会是个很好的习惯。这样一来，你就可以轻松地一个 `import` 来重用其中的函数.
+我们已经见识过了几个很酷的模块，但怎样才能构造自己的模块呢? 几乎所有的编程语言都允许你将代码分成多个文件，Haskell 也不例外。在编程时，将功能相近的函数和类型至于同一模块中会是个很好的习惯。这样一来，你就可以轻松地一个 `import` 来重用其中的函数.
 
 接下来我们将构造一个由计算机几何图形体积和面积组成的模块，先从新建一个 `Geometry.hs` 的文件开始.
 

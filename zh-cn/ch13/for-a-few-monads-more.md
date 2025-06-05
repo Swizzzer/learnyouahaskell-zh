@@ -16,7 +16,7 @@
 
 相对于 `Maybe` 是加入可能失败的 context，list 是加入 non-deterministic 的 context，`Writer` 则是加进一个附加值的 context，好比 log 一般。`Writer` 可以让我们在计算的同时搜集所有 log 纪录，并汇集成一个 log 并附加在结果上。
 
-例如我们想要附加一个 String 好说明我们的值在干么（有可能是为了除错）。想像有一个函数接受一个代表帮派人数的数字，然后会回传值告诉我们这是否算是一个庞大的帮派：
+例如我们想要附加一个 String 好说明我们的值在干么（有可能是为了除错）。想像有一个函数接受一个代表帮派人数的数字，然后会返回值告诉我们这是否算是一个庞大的帮派：
 
 ```haskell
 isBigGang :: Int -> Bool  
@@ -588,7 +588,7 @@ push :: Int -> Stack -> ((),Stack)
 push a xs = ((),a:xs)
 ```
 
-我们用 `()` 来当作 pushing 的结果，毕竟推上堆叠并不需要什么回传值，他的重点是在改变堆叠。注意到 `push` 跟 `pop` 都是改变状态的计算，可以从他们的型态看出来。
+我们用 `()` 来当作 pushing 的结果，毕竟推上堆叠并不需要什么返回值，他的重点是在改变堆叠。注意到 `push` 跟 `pop` 都是改变状态的计算，可以从他们的型态看出来。
 
 我们来写一段程序来仿真一个堆叠的操作。我们接受一个堆叠，把 `3` 推上去，然后取出两个元素。
 
@@ -1175,7 +1175,7 @@ foldl :: (a -> b -> a) -> a -> [b] -> a
 foldM :: (Monad m) => (a -> b -> m a) -> a -> [b] -> m a
 ```
 
-binary 函数的回传值是 monadic，所以结果也会是 monadic。我们来试着把 list 的值用 fold 全部加起来：
+binary 函数的返回值是 monadic，所以结果也会是 monadic。我们来试着把 list 的值用 fold 全部加起来：
 
 ```haskell
 ghci> foldl (\acc x -> acc + x) 0 [2,8,3,1]  

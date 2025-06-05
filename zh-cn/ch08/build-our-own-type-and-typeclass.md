@@ -2,17 +2,17 @@
 
 ## Algebraic Data Types 入门
 
-在前面的章节中，我们谈了一些 Haskell 内置的类别和 Typeclass。而在本章中，我们将学习构造类别和 Typeclass 的方法。
+在前面的章节中，我们谈了一些 Haskell 内置的类型和 Typeclass。而在本章中，我们将学习构造类型和 Typeclass 的方法。
 
-我们已经见识过许多态别，如 `Bool`、`Int`、`Char`、`Maybe` 等等，不过在 Haskell 中该如何构造自己的类别呢？好问题，一种方法是使用 _data_ 关键字。首先我们来看看 `Bool` 在标准函式库中的定义：
+我们已经见识过许多态别，如 `Bool`、`Int`、`Char`、`Maybe` 等等，不过在 Haskell 中该如何构造自己的类型呢？好问题，一种方法是使用 _data_ 关键字。首先我们来看看 `Bool` 在标准函式库中的定义：
 
 ```haskell
 data Bool = False | True
 ```
 
-_data_ 表示我们要定义一个新的类别。`=` 的左端标明类别的名称即 `Bool`，`=` 的右端就是_值构造子_ \(_Value Constructor_\)，它们明确了该类别可能的值。`|` 读作"或"，所以可以这样阅读该声明：`Bool` 类别的值可以是 `True` 或 `False`。类别名和值构造子的首字母必大写。
+_data_ 表示我们要定义一个新的类型。`=` 的左端标明类型的名称即 `Bool`，`=` 的右端就是_值构造子_ \(_Value Constructor_\)，它们明确了该类型可能的值。`|` 读作"或"，所以可以这样阅读该声明：`Bool` 类型的值可以是 `True` 或 `False`。类型名和值构造子的首字母必大写。
 
-相似，我们可以假想 `Int` 类别的声明：
+相似，我们可以假想 `Int` 类型的声明：
 
 ```haskell
 data Int = -2147483648 | -2147483647 | ... | -1 | 0 | 1 | 2 | ... | 2147483647
@@ -20,17 +20,17 @@ data Int = -2147483648 | -2147483647 | ... | -1 | 0 | 1 | 2 | ... | 2147483647
 
 ![](./caveman.png)
 
-头尾两个值构造子分别表示了 `Int` 类别的最小值和最大值，注意到真正的类别宣告不是长这个样子的，这样写只是为了便于理解。我们用省略号表示中间省略的一大段数字。
+头尾两个值构造子分别表示了 `Int` 类型的最小值和最大值，注意到真正的类型宣告不是长这个样子的，这样写只是为了便于理解。我们用省略号表示中间省略的一大段数字。
 
-我们想想 Haskell 中图形的表示方法。表示圆可以用一个 Tuple，如 `(43.1,55.0,10.4)`，前两项表示圆心的位置，末项表示半径。听着不错，不过三维矢量或其它什么东西也可能是这种形式！更好的方法就是自己构造一个表示图形的类别。假定图形可以是圆 \(Circle\) 或长方形 \(Rectangle\)：
+我们想想 Haskell 中图形的表示方法。表示圆可以用一个 Tuple，如 `(43.1,55.0,10.4)`，前两项表示圆心的位置，末项表示半径。听着不错，不过三维矢量或其它什么东西也可能是这种形式！更好的方法就是自己构造一个表示图形的类型。假定图形可以是圆 \(Circle\) 或长方形 \(Rectangle\)：
 
 ```haskell
 data Shape = Circle Float Float Float | Rectangle Float Float Float Float
 ```
 
-这是啥，想想？`Circle` 的值构造子有三个项，都是 Float。可见我们在定义值构造子时，可以在后面跟几个类别表示它包含值的类别。在这里，前两项表示圆心的坐标，尾项表示半径。`Rectangle` 的值构造子取四个 `Float` 项，前两项表示其左上角的坐标，后两项表示右下角的坐标。
+这是啥，想想？`Circle` 的值构造子有三个项，都是 Float。可见我们在定义值构造子时，可以在后面跟几个类型表示它包含值的类型。在这里，前两项表示圆心的坐标，尾项表示半径。`Rectangle` 的值构造子取四个 `Float` 项，前两项表示其左上角的坐标，后两项表示右下角的坐标。
 
-谈到「项」 \(field\)，其实应为「参数」 \(parameters\)。值构造子的本质是个函数，可以返回一个类别的值。我们看下这两个值构造子的类别声明：
+谈到「项」 \(field\)，其实应为「参数」 \(parameters\)。值构造子的本质是个函数，可以返回一个类型的值。我们看下这两个值构造子的类型声明：
 
 ```haskell
 ghci> :t Circle
@@ -47,7 +47,7 @@ surface (Circle _ _ r) = pi * r ^ 2
 surface (Rectangle x1 y1 x2 y2) = (abs $ x2 - x1) * (abs $ y2 - y1)
 ```
 
-值得一提的是，它的类别声明表示了该函数取一个 `Shape` 值并返回一个 `Float` 值。写 `Circle -> Float` 是不可以的，因为 `Circle` 并非类别，真正的类别应该是 `Shape`。这与不能写`True->False` 的道理是一样的。再就是，我们使用的模式匹配针对的都是值构造子。之前我们匹配过 `[]`、`False` 或 `5`，它们都是不包含参数的值构造子。
+值得一提的是，它的类型声明表示了该函数取一个 `Shape` 值并返回一个 `Float` 值。写 `Circle -> Float` 是不可以的，因为 `Circle` 并非类型，真正的类型应该是 `Shape`。这与不能写`True->False` 的道理是一样的。再就是，我们使用的模式匹配针对的都是值构造子。之前我们匹配过 `[]`、`False` 或 `5`，它们都是不包含参数的值构造子。
 
 我们只关心圆的半径，因此不需理会表示坐标的前两项：
 
@@ -58,13 +58,13 @@ ghci> surface $ Rectangle 0 0 100 100
 10000.0
 ```
 
-Yay，it works！不过我们若尝试输出 `Circle 10 20` 到控制台，就会得到一个错误。这是因为 Haskell 还不知道该类别的字符串表示方法。想想，当我们往控制台输出值的时候，Haskell 会先调用 `show` 函数得到这个值的字符串表示才会输出。因此要让我们的 `Shape` 类别成为 Show 类别类的成员。可以这样修改：
+Yay，it works！不过我们若尝试输出 `Circle 10 20` 到控制台，就会得到一个错误。这是因为 Haskell 还不知道该类型的字符串表示方法。想想，当我们往控制台输出值的时候，Haskell 会先调用 `show` 函数得到这个值的字符串表示才会输出。因此要让我们的 `Shape` 类型成为 Show 类型类的成员。可以这样修改：
 
 ```haskell
 data Shape = Circle Float Float Float | Rectangle Float Float Float Float deriving (Show)
 ```
 
-先不去深究 _deriving_（派生），可以先这样理解：若在 `data` 声明的后面加上 `deriving (Show)`，那 Haskell 就会自动将该类别至于 `Show` 类别类之中。好了，由于值构造子是个函数，因此我们可以拿它交给 `map`，拿它不全调用，以及普通函数能做的一切。
+先不去深究 _deriving_（派生），可以先这样理解：若在 `data` 声明的后面加上 `deriving (Show)`，那 Haskell 就会自动将该类型至于 `Show` 类型类之中。好了，由于值构造子是个函数，因此我们可以拿它交给 `map`，拿它不全调用，以及普通函数能做的一切。
 
 ```haskell
 ghci> Circle 10 20 5
@@ -80,14 +80,14 @@ ghci> map (Circle 10 20) [4,5,6,6]
 [Circle 10.0 20.0 4.0,Circle 10.0 20.0 5.0,Circle 10.0 20.0 6.0,Circle 10.0 20.0 6.0]
 ```
 
-我们的类别还可以更好。增加加一个表示二维空间中点的类别，可以让我们的 `Shape` 更加容易理解：
+我们的类型还可以更好。增加加一个表示二维空间中点的类型，可以让我们的 `Shape` 更加容易理解：
 
 ```haskell
 data Point = Point Float Float deriving (Show)
 data Shape = Circle Point Float | Rectangle Point Point deriving (Show)
 ```
 
-注意下 `Point` 的定义，它的类别与值构造子用了相同的名字。没啥特殊含义，实际上，在一个类别含有唯一值构造子时这种重名是很常见的。好的，如今我们的 `Circle` 含有两个项，一个是 `Point` 类别，一个是 `Float` 类别，好作区分。`Rectangle` 也是同样，我们得修改 `surface` 函数以适应类别定义的变动。
+注意下 `Point` 的定义，它的类型与值构造子用了相同的名字。没啥特殊含义，实际上，在一个类型含有唯一值构造子时这种重名是很常见的。好的，如今我们的 `Circle` 含有两个项，一个是 `Point` 类型，一个是 `Float` 类型，好作区分。`Rectangle` 也是同样，我们得修改 `surface` 函数以适应类型定义的变动。
 
 ```haskell
 surface :: Shape -> Float
@@ -134,9 +134,9 @@ ghci> nudge (baseRect 40 100) 60 23
 Rectangle (Point 60.0 23.0) (Point 100.0 123.0)
 ```
 
-毫无疑问，你可以把你的数据类别导出到模块中。只要把你的类别与要导出的函数写到一起就是了。再在后面跟个括号，列出要导出的值构造子，用逗号隔开。如要导出所有的值构造子，那就写个..。
+毫无疑问，你可以把你的数据类型导出到模块中。只要把你的类型与要导出的函数写到一起就是了。再在后面跟个括号，列出要导出的值构造子，用逗号隔开。如要导出所有的值构造子，那就写个..。
 
-若要将这里定义的所有函数和类别都导出到一个模块中，可以这样：
+若要将这里定义的所有函数和类型都导出到一个模块中，可以这样：
 
 ```haskell
 module Shapes
@@ -151,13 +151,13 @@ module Shapes
 
 一个 `Shape` \(..\)，我们就导出了 `Shape` 的所有值构造子。这一来无论谁导入我们的模块，都可以用 `Rectangle` 和 `Circle` 值构造子来构造 `Shape` 了。这与写 `Shape(Rectangle,Circle)` 等价。
 
-我们可以选择不导出任何 `Shape` 的值构造子，这一来使用我们模块的人就只能用辅助函数 `baseCircle` 和 `baseRect` 来得到 `Shape` 了。`Data.Map` 就是这一套，没有 `Map.Map [(1,2),(3,4)]`，因为它没有导出任何一个值构造子。但你可以用，像 `Map.fromList` 这样的辅助函数得到 `map`。应该记住，值构造子只是函数而已，如果不导出它们，就拒绝了使用我们模块的人调用它们。但可以使用其他返回该类别的函数，来取得这一类别的值。
+我们可以选择不导出任何 `Shape` 的值构造子，这一来使用我们模块的人就只能用辅助函数 `baseCircle` 和 `baseRect` 来得到 `Shape` 了。`Data.Map` 就是这一套，没有 `Map.Map [(1,2),(3,4)]`，因为它没有导出任何一个值构造子。但你可以用，像 `Map.fromList` 这样的辅助函数得到 `map`。应该记住，值构造子只是函数而已，如果不导出它们，就拒绝了使用我们模块的人调用它们。但可以使用其他返回该类型的函数，来取得这一类型的值。
 
-不导出数据类别的值构造子隐藏了他们的内部实现，令类别的抽象度更高。同时，我们模块的用户也就无法使用该值构造子进行模式匹配了。
+不导出数据类型的值构造子隐藏了他们的内部实现，令类型的抽象度更高。同时，我们模块的用户也就无法使用该值构造子进行模式匹配了。
 
 ## Record Syntax
 
-OK，我们需要一个数据类别来描述一个人，得包含他的姓、名、年龄、身高、电话号码以及最爱的冰淇淋。我不知你的想法，不过我觉得要了解一个人，这些数据就够了。就这样，实现出来！
+OK，我们需要一个数据类型来描述一个人，得包含他的姓、名、年龄、身高、电话号码以及最爱的冰淇淋。我不知你的想法，不过我觉得要了解一个人，这些数据就够了。就这样，实现出来！
 
 ```haskell
 data Person = Person String String Int Float String String deriving (Show)
@@ -207,7 +207,7 @@ ghci> flavor guy
 
 你可能会说，一定有更好的方法！呃，抱歉，没有。
 
-开个玩笑，其实有的，哈哈哈～Haskell 的发明者都是天才，早就料到了此类情形。他们引入了一个特殊的类别，也就是刚才提到的更好的方法 -- _Record Syntax_。
+开个玩笑，其实有的，哈哈哈～Haskell 的发明者都是天才，早就料到了此类情形。他们引入了一个特殊的类型，也就是刚才提到的更好的方法 -- _Record Syntax_。
 
 ```haskell
 data Person = Person { firstName :: String
@@ -219,7 +219,7 @@ data Person = Person { firstName :: String
                      } deriving (Show)
 ```
 
-与原先让那些项一个挨一个的空格隔开不同，这里用了花括号 `{}`。先写出项的名字，如 `firstName`，后跟两个冒号\(也叫 Paamayim Nekudotayim，哈哈~\(译者不知道什么意思~囧\)\)，标明其类别，返回的数据类别仍与以前相同。这样的好处就是，可以用函数从中直接按项取值。通过 Record Syntax，Haskell 就自动生成了这些函数：`firstName`, `lastName`, `age`, `height`, `phoneNumber` 和 `flavor`。
+与原先让那些项一个挨一个的空格隔开不同，这里用了花括号 `{}`。先写出项的名字，如 `firstName`，后跟两个冒号\(也叫 Paamayim Nekudotayim，哈哈~\(译者不知道什么意思~囧\)\)，标明其类型，返回的数据类型仍与以前相同。这样的好处就是，可以用函数从中直接按项取值。通过 Record Syntax，Haskell 就自动生成了这些函数：`firstName`, `lastName`, `age`, `height`, `phoneNumber` 和 `flavor`。
 
 ```haskell
 ghci> :t flavor
@@ -228,7 +228,7 @@ ghci> :t firstName
 firstName :: Person -> String
 ```
 
-还有个好处，就是若派生 \(deriving\) 到 `Show` 类别类，它的显示是不同的。假如我们有个类别表示一辆车，要包含生产商、型号以及出场年份：
+还有个好处，就是若派生 \(deriving\) 到 `Show` 类型类，它的显示是不同的。假如我们有个类型表示一辆车，要包含生产商、型号以及出场年份：
 
 ```haskell
 data Car = Car String String Int deriving (Show)
@@ -256,7 +256,7 @@ Car {company = "Ford", model = "Mustang", year = 1967}
 
 ## Type parameters
 
-值构造子可以取几个参数产生一个新值，如 `Car` 的构造子是取三个参数返回一个 `Car`。与之相似，类别构造子可以取类别作参数，产生新的类别。这咋一听貌似有点深奥，不过实际上并不复杂。如果你对 C++ 的模板有了解，就会看到很多相似的地方。我们看一个熟悉的类别，好对类别参数有个大致印象：
+值构造子可以取几个参数产生一个新值，如 `Car` 的构造子是取三个参数返回一个 `Car`。与之相似，类型构造子可以取类型作参数，产生新的类型。这咋一听貌似有点深奥，不过实际上并不复杂。如果你对 C++ 的模板有了解，就会看到很多相似的地方。我们看一个熟悉的类型，好对类型参数有个大致印象：
 
 ```haskell
 data Maybe a = Nothing | Just a
@@ -264,11 +264,11 @@ data Maybe a = Nothing | Just a
 
 ![](./yeti.png)
 
-这里的a就是个类别参数。也正因为有了它，`Maybe` 就成为了一个类别构造子。在它的值不是 `Nothing` 时，它的类别构造子可以搞出 `Maybe Int`，`Maybe String` 等等诸多态别。但只一个 `Maybe` 是不行的，因为它不是类别，而是类别构造子。要成为真正的类别，必须得把它需要的类别参数全部填满。
+这里的a就是个类型参数。也正因为有了它，`Maybe` 就成为了一个类型构造子。在它的值不是 `Nothing` 时，它的类型构造子可以搞出 `Maybe Int`，`Maybe String` 等等诸多态别。但只一个 `Maybe` 是不行的，因为它不是类型，而是类型构造子。要成为真正的类型，必须得把它需要的类型参数全部填满。
 
-所以，如果拿 `Char` 作参数交给 `Maybe`，就可以得到一个 `Maybe Char` 的类别。如，`Just 'a'` 的类别就是 `Maybe Char` 。
+所以，如果拿 `Char` 作参数交给 `Maybe`，就可以得到一个 `Maybe Char` 的类型。如，`Just 'a'` 的类型就是 `Maybe Char` 。
 
-你可能并未察觉，在遇见 Maybe 之前我们早就接触到类别参数了。它便是 List 类别。这里面有点语法糖，List 类别实际上就是取一个参数来生成一个特定类别，这类别可以是 `[Int]`，`[Char]` 也可以是 `[String]`，但不会跟在 `[]` 的后面。
+你可能并未察觉，在遇见 Maybe 之前我们早就接触到类型参数了。它便是 List 类型。这里面有点语法糖，List 类型实际上就是取一个参数来生成一个特定类型，这类型可以是 `[Int]`，`[Char]` 也可以是 `[String]`，但不会跟在 `[]` 的后面。
 
 把玩一下 `Maybe`！
 
@@ -287,13 +287,13 @@ ghci> Just 10 :: Maybe Double
 Just 10.0
 ```
 
-类别参数很实用。有了它，我们就可以按照我们的需要构造出不同的类别。若执行 `:t Just "Haha"`，类别推导引擎就会认出它是个 `Maybe [Char]`，由于 `Just a` 里的 `a` 是个字符串，那么 `Maybe a` 里的 `a` 一定也是个字符串。
+类型参数很实用。有了它，我们就可以按照我们的需要构造出不同的类型。若执行 `:t Just "Haha"`，类型推导引擎就会认出它是个 `Maybe [Char]`，由于 `Just a` 里的 `a` 是个字符串，那么 `Maybe a` 里的 `a` 一定也是个字符串。
 
 ![](./meekrat.png)
 
-注意下，`Nothing` 的类别为 `Maybe a`。它是多态的，若有函数取 `Maybe Int` 类别的参数，就一概可以传给它一个 `Nothing`，因为 `Nothing` 中不包含任何值。`Maybe a` 类别可以有 `Maybe Int` 的行为，正如 `5` 可以是 `Int` 也可以是 `Double`。与之相似，空 List 的类别是 `[a]`，可以与一切 List 打交道。因此，我们可以 `[1,2,3]++[]`，也可以 `["ha","ha,","ha"]++[]`。
+注意下，`Nothing` 的类型为 `Maybe a`。它是多态的，若有函数取 `Maybe Int` 类型的参数，就一概可以传给它一个 `Nothing`，因为 `Nothing` 中不包含任何值。`Maybe a` 类型可以有 `Maybe Int` 的行为，正如 `5` 可以是 `Int` 也可以是 `Double`。与之相似，空 List 的类型是 `[a]`，可以与一切 List 打交道。因此，我们可以 `[1,2,3]++[]`，也可以 `["ha","ha,","ha"]++[]`。
 
-类别参数有很多好处，但前提是用对了地方才行。一般都是不关心类别里面的内容，如 `Maybe a`。一个类别的行为若有点像是容器，那么使用类别参数会是个不错的选择。我们完全可以把我们的`Car`类别从
+类型参数有很多好处，但前提是用对了地方才行。一般都是不关心类型里面的内容，如 `Maybe a`。一个类型的行为若有点像是容器，那么使用类型参数会是个不错的选择。我们完全可以把我们的`Car`类型从
 
 ```haskell
 data Car = Car { company :: String
@@ -311,7 +311,7 @@ data Car a b c = Car { company :: a
                         } deriving (Show)
 ```
 
-但是，这样我们又得到了什么好处？回答很可能是，一无所得。因为我们只定义了处理 `Car String String Int` 类别的函数，像以前，我们还可以弄个简单函数来描述车的属性。
+但是，这样我们又得到了什么好处？回答很可能是，一无所得。因为我们只定义了处理 `Car String String Int` 类型的函数，像以前，我们还可以弄个简单函数来描述车的属性。
 
 ```haskell
 tellCar :: Car -> String
@@ -324,14 +324,14 @@ ghci> tellCar stang
 "This Ford Mustang was made in 1967"
 ```
 
-可爱的小函数！它的类别声明得很漂亮，而且工作良好。好，如果改成 `Car a b c` 又会怎样？
+可爱的小函数！它的类型声明得很漂亮，而且工作良好。好，如果改成 `Car a b c` 又会怎样？
 
 ```haskell
 tellCar :: (Show a) => Car String String a -> String
 tellCar (Car {company = c, model = m, year = y}) = "This " ++ c ++ " " ++ m ++ " was made in " ++ show y
 ```
 
-我们只能强制性地给这个函数安一个 `(Show a) => Car String String a` 的类别约束。看得出来，这要繁复得多。而唯一的好处貌似就是，我们可以使用 `Show` 类别类的 `instance` 来作 `a` 的类别。
+我们只能强制性地给这个函数安一个 `(Show a) => Car String String a` 的类型约束。看得出来，这要繁复得多。而唯一的好处貌似就是，我们可以使用 `Show` 类型类的 `instance` 来作 `a` 的类型。
 
 ```haskell
 ghci> tellCar (Car "Ford" "Mustang" 1967)
@@ -344,19 +344,19 @@ ghci> :t Car "Ford" "Mustang" "nineteen sixty seven"
 Car "Ford" "Mustang" "nineteen sixty seven" :: Car [Char] [Char] [Char]
 ```
 
-其实在现实生活中，使用 `Car String String Int` 在大多数情况下已经满够了。所以给 `Car` 类别加类别参数貌似并没有什么必要。通常我们都是都是在一个类别中包含的类别并不影响它的行为时才引入类别参数。一组什么东西组成的 List 就是一个 List，它不关心里面东西的类别是啥，然而总是工作良好。若取一组数字的和，我们可以在后面的函数体中明确是一组数字的 List。Maybe 与之相似，它表示可以有什么东西可以没有，而不必关心这东西是啥。
+其实在现实生活中，使用 `Car String String Int` 在大多数情况下已经满够了。所以给 `Car` 类型加类型参数貌似并没有什么必要。通常我们都是都是在一个类型中包含的类型并不影响它的行为时才引入类型参数。一组什么东西组成的 List 就是一个 List，它不关心里面东西的类型是啥，然而总是工作良好。若取一组数字的和，我们可以在后面的函数体中明确是一组数字的 List。Maybe 与之相似，它表示可以有什么东西可以没有，而不必关心这东西是啥。
 
-我们之前还遇见过一个类别参数的应用，就是 `Data.Map` 中的 `Map k v`。 `k` 表示 Map 中键的类别，`v` 表示值的类别。这是个好例子，Map 中类别参数的使用允许我们能够用一个类别索引另一个类别，只要键的类别在 `Ord` 类别类就行。如果叫我们自己定义一个 Map 类别，可以在 `data` 声明中加上一个类别类的约束。
+我们之前还遇见过一个类型参数的应用，就是 `Data.Map` 中的 `Map k v`。 `k` 表示 Map 中键的类型，`v` 表示值的类型。这是个好例子，Map 中类型参数的使用允许我们能够用一个类型索引另一个类型，只要键的类型在 `Ord` 类型类就行。如果叫我们自己定义一个 Map 类型，可以在 `data` 声明中加上一个类型类的约束。
 
 ```haskell
 data (Ord k) => Map k v = ...
 ```
 
-然而 Haskell 中有一个严格的约定，那就是永远不要在 `data` 声明中添加类别约束。为啥？嗯，因为这样没好处，反而得写更多不必要的类别约束。`Map k v` 要是有 `Ord k` 的约束，那就相当于假定每个 Map 的相关函数都认为 `k` 是可排序的。若不给数据类别加约束，我们就不必给那些不关心键是否可排序的函数另加约束了。这类函数的一个例子就是 `toList`，它只是把一个 Map 转换为关联 List 罢了，类别声明为 `toList :: Map k v -> [(k, v)]`。要是加上类别约束，就只能是 `toList :: (Ord k) =>Map k a -> [(k,v)]`，明显没必要嘛。
+然而 Haskell 中有一个严格的约定，那就是永远不要在 `data` 声明中添加类型约束。为啥？嗯，因为这样没好处，反而得写更多不必要的类型约束。`Map k v` 要是有 `Ord k` 的约束，那就相当于假定每个 Map 的相关函数都认为 `k` 是可排序的。若不给数据类型加约束，我们就不必给那些不关心键是否可排序的函数另加约束了。这类函数的一个例子就是 `toList`，它只是把一个 Map 转换为关联 List 罢了，类型声明为 `toList :: Map k v -> [(k, v)]`。要是加上类型约束，就只能是 `toList :: (Ord k) =>Map k a -> [(k,v)]`，明显没必要嘛。
 
-所以说，永远不要在 `data` 声明中加类别约束 --- 即便看起来没问题。免得在函数声明中写出过多无谓的类别约束。
+所以说，永远不要在 `data` 声明中加类型约束 --- 即便看起来没问题。免得在函数声明中写出过多无谓的类型约束。
 
-我们实现个表示三维矢量的类别，再给它加几个处理函数。我么那就给它个类别参数，虽然大多数情况都是数值型，不过这一来它就支持了多种数值类别。
+我们实现个表示三维矢量的类型，再给它加几个处理函数。我么那就给它个类型参数，虽然大多数情况都是数值型，不过这一来它就支持了多种数值类型。
 
 ```haskell
 data Vector a = Vector a a a deriving (Show)
@@ -368,9 +368,9 @@ scalarMult :: (Num t) => Vector t -> Vector t -> t
 (Vector i j k) `scalarMult` (Vector l m n) = i*l + j*m + k*n
 ```
 
-`vplus` 用来相加两个矢量，即将其所有对应的项相加。`scalarMult` 用来求两个矢量的标量积，`vectMult` 求一个矢量和一个标量的积。这些函数可以处理 `Vector Int`，`Vector Integer`，`Vector Float` 等等类别，只要 `Vector a` 里的这个 `a` 在 `Num` 类别类中就行。同样，如果你看下这些函数的类别声明就会发现，它们只能处理相同类别的矢量，其中包含的数字类别必须与另一个矢量一致。注意，我们并没有在 `data` 声明中添加 `Num` 的类约束。反正无论怎么着都是给函数加约束。
+`vplus` 用来相加两个矢量，即将其所有对应的项相加。`scalarMult` 用来求两个矢量的标量积，`vectMult` 求一个矢量和一个标量的积。这些函数可以处理 `Vector Int`，`Vector Integer`，`Vector Float` 等等类型，只要 `Vector a` 里的这个 `a` 在 `Num` 类型类中就行。同样，如果你看下这些函数的类型声明就会发现，它们只能处理相同类型的矢量，其中包含的数字类型必须与另一个矢量一致。注意，我们并没有在 `data` 声明中添加 `Num` 的类约束。反正无论怎么着都是给函数加约束。
 
-再度重申，类别构造子和值构造子的区分是相当重要的。在声明数据类别时，等号=左端的那个是类别构造子，右端的\(中间可能有\|分隔\)都是值构造子。拿 `Vector t t t -> Vector t t t -> t` 作函数的类别就会产生一个错误，因为在类别声明中只能写类别，而 `Vector` 的类别构造子只有个参数，它的值构造子才是有三个。我们就慢慢耍：
+再度重申，类型构造子和值构造子的区分是相当重要的。在声明数据类型时，等号=左端的那个是类型构造子，右端的\(中间可能有\|分隔\)都是值构造子。拿 `Vector t t t -> Vector t t t -> t` 作函数的类型就会产生一个错误，因为在类型声明中只能写类型，而 `Vector` 的类型构造子只有个参数，它的值构造子才是有三个。我们就慢慢耍：
 
 ```haskell
 ghci> Vector 3 5 8 `vplus` Vector 9 2 8
@@ -389,13 +389,13 @@ Vector 148 666 222
 
 ![](./gob.png)
 
-在 [Typeclass 101](/zh-cn/ch03/type-and-typeclass#typeclasses-ru-men) 那一节里面，我们了解了 Typeclass 的基础内容。里面提到，类别类就是定义了某些行为的接口。例如，Int 类别是 `Eq` 类别类的一个 instance，`Eq` 类就定义了判定相等性的行为。Int 值可以判断相等性，所以 Int 就是 `Eq` 类别类的成员。它的真正威力体现在作为 `Eq` 接口的函数中，即 `==` 和 `/=`。只要一个类别是 `Eq` 类别类的成员，我们就可以使用 `==` 函数来处理这一类别。这便是为何 `4==4` 和 `"foo"/="bar"` 这样的表达式都需要作类别检查。
+在 [Typeclass 101](/zh-cn/ch03/type-and-typeclass#typeclasses-ru-men) 那一节里面，我们了解了 Typeclass 的基础内容。里面提到，类型类就是定义了某些行为的接口。例如，Int 类型是 `Eq` 类型类的一个 instance，`Eq` 类就定义了判定相等性的行为。Int 值可以判断相等性，所以 Int 就是 `Eq` 类型类的成员。它的真正威力体现在作为 `Eq` 接口的函数中，即 `==` 和 `/=`。只要一个类型是 `Eq` 类型类的成员，我们就可以使用 `==` 函数来处理这一类型。这便是为何 `4==4` 和 `"foo"/="bar"` 这样的表达式都需要作类型检查。
 
-我们也曾提到，人们很容易把类别类与 Java，Python，C++ 等语言的类混淆。很多人对此都倍感不解，在原先那些语言中，类就像是蓝图，我们可以根据它来创造对象、保存状态并执行操作。而类别类更像是接口，我们不是靠它构造数据，而是给既有的数据类别描述行为。什么东西若可以判定相等性，我们就可以让它成为 `Eq` 类别类的 instance。什么东西若可以比较大小，那就可以让它成为 `Ord` 类别类的 instance。
+我们也曾提到，人们很容易把类型类与 Java，Python，C++ 等语言的类混淆。很多人对此都倍感不解，在原先那些语言中，类就像是蓝图，我们可以根据它来创造对象、保存状态并执行操作。而类型类更像是接口，我们不是靠它构造数据，而是给既有的数据类型描述行为。什么东西若可以判定相等性，我们就可以让它成为 `Eq` 类型类的 instance。什么东西若可以比较大小，那就可以让它成为 `Ord` 类型类的 instance。
 
-在下一节，我们将看一下如何手工实现类别类中定义函数来构造 instance。现在呢，我们先了解下 Haskell 是如何自动生成这几个类别类的 instance，`Eq`, `Ord`, `Enum`, `Bounded`, `Show`, `Read`。只要我们在构造类别时在后面加个 `deriving`\(派生\)关键字，Haskell 就可以自动地给我们的类别加上这些行为。
+在下一节，我们将看一下如何手工实现类型类中定义函数来构造 instance。现在呢，我们先了解下 Haskell 是如何自动生成这几个类型类的 instance，`Eq`, `Ord`, `Enum`, `Bounded`, `Show`, `Read`。只要我们在构造类型时在后面加个 `deriving`\(派生\)关键字，Haskell 就可以自动地给我们的类型加上这些行为。
 
-看这个数据类别：
+看这个数据类型：
 
 ```haskell
 data Person = Person { firstName :: String
@@ -404,7 +404,7 @@ data Person = Person { firstName :: String
                      }
 ```
 
-这描述了一个人。我们先假定世界上没有重名重姓又同龄的人存在，好，假如有两个 record，有没有可能是描述同一个人呢？当然可能，我么可以判定姓名年龄的相等性，来判断它俩是否相等。这一来，让这个类别成为 `Eq` 的成员就很靠谱了。直接 derive 这个 instance：
+这描述了一个人。我们先假定世界上没有重名重姓又同龄的人存在，好，假如有两个 record，有没有可能是描述同一个人呢？当然可能，我么可以判定姓名年龄的相等性，来判断它俩是否相等。这一来，让这个类型成为 `Eq` 的成员就很靠谱了。直接 derive 这个 instance：
 
 ```haskell
 data Person = Person { firstName :: String
@@ -413,7 +413,7 @@ data Person = Person { firstName :: String
                      } deriving (Eq)
 ```
 
-在一个类别 derive 为 `Eq` 的 instance 后，就可以直接使用 `==` 或 `/=` 来判断它们的相等性了。Haskell 会先看下这两个值的值构造子是否一致\(这里只是单值构造子\)，再用 `==` 来检查其中的所有数据\(必须都是 `Eq` 的成员\)是否一致。在这里只有 `String` 和 Int，所以是没有问题的。测试下我们的 Eqinstance：
+在一个类型 derive 为 `Eq` 的 instance 后，就可以直接使用 `==` 或 `/=` 来判断它们的相等性了。Haskell 会先看下这两个值的值构造子是否一致\(这里只是单值构造子\)，再用 `==` 来检查其中的所有数据\(必须都是 `Eq` 的成员\)是否一致。在这里只有 `String` 和 Int，所以是没有问题的。测试下我们的 Eqinstance：
 
 ```haskell
 ghci> let mikeD = Person {firstName = "Michael", lastName = "Diamond", age = 43}
@@ -429,7 +429,7 @@ ghci> mikeD == Person {firstName = "Michael", lastName = "Diamond", age = 43}
 True
 ```
 
-自然，`Person` 如今已经成为了 `Eq` 的成员，我们就可以将其应用于所有在类别声明中用到 `Eq` 类约束的函数了，如 `elem`。
+自然，`Person` 如今已经成为了 `Eq` 的成员，我们就可以将其应用于所有在类型声明中用到 `Eq` 类约束的函数了，如 `elem`。
 
 ```haskell
 ghci> let beastieBoys = [mca, adRock, mikeD]
@@ -437,7 +437,7 @@ ghci> mikeD `elem` beastieBoys
 True
 ```
 
-`Show` 和 `Read` 类别类处理可与字符串相互转换的东西。同 `Eq` 相似，如果一个类别的构造子含有参数，那所有参数的类别必须都得属于 `Show` 或 `Read` 才能让该类别成为其 instance。就让我们的 `Person` 也成为 `Read` 和 `Show` 的一员吧。
+`Show` 和 `Read` 类型类处理可与字符串相互转换的东西。同 `Eq` 相似，如果一个类型的构造子含有参数，那所有参数的类型必须都得属于 `Show` 或 `Read` 才能让该类型成为其 instance。就让我们的 `Person` 也成为 `Read` 和 `Show` 的一员吧。
 
 ```haskell
 data Person = Person { firstName :: String
@@ -456,9 +456,9 @@ ghci> "mikeD is: " ++ show mikeD
 "mikeD is: Person {firstName = \"Michael\", lastName = \"Diamond\", age = 43}"
 ```
 
-如果我们还没让 `Person` 类别作为 `Show` 的成员就尝试输出它，Haskell 就会向我们抱怨，说它不知道该怎么把它表示成一个字符串。不过现在既然已经 derive 成为了 `Show` 的一个 instance，它就知道了。
+如果我们还没让 `Person` 类型作为 `Show` 的成员就尝试输出它，Haskell 就会向我们抱怨，说它不知道该怎么把它表示成一个字符串。不过现在既然已经 derive 成为了 `Show` 的一个 instance，它就知道了。
 
-`Read` 几乎就是与 `Show` 相对的类别类，`show` 是将一个值转换成字符串，而 `read` 则是将一个字符串转成某类别的值。还记得，使用 `read` 函数时我们必须得用类别注释注明想要的类别，否则 Haskell 就不会知道如何转换。
+`Read` 几乎就是与 `Show` 相对的类型类，`show` 是将一个值转换成字符串，而 `read` 则是将一个字符串转成某类型的值。还记得，使用 `read` 函数时我们必须得用类型注释注明想要的类型，否则 Haskell 就不会知道如何转换。
 
 ```haskell
 ghci> read "Person {firstName =\"Michael\", lastName =\"Diamond\", age = 43}" :: Person
@@ -472,9 +472,9 @@ ghci> read "Person {firstName =\"Michael\", lastName =\"Diamond\", age = 43}" ==
 True
 ```
 
-也可以 `read` 带参数的类别，但必须填满所有的参数。因此 `read "Just 't'" :: Maybe a` 是不可以的，`read "Just 't'" :: Maybe Char` 才对。
+也可以 `read` 带参数的类型，但必须填满所有的参数。因此 `read "Just 't'" :: Maybe a` 是不可以的，`read "Just 't'" :: Maybe Char` 才对。
 
-很容易想象 `Ord` 类别类 derive instance 的行为。首先，判断两个值构造子是否一致，如果是，再判断它们的参数，前提是它们的参数都得是 `Ord` 的 instance。`Bool` 类别可以有两种值，`False` 和 `True`。为了了解在比较中进程的行为，我们可以这样想象：
+很容易想象 `Ord` 类型类 derive instance 的行为。首先，判断两个值构造子是否一致，如果是，再判断它们的参数，前提是它们的参数都得是 `Ord` 的 instance。`Bool` 类型可以有两种值，`False` 和 `True`。为了了解在比较中进程的行为，我们可以这样想象：
 
 ```haskell
 data Bool = False | True deriving (Ord)
@@ -491,7 +491,7 @@ ghci> True < False
 False
 ```
 
-在 `Maybe a` 数据类别中，值构造子 `Nothing` 在 `Just` 值构造子前面，所以一个 `Nothing` 总要比 `Just something` 的值小。即便这个 `something` 是 `-100000000` 也是如此。
+在 `Maybe a` 数据类型中，值构造子 `Nothing` 在 `Just` 值构造子前面，所以一个 `Nothing` 总要比 `Just something` 的值小。即便这个 `something` 是 `-100000000` 也是如此。
 
 ```haskell
 ghci> Nothing < Just 100
@@ -506,20 +506,20 @@ True
 
 不过类似 `Just (*3) > Just (*2)` 之类的代码是不可以的。因为 `(*3)` 和 `(*2)` 都是函数，而函数不是 `Ord` 类的成员。
 
-作枚举，使用数字类别就能轻易做到。不过使用 `Enum` 和 `Bounded` 类别类会更好，看下这个类别：
+作枚举，使用数字类型就能轻易做到。不过使用 `Enum` 和 `Bounded` 类型类会更好，看下这个类型：
 
 ```haskell
 data Day = Monday | Tuesday | Wednesday | Thursday | Friday | Saturday | Sunday
 ```
 
-所有的值构造子都是 `nullary` 的\(也就是没有参数\)，每个东西都有前置子和后继子，我们可以让它成为 `Enum` 类别类的成员。同样，每个东西都有可能的最小值和最大值，我们也可以让它成为 `Bounded` 类别类的成员。在这里，我们就同时将它搞成其它可 derive类别类的 instance。再看看我们能拿它做啥：
+所有的值构造子都是 `nullary` 的\(也就是没有参数\)，每个东西都有前置子和后继子，我们可以让它成为 `Enum` 类型类的成员。同样，每个东西都有可能的最小值和最大值，我们也可以让它成为 `Bounded` 类型类的成员。在这里，我们就同时将它搞成其它可 derive类型类的 instance。再看看我们能拿它做啥：
 
 ```haskell
 data Day = Monday | Tuesday | Wednesday | Thursday | Friday | Saturday | Sunday
            deriving (Eq, Ord, Show, Read, Bounded, Enum)
 ```
 
-由于它是 `Show` 和 `Read` 类别类的成员，我们可以将这个类别的值与字符串相互转换。
+由于它是 `Show` 和 `Read` 类型类的成员，我们可以将这个类型的值与字符串相互转换。
 
 ```haskell
 ghci> Wednesday
@@ -569,15 +569,15 @@ ghci> [minBound .. maxBound] :: [Day]
 
 ## Type synonyms
 
-在前面我们提到在写类别名的时候，`[Char]` 和 `String` 等价，可以互换。这就是由类别别名实现的。类别别名实际上什么也没做，只是给类别提供了不同的名字，让我们的代码更容易理解。这就是 `[Char]` 的别名 `String` 的由来。
+在前面我们提到在写类型名的时候，`[Char]` 和 `String` 等价，可以互换。这就是由类型别名实现的。类型别名实际上什么也没做，只是给类型提供了不同的名字，让我们的代码更容易理解。这就是 `[Char]` 的别名 `String` 的由来。
 
 ```haskell
 type String = [Char]
 ```
 
-我们已经介绍过了 `type` 关键字，这个关键字有一定误导性，它并不是用来创造新类（这是 `data` 关键字做的事情），而是给一个既有类别提供一个别名。
+我们已经介绍过了 `type` 关键字，这个关键字有一定误导性，它并不是用来创造新类（这是 `data` 关键字做的事情），而是给一个既有类型提供一个别名。
 
-如果我们随便搞个函数 `toUpperString` 或其他什么名字，将一个字符串变成大写，可以用这样的类别声明 `toUpperString :: [Char] -> [Char]`， 也可以这样 `toUpperString :: String -> String`，二者在本质上是完全相同的。后者要更易读些。
+如果我们随便搞个函数 `toUpperString` 或其他什么名字，将一个字符串变成大写，可以用这样的类型声明 `toUpperString :: [Char] -> [Char]`， 也可以这样 `toUpperString :: String -> String`，二者在本质上是完全相同的。后者要更易读些。
 
 在前面 `Data.Map` 那部分，我们用了一个关联 `List` 来表示 `phoneBook`，之后才改成的 Map。我们已经发现了，一个关联 List 就是一组键值对组成的 List。再看下我们 `phoneBook` 的样子：
 
@@ -593,13 +593,13 @@ phoneBook =
     ]
 ```
 
-可以看出，`phoneBook` 的类别就是 `[(String,String)]`，这表示一个关联 List 仅是 String 到 String 的映射关系。我们就弄个类别别名，好让它类别声明中能够表达更多信息。
+可以看出，`phoneBook` 的类型就是 `[(String,String)]`，这表示一个关联 List 仅是 String 到 String 的映射关系。我们就弄个类型别名，好让它类型声明中能够表达更多信息。
 
 ```haskell
 type PhoneBook = [(String,String)]
 ```
 
-现在我们 `phoneBook` 的类别声明就可以是 `phoneBook :: PhoneBook` 了。再给字符串加上别名：
+现在我们 `phoneBook` 的类型声明就可以是 `phoneBook :: PhoneBook` 了。再给字符串加上别名：
 
 ```haskell
 type PhoneNumber = String
@@ -609,7 +609,7 @@ type PhoneBook = [(Name,PhoneNumber)]
 
 Haskell 程序员们给 String 加别名是为了让函数中字符串的表达方式及用途更加明确。
 
-好的，我们实现了一个函数，它可以取一名字和号码检查它是否存在于电话本。现在可以给它加一个相当好看明了的类别声明：
+好的，我们实现了一个函数，它可以取一名字和号码检查它是否存在于电话本。现在可以给它加一个相当好看明了的类型声明：
 
 ```haskell
 inPhoneBook :: Name -> PhoneNumber -> PhoneBook -> Bool
@@ -618,21 +618,21 @@ inPhoneBook name pnumber pbook = (name,pnumber) `elem` pbook
 
 ![](./chicken.png)
 
-如果不用类别别名，我们函数的类别声明就只能是 `String -> String -> [(String ,String)] -> Bool` 了。在这里使用类别别名是为了让类别声明更加易读，但你也不必拘泥于它。引入类别别名的动机既非单纯表示我们函数中的既有类别，也不是为了替换掉那些重复率高的长名字体别\(如 `[(String,String)]`\)，而是为了让类别对事物的描述更加明确。
+如果不用类型别名，我们函数的类型声明就只能是 `String -> String -> [(String ,String)] -> Bool` 了。在这里使用类型别名是为了让类型声明更加易读，但你也不必拘泥于它。引入类型别名的动机既非单纯表示我们函数中的既有类型，也不是为了替换掉那些重复率高的长名字体别\(如 `[(String,String)]`\)，而是为了让类型对事物的描述更加明确。
 
-类别别名也是可以有参数的，如果你想搞个类别来表示关联 List，但依然要它保持通用，好让它可以使用任意类别作 `key` 和 `value`，我们可以这样：
+类型别名也是可以有参数的，如果你想搞个类型来表示关联 List，但依然要它保持通用，好让它可以使用任意类型作 `key` 和 `value`，我们可以这样：
 
 ```haskell
 type AssocList k v = [(k,v)]
 ```
 
-好的，现在一个从关联 List 中按键索值的函数类别可以定义为 `(Eq k) => k -> AssocList k v -> Maybe`。`AssocList` 是个取两个类别做参数生成一个具体类别的类别构造子，如 `Assoc Int String` 等等。
+好的，现在一个从关联 List 中按键索值的函数类型可以定义为 `(Eq k) => k -> AssocList k v -> Maybe`。`AssocList` 是个取两个类型做参数生成一个具体类型的类型构造子，如 `Assoc Int String` 等等。
 
 ```text
-*Fronzie 说*：Hey！当我提到具体类别，那我就是说它是完全调用的，就像 ``Map Int String``。要不就是多态函数中的 ``[a]`` 或 ``(Ord a) => Maybe a`` 之类。有时我和孩子们会说 "Maybe 类别"，但我们的意思并不是按字面来，傻瓜都知道 ``Maybe`` 是类别构造子嘛。只要用一个明确的类别调用 ``Maybe``，如 ``Maybe String`` 可得一个具体类别。你知道，只有具体类别才可以保存值。
+*Fronzie 说*：Hey！当我提到具体类型，那我就是说它是完全调用的，就像 ``Map Int String``。要不就是多态函数中的 ``[a]`` 或 ``(Ord a) => Maybe a`` 之类。有时我和孩子们会说 "Maybe 类型"，但我们的意思并不是按字面来，傻瓜都知道 ``Maybe`` 是类型构造子嘛。只要用一个明确的类型调用 ``Maybe``，如 ``Maybe String`` 可得一个具体类型。你知道，只有具体类型才可以保存值。
 ```
 
-我们可以用不全调用来得到新的函数，同样也可以使用不全调用得到新的类别构造子。同函数一样，用不全的类别参数调用类别构造子就可以得到一个不全调用的类别构造子，如果我们要一个表示从整数到某东西间映射关系的类别，我们可以这样：
+我们可以用不全调用来得到新的函数，同样也可以使用不全调用得到新的类型构造子。同函数一样，用不全的类型参数调用类型构造子就可以得到一个不全调用的类型构造子，如果我们要一个表示从整数到某东西间映射关系的类型，我们可以这样：
 
 ```haskell
 type IntMap v = Map Int v
@@ -644,19 +644,19 @@ type IntMap v = Map Int v
 type IntMap = Map Int
 ```
 
-无论怎样，`IntMap` 的类别构造子都是取一个参数，而它就是这整数指向的类别。
+无论怎样，`IntMap` 的类型构造子都是取一个参数，而它就是这整数指向的类型。
 
-Oh yeah，如果要你去实现它，很可能会用个 `qualified import` 来导入 `Data.Map`。这时，类别构造子前面必须得加上模块名。所以应该写个 `type IntMap = Map.Map Int`
+Oh yeah，如果要你去实现它，很可能会用个 `qualified import` 来导入 `Data.Map`。这时，类型构造子前面必须得加上模块名。所以应该写个 `type IntMap = Map.Map Int`
 
-你得保证真正弄明白了类别构造子和值构造子的区别。我们有了个叫 `IntMap` 或者 `AssocList` 的别名并不意味着我们可以执行类似 `AssocList [(1,2),(4,5),(7,9)]` 的代码，而是可以用不同的名字来表示原先的 List，就像 `[(1,2),(4,5),(7,9)] :: AssocList Int Int` 让它里面的类别都是 Int。而像处理普通的 Tuple 构成的那种 List 处理它也是可以的。类别别名\(类别依然不变\)，只可以在 Haskell 的类别部分中使用，像定义新类别或类别声明或类别注释中跟在::后面的部分。
+你得保证真正弄明白了类型构造子和值构造子的区别。我们有了个叫 `IntMap` 或者 `AssocList` 的别名并不意味着我们可以执行类似 `AssocList [(1,2),(4,5),(7,9)]` 的代码，而是可以用不同的名字来表示原先的 List，就像 `[(1,2),(4,5),(7,9)] :: AssocList Int Int` 让它里面的类型都是 Int。而像处理普通的 Tuple 构成的那种 List 处理它也是可以的。类型别名\(类型依然不变\)，只可以在 Haskell 的类型部分中使用，像定义新类型或类型声明或类型注释中跟在::后面的部分。
 
-另一个很酷的二参类别就是 `Either a b` 了，它大约是这样定义的：
+另一个很酷的二参类型就是 `Either a b` 了，它大约是这样定义的：
 
 ```haskell
 data Either a b = Left a | Right b deriving (Eq, Ord, Read, Show)
 ```
 
-它有两个值构造子。如果用了 `Left`，那它内容的类别就是 `a`；用了 `Right`，那它内容的类别就是 `b`。我们可以用它来将可能是两种类别的值封装起来，从里面取值时就同时提供 `Left` 和 `Right` 的模式匹配。
+它有两个值构造子。如果用了 `Left`，那它内容的类型就是 `a`；用了 `Right`，那它内容的类型就是 `b`。我们可以用它来将可能是两种类型的值封装起来，从里面取值时就同时提供 `Left` 和 `Right` 的模式匹配。
 
 ```haskell
 ghci> Right 20
@@ -669,7 +669,7 @@ ghci> :t Left True
 Left True :: Either Bool b
 ```
 
-到现在为止，`Maybe` 是最常见的表示可能失败的计算的类别了。但有时 `Maybe` 也并不是十分的好用，因为 `Nothing` 中包含的信息还是太少。要是我们不关心函数失败的原因，它还是不错的。就像 `Data.Map` 的 `lookup` 只有在搜索的项不在 Map 时才会失败，对此我们一清二楚。但我们若想知道函数失败的原因，那还得使用 `Either a b`，用 `a` 来表示可能的错误的类别，用 `b` 来表示一个成功运算的类别。从现在开始，错误一律用 `Left` 值构造子，而结果一律用 `Right`。
+到现在为止，`Maybe` 是最常见的表示可能失败的计算的类型了。但有时 `Maybe` 也并不是十分的好用，因为 `Nothing` 中包含的信息还是太少。要是我们不关心函数失败的原因，它还是不错的。就像 `Data.Map` 的 `lookup` 只有在搜索的项不在 Map 时才会失败，对此我们一清二楚。但我们若想知道函数失败的原因，那还得使用 `Either a b`，用 `a` 来表示可能的错误的类型，用 `b` 来表示一个成功运算的类型。从现在开始，错误一律用 `Left` 值构造子，而结果一律用 `Right`。
 
 一个例子：有个学校提供了不少壁橱，好给学生们地方放他们的 Gun'N'Rose 海报。每个壁橱都有个密码，哪个学生想用个壁橱，就告诉管理员壁橱的号码，管理员就会告诉他壁橱的密码。但如果这个壁橱已经让别人用了，管理员就不能告诉他密码了，得换一个壁橱。我们就用 `Data.Map` 的一个 Map 来表示这些壁橱，把一个号码映射到一个表示壁橱占用情况及密码的 Tuple 里。
 
@@ -683,7 +683,7 @@ type Code = String
 type LockerMap = Map.Map Int (LockerState, Code)
 ```
 
-很简单，我们引入了一个新的类别来表示壁橱的占用情况。并为壁橱密码及按号码找壁橱的 Map 分别设置了一个别名。好，现在我们实现这个按号码找壁橱的函数，就用 `Either String Code` 类别表示我们的结果，因为 `lookup` 可能会以两种原因失败。橱子已经让别人用了或者压根就没有这个橱子。如果 `lookup` 失败，就用字符串表明失败的原因。
+很简单，我们引入了一个新的类型来表示壁橱的占用情况。并为壁橱密码及按号码找壁橱的 Map 分别设置了一个别名。好，现在我们实现这个按号码找壁橱的函数，就用 `Either String Code` 类型表示我们的结果，因为 `lookup` 可能会以两种原因失败。橱子已经让别人用了或者压根就没有这个橱子。如果 `lookup` 失败，就用字符串表明失败的原因。
 
 ```haskell
 lockerLookup :: Int -> LockerMap -> Either String Code
@@ -695,7 +695,7 @@ lockerLookup lockerNumber map =
                                 else Left $ "Locker " ++ show lockerNumber ++ " is already taken!"
 ```
 
-我们在这里个 Map 中执行一次普通的 `lookup`，如果得到一个 `Nothing`，就返回一个 `Left String` 的值，告诉他压根就没这个号码的橱子。如果找到了，就再检查下，看这橱子是不是已经让别人用了，如果是，就返回个 `Left String` 说它已经让别人用了。否则就返回个 `Right Code` 的值，通过它来告诉学生壁橱的密码。它实际上就是个 `Right String`，我们引入了个类别别名让它这类别声明更好看。
+我们在这里个 Map 中执行一次普通的 `lookup`，如果得到一个 `Nothing`，就返回一个 `Left String` 的值，告诉他压根就没这个号码的橱子。如果找到了，就再检查下，看这橱子是不是已经让别人用了，如果是，就返回个 `Left String` 说它已经让别人用了。否则就返回个 `Right Code` 的值，通过它来告诉学生壁橱的密码。它实际上就是个 `Right String`，我们引入了个类型别名让它这类型声明更好看。
 
 如下是个 Map 的例子：
 
@@ -726,7 +726,7 @@ ghci> lockerLookup 105 lockers
 Right "QOTSA"
 ```
 
-我们完全可以用 `Maybe a` 来表示它的结果，但这样一来我们就对得不到密码的原因不得而知了。而在这里，我们的新类别可以告诉我们失败的原因。
+我们完全可以用 `Maybe a` 来表示它的结果，但这样一来我们就对得不到密码的原因不得而知了。而在这里，我们的新类型可以告诉我们失败的原因。
 
 ## Recursive data structures \(递归地定义数据结构\)
 
@@ -886,13 +886,13 @@ False
 
 ## Typeclasses 的第二堂课
 
-到目前为止我们学到了一些 Haskell 中的标准 typeclass，也学到了某些已经定义为他们 instance 的类别。我们知道如何让我们自己定义的类别自动被 Haskell 所推导成标准 typeclass 的 instance。在这个章节中，我们会学到如何构造我们自己的 typeclass，并且如何构造这些 typeclass 的 type instance。
+到目前为止我们学到了一些 Haskell 中的标准 typeclass，也学到了某些已经定义为他们 instance 的类型。我们知道如何让我们自己定义的类型自动被 Haskell 所推导成标准 typeclass 的 instance。在这个章节中，我们会学到如何构造我们自己的 typeclass，并且如何构造这些 typeclass 的 type instance。
 
-来快速复习一下什么是 typeclass: typeclass 就像是 interface。一个 typeclass 定义了一些行为\(像是比较相不相等，比较大小顺序，能否穷举\)而我们会把希望满足这些性质的类别定义成这些 typeclass 的 instance。typeclass 的行为是由定义的函数来描述。并写出对应的实作。当我们把一个类别定义成某个 typeclass 的 instance，就表示我们可以对那个类别使用 typeclass 中定义的函数。
+来快速复习一下什么是 typeclass: typeclass 就像是 interface。一个 typeclass 定义了一些行为\(像是比较相不相等，比较大小顺序，能否穷举\)而我们会把希望满足这些性质的类型定义成这些 typeclass 的 instance。typeclass 的行为是由定义的函数来描述。并写出对应的实作。当我们把一个类型定义成某个 typeclass 的 instance，就表示我们可以对那个类型使用 typeclass 中定义的函数。
 
 Typeclass 跟 Java 或 Python 中的 class 一点关系也没有。这个概念让很多人混淆，所以我希望你先忘掉所有在命令式语言中学到有关 class 的所有东西。
 
-例如说，`Eq` 这个 typeclass 是描述可以比较相等的事物。他定义了 `==` 跟 `/=` 两个函数。如果我们有一个类别 `Car`，而且对他们做相等比较是有意义的，那把 `Car` 作成是 `Eq` 的一个 instance 是非常合理的。
+例如说，`Eq` 这个 typeclass 是描述可以比较相等的事物。他定义了 `==` 跟 `/=` 两个函数。如果我们有一个类型 `Car`，而且对他们做相等比较是有意义的，那把 `Car` 作成是 `Eq` 的一个 instance 是非常合理的。
 
 这边来看看在 `Prelude` 之中 `Eq` 是怎么被定义的。
 
@@ -904,21 +904,21 @@ class Eq a where
     x /= y = not (x == y)
 ```
 
-我们在这边看到了一些奇怪的语法跟关键字。别担心，你一下子就会了解他们的。首先，我们看到 `class Eq a where`，那代表我们定义了一个新的 typeclass 叫做 `Eq`。`a` 是一个类别变量，他代表 `a` 是任何我们在定义 instance 时的类别。他不一定要叫做 `a`。他也不一定非要一个字母不可，只要他是小写就好。然后我们又定义了几个函数。我们并不一定要实作函数的本体，不过必须要写出函数的类别宣告。
+我们在这边看到了一些奇怪的语法跟关键字。别担心，你一下子就会了解他们的。首先，我们看到 `class Eq a where`，那代表我们定义了一个新的 typeclass 叫做 `Eq`。`a` 是一个类型变量，他代表 `a` 是任何我们在定义 instance 时的类型。他不一定要叫做 `a`。他也不一定非要一个字母不可，只要他是小写就好。然后我们又定义了几个函数。我们并不一定要实作函数的本体，不过必须要写出函数的类型宣告。
 
 如果我们写成 `class Eq equatable where` 还有 `(==) :: equatable -> equatable -> Bool` 这样的形式，对一些人可能比较容易理解。
 
 总之我们实作了 `Eq` 中需要定义的函数本体，只是我们定义他的方式是用交互递归的形式。我们描述两个 `Eq` 的 instance 要相等，那他们就不能不一样，而他们如果不一样，那他们就是不相等。我们其实不必这样写，但很快你会看到这其实是有用的。
 
-如果我们说 `class Eq a where` 然后定义 `(==) :: a -> a -> Bool`，那我们之后检查函数的类别时会发现他的类别是 `(Eq a) => a -> a -> Bool`。
+如果我们说 `class Eq a where` 然后定义 `(==) :: a -> a -> Bool`，那我们之后检查函数的类型时会发现他的类型是 `(Eq a) => a -> a -> Bool`。
 
-当我们有了 class 以后，可以用来做些什么呢？说实话，不多。不过一旦我们为它写一些 instance，就会有些好功能。来看看下面这个类别：
+当我们有了 class 以后，可以用来做些什么呢？说实话，不多。不过一旦我们为它写一些 instance，就会有些好功能。来看看下面这个类型：
 
 ```haskell
 data TrafficLight = Red | Yellow | Green
 ```
 
-这里定义了红绿灯的状态。请注意这个类别并不是任何 class 的 instance，虽然可以透过 derive 让它成为 `Eq` 或 `Show` 的 instance，但我们打算手工打造。下面展示了如何让一个类别成为 `Eq` 的 instance：
+这里定义了红绿灯的状态。请注意这个类型并不是任何 class 的 instance，虽然可以透过 derive 让它成为 `Eq` 或 `Show` 的 instance，但我们打算手工打造。下面展示了如何让一个类型成为 `Eq` 的 instance：
 
 ```haskell
 instance Eq TrafficLight where
@@ -928,9 +928,9 @@ instance Eq TrafficLight where
     _ == _ = False
 ```
 
-我们使用了 `instance` 这个关键字。class 是用来定义新的 typeclass，而 instance 是用来说明我们要定义某个 typeclass 的 instance。当我们要定义 `Eq`，我们会写 `class Eq a where`，其中 `a` 代表任何型态。我们可以从 instance 的写法：`instance Eq TrafficLight where` 看出来。我们会把 `a` 换成实际的类别。
+我们使用了 `instance` 这个关键字。class 是用来定义新的 typeclass，而 instance 是用来说明我们要定义某个 typeclass 的 instance。当我们要定义 `Eq`，我们会写 `class Eq a where`，其中 `a` 代表任何型态。我们可以从 instance 的写法：`instance Eq TrafficLight where` 看出来。我们会把 `a` 换成实际的类型。
 
-由于 `==` 是用 `/=` 来定义的，同样的 `/=` 也是用 `==` 来定义。所以我们只需要在 instance 定义中复写其中一个就好了。我们这样叫做定义了一个 minimal complete definition。这是说能让类别符合 class 行为所最小需要实作的函数数量。而 `Eq` 的 minimal complete definition 需要 `==` 或 `/=` 其中一个。而如果 `Eq` 是这样定义的：
+由于 `==` 是用 `/=` 来定义的，同样的 `/=` 也是用 `==` 来定义。所以我们只需要在 instance 定义中复写其中一个就好了。我们这样叫做定义了一个 minimal complete definition。这是说能让类型符合 class 行为所最小需要实作的函数数量。而 `Eq` 的 minimal complete definition 需要 `==` 或 `/=` 其中一个。而如果 `Eq` 是这样定义的：
 
 ```haskell
 class Eq a where
@@ -973,9 +973,9 @@ class (Eq a) => Num a where
    ...
 ```
 
-正如我们先前提到的，我们可以在很多地方加上 class constraints。这不过就是在 `class Num a where` 中的 `a` 上，加上他必须要是 `Eq` 的 instance 的限制。这基本上就是在说我们在定义一个类别为 `Num` 之前，必须先为他定义 `Eq` 的 instance。在某个类别可以被视作 `Number` 之前，必须先能被比较相不相等其实是蛮合理的。这就是 subclass 在做的事：帮 class declaration 加上限制。也就是说当我们定义 typeclass 中的函数本体时，我们可以缺省 `a` 是属于 `Eq`，因此能使用 `==`。
+正如我们先前提到的，我们可以在很多地方加上 class constraints。这不过就是在 `class Num a where` 中的 `a` 上，加上他必须要是 `Eq` 的 instance 的限制。这基本上就是在说我们在定义一个类型为 `Num` 之前，必须先为他定义 `Eq` 的 instance。在某个类型可以被视作 `Number` 之前，必须先能被比较相不相等其实是蛮合理的。这就是 subclass 在做的事：帮 class declaration 加上限制。也就是说当我们定义 typeclass 中的函数本体时，我们可以缺省 `a` 是属于 `Eq`，因此能使用 `==`。
 
-但像是 `Maybe` 或是 List 是如何被定义成 typeclass 的 instance 呢？`Maybe` 的特别之处在于他跟 `TrafficLight` 不一样，他不是一个具体的类别。他是一个类别构造子，接受一个类别参数（像是 `Char` 之类的）而构造出一个具体的类别（像是 `Maybe Char` ）。让我们再回顾一下 `Eq` 这个 typeclass：
+但像是 `Maybe` 或是 List 是如何被定义成 typeclass 的 instance 呢？`Maybe` 的特别之处在于他跟 `TrafficLight` 不一样，他不是一个具体的类型。他是一个类型构造子，接受一个类型参数（像是 `Char` 之类的）而构造出一个具体的类型（像是 `Maybe Char` ）。让我们再回顾一下 `Eq` 这个 typeclass：
 
 ```haskell
 class Eq a where
@@ -985,7 +985,7 @@ class Eq a where
     x /= y = not (x == y)
 ```
 
-从类别宣告来看，可以看到 `a` 必须是一个具体类别，因为所有在函数中的类别都必须是具体类别。\(你没办法写一个函数，他的类别是 `a -> Maybe`，但你可以写一个函数，他的类别是 `a -> Maybe a`，或是 `Maybe Int -> Maybe String`\) 这就是为什么我们不能写成像这样：
+从类型宣告来看，可以看到 `a` 必须是一个具体类型，因为所有在函数中的类型都必须是具体类型。\(你没办法写一个函数，他的类型是 `a -> Maybe`，但你可以写一个函数，他的类型是 `a -> Maybe a`，或是 `Maybe Int -> Maybe String`\) 这就是为什么我们不能写成像这样：
 
 ```haskell
 instance Eq Maybe where
@@ -999,7 +999,7 @@ instance Eq (Maybe m) where
     _ == _ = False
 ```
 
-这就好像在说我们要把 `Maybe something` 这种东西全部都做成 `Eq` 的 instance。我们的确可以写成 `(Maybe something)`，但我们通常是只用一个字母，这样比较像是 Haskell 的风格。`(Maybe m)` 这边则取代了 `a` 在 `class Eq a where` 的位置。尽管 `Maybe` 不是一个具体的类别。`Maybe m` 却是。指定一个类别参数（在这边是小写的 `m`），我们说我们想要所有像是 `Maybe m` 的都成为 `Eq` 的 instance。
+这就好像在说我们要把 `Maybe something` 这种东西全部都做成 `Eq` 的 instance。我们的确可以写成 `(Maybe something)`，但我们通常是只用一个字母，这样比较像是 Haskell 的风格。`(Maybe m)` 这边则取代了 `a` 在 `class Eq a where` 的位置。尽管 `Maybe` 不是一个具体的类型。`Maybe m` 却是。指定一个类型参数（在这边是小写的 `m`），我们说我们想要所有像是 `Maybe m` 的都成为 `Eq` 的 instance。
 
 不过这仍然有一个问题。你能看出来吗？ 我们用 `==` 来比较 `Maybe` 包含的东西，但我们并没有任何保证说 `Maybe` 装的东西可以是 `Eq`。这就是为什么我们需要修改我们的 instance 定义：
 
@@ -1010,19 +1010,19 @@ instance (Eq m) => Eq (Maybe m) where
     _ == _ = False
 ```
 
-这边我们必须要加上限制。在这个 instance 的宣告中，我们希望所有 `Maybe m` 形式的类别都属于 `Eq`，但只有当 `m` 也属于 `Eq` 的时候。这也是 Haskell 在 derive 的时候做的事。
+这边我们必须要加上限制。在这个 instance 的宣告中，我们希望所有 `Maybe m` 形式的类型都属于 `Eq`，但只有当 `m` 也属于 `Eq` 的时候。这也是 Haskell 在 derive 的时候做的事。
 
-在大部份情形下，在 typeclass 宣告中的 class constraints 都是要让一个 typeclass 成为另一个 typeclass 的 subclass。而在 instance 宣告中的 class constraint 则是要表达类别的要求限制。举里来说，我们要求 `Maybe` 的内容物也要属于 `Eq`。
+在大部份情形下，在 typeclass 宣告中的 class constraints 都是要让一个 typeclass 成为另一个 typeclass 的 subclass。而在 instance 宣告中的 class constraint 则是要表达类型的要求限制。举里来说，我们要求 `Maybe` 的内容物也要属于 `Eq`。
 
-当定义 instance 的时候，如果你需要提供具体类别（像是在 `a -> a -> Bool` 中的 `a`），那你必须要加上括号跟类别参数来构造一个具体类别。
+当定义 instance 的时候，如果你需要提供具体类型（像是在 `a -> a -> Bool` 中的 `a`），那你必须要加上括号跟类型参数来构造一个具体类型。
 
-要知道你在定义 instance 的时候，类别参数会被取代。`class Eq a where` 中的 `a` 会被取代成真实的类别。所以试着想像把类别放进类别宣告中。`(==) :: Maybe -> Maybe -> Bool` 并非合法。但 `(==) :: (Eq m) => Maybe m -> Maybe m -> Bool` 则是。这是不论我们要定义什么，通用的类别宣告都是 `(==) :: (Eq a) => a -> a -> Bool`
+要知道你在定义 instance 的时候，类型参数会被取代。`class Eq a where` 中的 `a` 会被取代成真实的类型。所以试着想像把类型放进类型宣告中。`(==) :: Maybe -> Maybe -> Bool` 并非合法。但 `(==) :: (Eq m) => Maybe m -> Maybe m -> Bool` 则是。这是不论我们要定义什么，通用的类型宣告都是 `(==) :: (Eq a) => a -> a -> Bool`
 
-还有一件事要确认。如果你想看看一个 typeclass 有定义哪些 instance。可以在 ghci 中输入 `:info YourTypeClass`。所以输入 `:info Num` 会告诉你这个 typeclass 定义了哪些函数，还有哪些类别属于这个 typeclass。`:info` 也可以查找类别跟类别构造子的信息。如果你输入 `:info Maybe`。他会显示 `Maybe` 所属的所有 typeclass。`:info` 也能告诉你函数的类别宣告。
+还有一件事要确认。如果你想看看一个 typeclass 有定义哪些 instance。可以在 ghci 中输入 `:info YourTypeClass`。所以输入 `:info Num` 会告诉你这个 typeclass 定义了哪些函数，还有哪些类型属于这个 typeclass。`:info` 也可以查找类型跟类型构造子的信息。如果你输入 `:info Maybe`。他会显示 `Maybe` 所属的所有 typeclass。`:info` 也能告诉你函数的类型宣告。
 
 ## yes-no typeclass
 
-在 Javascript 或是其他弱类别的编程语言，你能在 if expression 中摆上任何东西。举例来说，你可以做像下列的事： `if (0) alert("YEAH!") else alert("NO!")`, `if ("") alert ("YEAH!") else alert("NO!")`, `if (false) alert("YEAH") else alert("NO!)` 等等， 而上述所有的片段执行后都会跳出 `NO!`。如果你写 `if ("WHAT") alert ("YEAH") else alert("NO!")`，他会跳出 `YEAH!`，因为 Javascript 认为非空字串会是 true。
+在 Javascript 或是其他弱类型的编程语言，你能在 if expression 中摆上任何东西。举例来说，你可以做像下列的事： `if (0) alert("YEAH!") else alert("NO!")`, `if ("") alert ("YEAH!") else alert("NO!")`, `if (false) alert("YEAH") else alert("NO!)` 等等， 而上述所有的片段执行后都会跳出 `NO!`。如果你写 `if ("WHAT") alert ("YEAH") else alert("NO!")`，他会跳出 `YEAH!`，因为 Javascript 认为非空字串会是 true。
 
 尽管使用 `Bool` 来表达布林的语意是比较好的作法。为了有趣起见，我们来试试看模仿 Javascript 的行为。我们先从 typeclass 宣告开始看：
 
@@ -1031,7 +1031,7 @@ class YesNo a where
     yesno :: a -> Bool
 ```
 
-`YesNo` typeclass 定义了一个函数。这个函数接受一个可以判断为真否的类别的值。而从我们写 `a` 的位置，可以看出来 `a` 必须是一个具体类别。
+`YesNo` typeclass 定义了一个函数。这个函数接受一个可以判断为真否的类型的值。而从我们写 `a` 的位置，可以看出来 `a` 必须是一个具体类型。
 
 接下来我们来定义一些 instance。对于数字，我们会假设任何非零的数字都会被当作 `true`，而 0 则当作 `false`。
 
@@ -1049,7 +1049,7 @@ instance YesNo [a] where
     yesno _ = True
 ```
 
-留意到我们加了一个类别参数 `a` 来让整个 List 是一个具体类别，不过我们并没有对包涵在 List 中的元素的类别做任何额外假设。我们还剩下 `Bool` 可以被作为真假值，要定义他们也很容易：
+留意到我们加了一个类型参数 `a` 来让整个 List 是一个具体类型，不过我们并没有对包涵在 List 中的元素的类型做任何额外假设。我们还剩下 `Bool` 可以被作为真假值，要定义他们也很容易：
 
 ```haskell
 instance YesNo Bool where
@@ -1066,7 +1066,7 @@ instance YesNo (Maybe a) where
     yesno Nothing = False
 ```
 
-由于我们不必对 `Maybe` 的内容做任何假设，因此并不需要 class constraint。我们只要定义遇到 `Just` 包装过的值就代表 true，而 `Nothing` 则代表 false。这里还是得写出 `(Maybe a)` 而不是只有 `Maybe`，毕竟 `Maybe -> Bool` 的函式并不存在（因为 `Maybe` 并不是具体类别），而 `Maybe a -> Bool` 看起来就合理多了。现在有了这个定义，`Maybe something` 型式的类别都属于 `YesNo` 了，不论 `something` 是什么。
+由于我们不必对 `Maybe` 的内容做任何假设，因此并不需要 class constraint。我们只要定义遇到 `Just` 包装过的值就代表 true，而 `Nothing` 则代表 false。这里还是得写出 `(Maybe a)` 而不是只有 `Maybe`，毕竟 `Maybe -> Bool` 的函式并不存在（因为 `Maybe` 并不是具体类型），而 `Maybe a -> Bool` 看起来就合理多了。现在有了这个定义，`Maybe something` 型式的类型都属于 `YesNo` 了，不论 `something` 是什么。
 
 之前我们定义了 `Tree a`，那代表一个二元搜索树。我们可以说一棵空的树是 `false`，而非空的树则是 `true`。
 
@@ -1107,7 +1107,7 @@ ghci> :t yesno
 yesno :: (YesNo a) => a -> Bool
 ```
 
-很好，统统是我们预期的结果。我们来写一个函数来模仿 if statement 的行为，但他是运作在 `YesNo` 的类别上。
+很好，统统是我们预期的结果。我们来写一个函数来模仿 if statement 的行为，但他是运作在 `YesNo` 的类型上。
 
 ```haskell
 yesnoIf :: (YesNo y) => y -> a -> a -> a
@@ -1132,7 +1132,7 @@ ghci> yesnoIf Nothing "YEAH!" "NO!"
 
 ## Functor typeclass
 
-到目前为止我们看过了许多在标准函式库中的 typeclass。我们操作过 `Ord`，代表可以被排序的东西。我们也操作过 `Eq`，代表可以被比较相等性的事物。也看过 `Show`，代表可以被印成字串来表示的东西。至于 `Read` 则是我们可以把字串转换成类别的动作。不过现在我们要来看一下 `Functor` 这个 typeclass，基本上就代表可以被 map over 的事物。听到这个词你可能会联想到 List，因为 map over list 在 Haskell 中是很常见的操作。你没想错，List 的确是属于 `Functor` 这个 typeclass。
+到目前为止我们看过了许多在标准函式库中的 typeclass。我们操作过 `Ord`，代表可以被排序的东西。我们也操作过 `Eq`，代表可以被比较相等性的事物。也看过 `Show`，代表可以被印成字串来表示的东西。至于 `Read` 则是我们可以把字串转换成类型的动作。不过现在我们要来看一下 `Functor` 这个 typeclass，基本上就代表可以被 map over 的事物。听到这个词你可能会联想到 List，因为 map over list 在 Haskell 中是很常见的操作。你没想错，List 的确是属于 `Functor` 这个 typeclass。
 
 来看看他的实作会是了解 `Functor` 的最佳方式：
 
@@ -1141,18 +1141,18 @@ class Functor f where
     fmap :: (a -> b) -> f a -> f b
 ```
 
-我们看到他定义了一个函数 `fmap`，而且并没有提供一个缺省的实作。`fmap` 的类别蛮有趣的。到目前为止的我们看过的 typeclass 中的类别变量都是具体类别。就像是 `(==) :: (Eq a) => a -> a -> Bool` 中的 `a` 一样。但现在碰到的 `f` 并不是一个具体类别（一个像是 `Int`, `Bool` 或 `Maybe String`的类别），而是接受一个类别参数的类别构造子。如果要快速回顾的话可以看一下 `Maybe Int` 是一个具体类别，而 `Maybe` 是一个类别构造子，可接受一个类别作为参数。总之，我们知道 `fmap` 接受一个函数，这个函数从一个类别映射到另一个类别，还接受一个 functor 装有原始的类别，然后会回传一个 functor 装有映射后的类别。
+我们看到他定义了一个函数 `fmap`，而且并没有提供一个缺省的实作。`fmap` 的类型蛮有趣的。到目前为止的我们看过的 typeclass 中的类型变量都是具体类型。就像是 `(==) :: (Eq a) => a -> a -> Bool` 中的 `a` 一样。但现在碰到的 `f` 并不是一个具体类型（一个像是 `Int`, `Bool` 或 `Maybe String`的类型），而是接受一个类型参数的类型构造子。如果要快速回顾的话可以看一下 `Maybe Int` 是一个具体类型，而 `Maybe` 是一个类型构造子，可接受一个类型作为参数。总之，我们知道 `fmap` 接受一个函数，这个函数从一个类型映射到另一个类型，还接受一个 functor 装有原始的类型，然后会回传一个 functor 装有映射后的类型。
 
-如果听不太懂也没关系。当我们看几个范例之后会比较好懂。不过这边 `fmap` 的类别宣告让我们想起类似的东西，就是 `map :: (a -> b) -> [a] -> [b]`。
+如果听不太懂也没关系。当我们看几个范例之后会比较好懂。不过这边 `fmap` 的类型宣告让我们想起类似的东西，就是 `map :: (a -> b) -> [a] -> [b]`。
 
-他接受一个函数，这函数把一个类别的东西映射成另一个。还有一串装有某个类别的 List 变成装有另一个类别的 List。到这边听起来实在太像 functor 了。实际上，`map` 就是针对 List 的 `fmap`。来看看 List 是如何被定义成 `Functor` 的 instance 的。
+他接受一个函数，这函数把一个类型的东西映射成另一个。还有一串装有某个类型的 List 变成装有另一个类型的 List。到这边听起来实在太像 functor 了。实际上，`map` 就是针对 List 的 `fmap`。来看看 List 是如何被定义成 `Functor` 的 instance 的。
 
 ```haskell
 instance Functor [] where
     fmap = map
 ```
 
-注意到我们不是写成 `instance Functor [a] where`，因为从 `fmap :: (a -> b) -> f a -> f b` 可以知道 `f` 是一个类别构造子，他接受一个类别。而 `[a]` 则已经是一个具体类别（一个拥有某个类别的 List），其中 `[]` 是一个类别构造子，能接受某个类别而构造出像 `[Int]`、`[String]` 甚至是 `[[String]]` 的具体类别。
+注意到我们不是写成 `instance Functor [a] where`，因为从 `fmap :: (a -> b) -> f a -> f b` 可以知道 `f` 是一个类型构造子，他接受一个类型。而 `[a]` 则已经是一个具体类型（一个拥有某个类型的 List），其中 `[]` 是一个类型构造子，能接受某个类型而构造出像 `[Int]`、`[String]` 甚至是 `[[String]]` 的具体类型。
 
 对于 List，`fmap` 只不过是 `map`，对 List 操作的时候他们都是一样的。
 
@@ -1164,9 +1164,9 @@ ghci> map (*2) [1..3]
 [2,4,6]
 ```
 
-至于当我们对空的 List 操作 `map` 或 `fmap` 呢？我们会得到一个空的 List。他把一个类别为 `[a]` 的空的 List 转成类别为 `[b]` 的空的 List。
+至于当我们对空的 List 操作 `map` 或 `fmap` 呢？我们会得到一个空的 List。他把一个类型为 `[a]` 的空的 List 转成类型为 `[b]` 的空的 List。
 
-可以当作盒子的类别可能就是一个 functor。你可以把 List 想做是一个拥有无限小隔间的盒子。他们可能全部都是空的，已也可能有一部份是满的其他是空的。所以作为一个盒子会具有什么性质呢？例如说 `Maybe a`。他表现得像盒子在于他可能什么东西都没有，就是 `Nothing`，或是可以装有一个东西，像是 `"HAHA"`，在这边就是 `Just "HAHA"`。可以看到 `Maybe` 作为一个 functor 的定义：
+可以当作盒子的类型可能就是一个 functor。你可以把 List 想做是一个拥有无限小隔间的盒子。他们可能全部都是空的，已也可能有一部份是满的其他是空的。所以作为一个盒子会具有什么性质呢？例如说 `Maybe a`。他表现得像盒子在于他可能什么东西都没有，就是 `Nothing`，或是可以装有一个东西，像是 `"HAHA"`，在这边就是 `Just "HAHA"`。可以看到 `Maybe` 作为一个 functor 的定义：
 
 ```haskell
 instance Functor Maybe where
@@ -1174,7 +1174,7 @@ instance Functor Maybe where
     fmap f Nothing = Nothing
 ```
 
-注意到我们是写 `instance Functor Maybe where` 而不是 `instance Functor (Maybe m) where`，就像我们在写 `YesNo` 时的 `Maybe` 一样。`Functor` 要的是一个接受一个类别参数的类别构造子而不是一个具体类别。如果你把 `f` 代换成 `Maybe`。`fmap` 就会像 `(a -> b) -> Maybe a -> Maybe b`。但如果你把 `f` 代换成 `(Maybe m)`，那他就会像 `(a -> b) -> Maybe m a -> Maybe m b`，这看起来并不合理，因为 `Maybe` 只接受一个类别参数。
+注意到我们是写 `instance Functor Maybe where` 而不是 `instance Functor (Maybe m) where`，就像我们在写 `YesNo` 时的 `Maybe` 一样。`Functor` 要的是一个接受一个类型参数的类型构造子而不是一个具体类型。如果你把 `f` 代换成 `Maybe`。`fmap` 就会像 `(a -> b) -> Maybe a -> Maybe b`。但如果你把 `f` 代换成 `(Maybe m)`，那他就会像 `(a -> b) -> Maybe m a -> Maybe m b`，这看起来并不合理，因为 `Maybe` 只接受一个类型参数。
 
 总之，`fmap` 的实作是很简单的。如果一个空值是 `Nothing`，那他就会回传 `Nothing`。如果我们 map over 一个空的盒子，我们就会得到一个空的盒子。就像我们 map over 一个空的 List，那我们就会得到一个空的 List。如果他不是一个空值，而是包在 `Just` 中的某个值，那我们就会套用在包在 `Just` 中的值。
 
@@ -1189,7 +1189,7 @@ ghci> fmap (*2) Nothing
 Nothing
 ```
 
-另外 `Tree a` 的类别也可以被 map over 且被定义成 `Functor` 的一个 instance。他可以被想成是一个盒子，而 `Tree` 的类别构造子也刚好接受单一一个类别参数。如果你把 `fmap` 看作是一个特别为 `Tree` 写的函数，他的类别宣告会长得像这样 `(a -> b) -> Tree a -> Tree b`。不过我们在这边会用到递归。map over 一棵空的树会得到一棵空的树。map over 一棵非空的树会得到一棵被函数映射过的树，他的 root 会先被映射，然后左右子树都分别递归地被函数映射。
+另外 `Tree a` 的类型也可以被 map over 且被定义成 `Functor` 的一个 instance。他可以被想成是一个盒子，而 `Tree` 的类型构造子也刚好接受单一一个类型参数。如果你把 `fmap` 看作是一个特别为 `Tree` 写的函数，他的类型宣告会长得像这样 `(a -> b) -> Tree a -> Tree b`。不过我们在这边会用到递归。map over 一棵空的树会得到一棵空的树。map over 一棵非空的树会得到一棵被函数映射过的树，他的 root 会先被映射，然后左右子树都分别递归地被函数映射。
 
 ```haskell
 instance Functor Tree where
@@ -1205,7 +1205,7 @@ ghci> fmap (*4) (foldr treeInsert EmptyTree [5,7,3,2,1,7])
 Node 28 (Node 4 EmptyTree (Node 8 EmptyTree (Node 12 EmptyTree (Node 20 EmptyTree EmptyTree)))) EmptyTree
 ```
 
-那 `Either a b` 又如何？他可以是一个 functor 吗？`Functor` 限制类别构造子只能接受一个类别参数，但 `Either` 却接受两个。聪明的你会想到我可以 partial apply `Either`，先喂给他一个参数，并把另一个参数当作 free parameter。来看看 `Either a` 在标准函式库中是如何被定义的：
+那 `Either a b` 又如何？他可以是一个 functor 吗？`Functor` 限制类型构造子只能接受一个类型参数，但 `Either` 却接受两个。聪明的你会想到我可以 partial apply `Either`，先喂给他一个参数，并把另一个参数当作 free parameter。来看看 `Either a` 在标准函式库中是如何被定义的：
 
 ```haskell
 instance Functor (Either a) where
@@ -1213,13 +1213,13 @@ instance Functor (Either a) where
     fmap f (Left x) = Left x
 ```
 
-我们在这边做了些什么？你可以看到我们把 `Either a` 定义成一个 instance，而不是 `Either`。那是因为 `Either a` 是一个接受单一类别参数的类别构造子，而 `Either` 则接受两个。如果 `fmap` 是针对 `Either a`，那他的类别宣告就会像是 `(b -> c) -> Either a b -> Either a c`，他又等价于 `(b -> c) -> (Either a) b -> (Either a) c`。在实作中，我们碰到一个 `Right` 的时候会做 `map`，但在碰到 `Left` 的时候却不这样做，为什么呢？如果我们回头看看 `Either a b` 是怎么定义的：
+我们在这边做了些什么？你可以看到我们把 `Either a` 定义成一个 instance，而不是 `Either`。那是因为 `Either a` 是一个接受单一类型参数的类型构造子，而 `Either` 则接受两个。如果 `fmap` 是针对 `Either a`，那他的类型宣告就会像是 `(b -> c) -> Either a b -> Either a c`，他又等价于 `(b -> c) -> (Either a) b -> (Either a) c`。在实作中，我们碰到一个 `Right` 的时候会做 `map`，但在碰到 `Left` 的时候却不这样做，为什么呢？如果我们回头看看 `Either a b` 是怎么定义的：
 
 ```haskell
 data Either a b = Left a | Right b
 ```
 
-如果我们希望对他们两个都做 `map` 的动作，那 `a` 跟 `b` 必须要是相同的类别。也就是说，如果我们的函数是接受一个字串然后回传另一个字串，而且 `b` 是字串，`a` 是数字，这样的情形是不可行的。而且从观察 `fmap` 的类别也可以知道，当他运作在 `Either` 上的时候，第一个类别参数必须固定，而第二个则可以改变，而其中第一个参数正好就是 `Left` 用的。
+如果我们希望对他们两个都做 `map` 的动作，那 `a` 跟 `b` 必须要是相同的类型。也就是说，如果我们的函数是接受一个字串然后回传另一个字串，而且 `b` 是字串，`a` 是数字，这样的情形是不可行的。而且从观察 `fmap` 的类型也可以知道，当他运作在 `Either` 上的时候，第一个类型参数必须固定，而第二个则可以改变，而其中第一个参数正好就是 `Left` 用的。
 
 我们持续用盒子的比喻也仍然贴切，我们可以把 `Left` 想做是空的盒子在他旁边写上错误消息，说明为什么他是空的。
 
@@ -1235,18 +1235,18 @@ data Either a b = Left a | Right b
 
 ## Kind
 
-类别构造子接受其他类别作为他的参数，来构造出一个具体类别。这样的行为会让我们想到函数，也是接受一个值当作参数，并回传另一个值。我们也看过类别构造子可以 partially apply （`Either String` 是一个类别构造子，他接受一个类别来构造出一个具体类别，就像 `Either String Int`）。这些都是函数能办到的事。在这个章节中，对于类别如何被套用到类别构造子上，我们会来看一下正式的定义。就像我们之前是用函数的类别来定义出函数是如何套用值的。如果你看不懂的话，你可以跳过这一章，这不会影响你后续的阅读。然而如果你搞懂的话，你会对于类别系统有更进一步的了解。
+类型构造子接受其他类型作为他的参数，来构造出一个具体类型。这样的行为会让我们想到函数，也是接受一个值当作参数，并回传另一个值。我们也看过类型构造子可以 partially apply （`Either String` 是一个类型构造子，他接受一个类型来构造出一个具体类型，就像 `Either String Int`）。这些都是函数能办到的事。在这个章节中，对于类型如何被套用到类型构造子上，我们会来看一下正式的定义。就像我们之前是用函数的类型来定义出函数是如何套用值的。如果你看不懂的话，你可以跳过这一章，这不会影响你后续的阅读。然而如果你搞懂的话，你会对于类型系统有更进一步的了解。
 
-像是 `3`,`"YEAH"` 或是 `takeWhile` 的值他们都有自己的类别（函数也是值的一种，我们可以把他们传来传去）类别是一个标签，值会把他带着，这样我们就可以推测出他的性质。但类别也有他们自己的标签，叫做 kind。kind 是类别的类别。虽然听起来有点玄妙，不过他的确是个有趣的概念。
+像是 `3`,`"YEAH"` 或是 `takeWhile` 的值他们都有自己的类型（函数也是值的一种，我们可以把他们传来传去）类型是一个标签，值会把他带着，这样我们就可以推测出他的性质。但类型也有他们自己的标签，叫做 kind。kind 是类型的类型。虽然听起来有点玄妙，不过他的确是个有趣的概念。
 
-那kind可以拿来做什么呢？我们可以在 ghci 中用 `:k` 来得知一个类别的 kind。
+那kind可以拿来做什么呢？我们可以在 ghci 中用 `:k` 来得知一个类型的 kind。
 
 ```haskell
 ghci> :k Int
 Int :: *
 ```
 
-一个星星代表的是什么意思？一个 `*` 代表这个类别是具体类别。一个具体类别是没有任何类别参数，而值只能属于具体类别。而 `*` 的读法叫做 star 或是 type。
+一个星星代表的是什么意思？一个 `*` 代表这个类型是具体类型。一个具体类型是没有任何类型参数，而值只能属于具体类型。而 `*` 的读法叫做 star 或是 type。
 
 我们再看看 `Maybe` 的 kind：
 
@@ -1255,16 +1255,16 @@ ghci> :k Maybe
 Maybe :: * -> *
 ```
 
-`Maybe` 的类别构造子接受一个具体类别（像是 `Int`）然后回传一个具体类别，像是 `Maybe Int`。这就是 kind 告诉我们的信息。就像 `Int -> Int` 代表这个函数接受 `Int` 并回传一个 `Int`。`* -> *` 代表这个类别构造子接受一个具体类别并回传一个具体类别。我们再来对 `Maybe` 套用类别参数后再看看他的 kind 是什么：
+`Maybe` 的类型构造子接受一个具体类型（像是 `Int`）然后回传一个具体类型，像是 `Maybe Int`。这就是 kind 告诉我们的信息。就像 `Int -> Int` 代表这个函数接受 `Int` 并回传一个 `Int`。`* -> *` 代表这个类型构造子接受一个具体类型并回传一个具体类型。我们再来对 `Maybe` 套用类型参数后再看看他的 kind 是什么：
 
 ```haskell
 ghci> :k Maybe Int
 Maybe Int :: *
 ```
 
-正如我们预期的。我们对 `Maybe` 套用了类别参数后会得到一个具体类别（这就是 `* -> *` 的意思）这跟 `:t isUpper` 还有 `:t isUpper 'A'` 的差别有点类似。`isUpper` 的类别是 `Char -> Bool` 而 `isUpper 'A'` 的类别是 `Bool`。而这两种类别，都是 `*` 的 kind。
+正如我们预期的。我们对 `Maybe` 套用了类型参数后会得到一个具体类型（这就是 `* -> *` 的意思）这跟 `:t isUpper` 还有 `:t isUpper 'A'` 的差别有点类似。`isUpper` 的类型是 `Char -> Bool` 而 `isUpper 'A'` 的类型是 `Bool`。而这两种类型，都是 `*` 的 kind。
 
-我们对一个类别使用 `:k` 来得到他的 kind。就像我们对值使用 `:t` 来得到的他的类别一样。就像我们先前说的，类别是值的标签，而 kind 是类别的标签。
+我们对一个类型使用 `:k` 来得到他的 kind。就像我们对值使用 `:t` 来得到的他的类型一样。就像我们先前说的，类型是值的标签，而 kind 是类型的标签。
 
 我们再来看看其他的 kind
 
@@ -1273,7 +1273,7 @@ ghci> :k Either
 Either :: * -> * -> *
 ```
 
-这告诉我们 `Either` 接受两个具体类别作为参数，并构造出一个具体类别。他看起来也像是一个接受两个参数并回传值的函数类别。类别构造子是可以做 curry 的，所以我们也能 partially apply。
+这告诉我们 `Either` 接受两个具体类型作为参数，并构造出一个具体类型。他看起来也像是一个接受两个参数并返回值的函数类型。类型构造子是可以做 curry 的，所以我们也能 partially apply。
 
 ```haskell
 ghci> :k Either String
@@ -1282,14 +1282,14 @@ ghci> :k Either String Int
 Either String Int :: *
 ```
 
-当我们希望定义 `Either` 成为 `Functor` 的 instance 的时候，我们必须先 partial apply，因为 `Functor` 预期有一个类别参数，但 `Either` 却有两个。也就是说，`Functor` 希望类别的 kind 是 `* -> *`，而我们必须先 partial apply `Either` 来得到 kind `* -> *`，而不是最开始的 `* -> * -> *`。我们再来看看 `Functor` 的定义
+当我们希望定义 `Either` 成为 `Functor` 的 instance 的时候，我们必须先 partial apply，因为 `Functor` 预期有一个类型参数，但 `Either` 却有两个。也就是说，`Functor` 希望类型的 kind 是 `* -> *`，而我们必须先 partial apply `Either` 来得到 kind `* -> *`，而不是最开始的 `* -> * -> *`。我们再来看看 `Functor` 的定义
 
 ```haskell
 class Functor f where
     fmap :: (a -> b) -> f a -> f b
 ```
 
-我们看到 `f` 类别变量是接受一个具体类别且构造出一个具体类别的类别。 知道他构造出具体类别是因为是作为函数参数的类别。 从那里我们可以推测出一个类别要是属于 `Functor` 必须是 `* -> *` kind。
+我们看到 `f` 类型变量是接受一个具体类型且构造出一个具体类型的类型。 知道他构造出具体类型是因为是作为函数参数的类型。 从那里我们可以推测出一个类型要是属于 `Functor` 必须是 `* -> *` kind。
 
 现在我们来练习一下。来看看下面这个新定义的 typeclass。
 
@@ -1298,15 +1298,15 @@ class Tofu t where
     tofu :: j a -> t a j
 ```
 
-这看起来很怪。我们干嘛要为这个奇怪的 typeclass 定义 instance？我们可以来看看他的 kind 是什么？由于 `j a` 被当作 `tofu` 这个函数的参数的类别，所以 `j a` 一定是 `*` kind。我们假设 `a` 是 `*` kind，那 `j` 就会是 `* -> *` 的 kind。我们看到 `t` 由于是函数的回传值，一定是接受两个类别参数的类别。而知道 `a` 是 `*`，`j` 是 `* -> *`，我们可以推测出 `t`是`* -> (* -> *) -> *`。也就是说他接受一个具体类别 `a`，一个接受单一参数的类别构造子 `j`，然后产生出一个具体类别。
+这看起来很怪。我们干嘛要为这个奇怪的 typeclass 定义 instance？我们可以来看看他的 kind 是什么？由于 `j a` 被当作 `tofu` 这个函数的参数的类型，所以 `j a` 一定是 `*` kind。我们假设 `a` 是 `*` kind，那 `j` 就会是 `* -> *` 的 kind。我们看到 `t` 由于是函数的返回值，一定是接受两个类型参数的类型。而知道 `a` 是 `*`，`j` 是 `* -> *`，我们可以推测出 `t`是`* -> (* -> *) -> *`。也就是说他接受一个具体类型 `a`，一个接受单一参数的类型构造子 `j`，然后产生出一个具体类型。
 
-我们再来定义出一个类别具有 `* -> (* -> *) -> *` 的 kind，下面是一种定义的方法：
+我们再来定义出一个类型具有 `* -> (* -> *) -> *` 的 kind，下面是一种定义的方法：
 
 ```haskell
 data Frank a b  = Frank {frankField :: b a} deriving (Show)
 ```
 
-我们怎么知道这个类别具有 `* -> (* -> *) -> *` 的 kind 呢？ADT 中的字段是要来塞值的，所以他们必须是 `*` kind。我们假设 `a` 是 `*`，那 `b` 就是接受一个类别参数的 kind `* -> *`。现在我们知道 `a` 跟 `b` 的 kind 了，而他们又是 `Frank` 的类别参数，所以我们知道 `Frank` 会有 `* -> (* -> *) -> *` 的 kind。第一个 `*` 代表 `a`，而 `(* -> *)` 代表 `b`。我们构造些 `Frank` 的值并检查他们的类别吧：
+我们怎么知道这个类型具有 `* -> (* -> *) -> *` 的 kind 呢？ADT 中的字段是要来塞值的，所以他们必须是 `*` kind。我们假设 `a` 是 `*`，那 `b` 就是接受一个类型参数的 kind `* -> *`。现在我们知道 `a` 跟 `b` 的 kind 了，而他们又是 `Frank` 的类型参数，所以我们知道 `Frank` 会有 `* -> (* -> *) -> *` 的 kind。第一个 `*` 代表 `a`，而 `(* -> *)` 代表 `b`。我们构造些 `Frank` 的值并检查他们的类型吧：
 
 ```haskell
 ghci> :t Frank {frankField = Just "HAHA"}
@@ -1317,7 +1317,7 @@ ghci> :t Frank {frankField = "YES"}
 Frank {frankField = "YES"} :: Frank Char []
 ```
 
-由于 `frankField` 具有 `a b` 的类别。他的值必定有一个类似的类别。他们可能是 `Just "HAHA"`，也就有 `Maybe [Char]` 的类别，或是他们可能是 `['Y','E','S']`，他的类别是 `[Char]`。（如果我们是用自己定义的 List 类别的话，那就会是 `List Char`）。我们看到 `Frank` 值的类别对应到 `Frank` 的 kind。`[Char]` 具有 `*` 的 kind，而 `Maybe` 则是 `* -> *`。由于结果必须是个值，也就是他必须要是具体类别，因使他必须 fully applied，因此每个 `Frank blah blaah` 的值都会是 `*` 的 kind。
+由于 `frankField` 具有 `a b` 的类型。他的值必定有一个类似的类型。他们可能是 `Just "HAHA"`，也就有 `Maybe [Char]` 的类型，或是他们可能是 `['Y','E','S']`，他的类型是 `[Char]`。（如果我们是用自己定义的 List 类型的话，那就会是 `List Char`）。我们看到 `Frank` 值的类型对应到 `Frank` 的 kind。`[Char]` 具有 `*` 的 kind，而 `Maybe` 则是 `* -> *`。由于结果必须是个值，也就是他必须要是具体类型，因使他必须 fully applied，因此每个 `Frank blah blaah` 的值都会是 `*` 的 kind。
 
 要把 `Frank` 定义成 `Tofu` 的 instance 也是很简单。我们看到 `tofu` 接受 `j a`（例如 `Maybe Int`）并回传 `t a j`。所以我们将 `Frank` 代入 `t`，就得到 `Frank Int Maybe`。
 
@@ -1333,20 +1333,20 @@ ghci> tofu ["HELLO"] :: Frank [Char] []
 Frank {frankField = ["HELLO"]}
 ```
 
-这并不是很有用，但让我们做了不少类别的练习。再来看看下面的类别：
+这并不是很有用，但让我们做了不少类型的练习。再来看看下面的类型：
 
 ```haskell
 data Barry t k p = Barry { yabba :: p, dabba :: t k }
 ```
 
-我们想要把他定义成 `Functor` 的 instance。`Functor` 希望是 `* -> *` 的类别，但 `Barry` 并不是那种 kind。那 `Barry` 的 kind 是什么呢？我们可以看到他接受三个类别参数，所以会是 `something -> something -> something -> *`。`p` 是一个具体类别因此是 `*`。至于 `k`，我们假设他是 `*`，所以 `t` 会是 `* -> *`。现在我们把这些代入 `something`，所以 kind 就变成 `(* -> *) -> * -> * -> *`。我们用 ghci 来检查一下。
+我们想要把他定义成 `Functor` 的 instance。`Functor` 希望是 `* -> *` 的类型，但 `Barry` 并不是那种 kind。那 `Barry` 的 kind 是什么呢？我们可以看到他接受三个类型参数，所以会是 `something -> something -> something -> *`。`p` 是一个具体类型因此是 `*`。至于 `k`，我们假设他是 `*`，所以 `t` 会是 `* -> *`。现在我们把这些代入 `something`，所以 kind 就变成 `(* -> *) -> * -> * -> *`。我们用 ghci 来检查一下。
 
 ```haskell
 ghci> :k Barry
 Barry :: (* -> *) -> * -> * -> *
 ```
 
-我们猜对了！现在要把这个类别定义成 `Functor`，我们必须先 partially apply 头两个类别参数，这样我们就会是 `* -> *` 的 kind。这代表 instance 定义会是 `instance Functor (Barry a b) where`。如果我们看 `fmap` 针对 `Barry` 的类别，也就是把 `f` 代换成 `Barry c d`，那就会是 `fmap :: (a -> b) -> Barry c d a -> Barry c d b`。第三个 `Barry` 的类别参数是对于任何类别，所以我们并不牵扯进他。
+我们猜对了！现在要把这个类型定义成 `Functor`，我们必须先 partially apply 头两个类型参数，这样我们就会是 `* -> *` 的 kind。这代表 instance 定义会是 `instance Functor (Barry a b) where`。如果我们看 `fmap` 针对 `Barry` 的类型，也就是把 `f` 代换成 `Barry c d`，那就会是 `fmap :: (a -> b) -> Barry c d a -> Barry c d b`。第三个 `Barry` 的类型参数是对于任何类型，所以我们并不牵扯进他。
 
 ```haskell
 instance Functor (Barry a b) where
@@ -1355,5 +1355,5 @@ instance Functor (Barry a b) where
 
 我们把 `f` map 到第一个字段。
 
-在这一个章节中，我们看到类别参数是怎么运作的，以及正如我们用类别来定义出函数的参数，我们也用 kind 是来定义他。我们看到函数跟类别构造子有许多彼此相像的地方。然而他们是两个完全不同的东西。当我们在写一般实用的 Haskell 程序时，你几乎不会碰到需要动到 kind 的东西，也不需要动脑去推敲 kind。通常你只需要在定义 instance 时 partially apply 你自己的 `* -> *` 或是 `*` 类别，但知道背后运作的原理也是很好的。知道类别本身也有自己的类别也是很有趣的。如果你实在不懂这边讲的东西，也可以继续阅读下去。但如果你能理解，那你就会理解 Haskell 类别系统的一大部份。
+在这一个章节中，我们看到类型参数是怎么运作的，以及正如我们用类型来定义出函数的参数，我们也用 kind 是来定义他。我们看到函数跟类型构造子有许多彼此相像的地方。然而他们是两个完全不同的东西。当我们在写一般实用的 Haskell 程序时，你几乎不会碰到需要动到 kind 的东西，也不需要动脑去推敲 kind。通常你只需要在定义 instance 时 partially apply 你自己的 `* -> *` 或是 `*` 类型，但知道背后运作的原理也是很好的。知道类型本身也有自己的类型也是很有趣的。如果你实在不懂这边讲的东西，也可以继续阅读下去。但如果你能理解，那你就会理解 Haskell 类型系统的一大部份。
 
