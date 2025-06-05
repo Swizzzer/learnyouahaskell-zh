@@ -2,7 +2,7 @@
 
 ## 装载模块
 
-![](../../.gitbook/assets/modules%20%281%29.png)
+![](./modules.png)
 
 Haskell 中的模块是含有一组相关的函数，型别和型别类的组合。而 Haskell 进程的本质便是从主模块中引用其它模块并调用其中的函数来执行操作。这样可以把代码分成多块，只要一个模块足够的独立，它里面的函数便可以被不同的进程反复重用。这就让不同的代码各司其职，提高了代码的健壮性。
 
@@ -101,7 +101,7 @@ ghci> map sum $ transpose [[0,3,5,9],[10,0,0,9],[8,5,1,-1]]
 [18,8,6,17]
 ```
 
-![](../../.gitbook/assets/legolists.png)
+![](./legolists.png)
 
 使用 `transpose` 处理这三个 List 之后，三次幂就到了第一行，二次幂到了第二行，以此类推。在用 `sum` 函数将其映射，即可得到正确的结果。
 
@@ -504,7 +504,7 @@ ghci> sortBy (compare `on` length) xs
 
 `Data.Char`模块中含有一系列用于判定字符范围的函数，如下:
 
-![](../../.gitbook/assets/legochar.png)
+![](./legochar.png)
 
 **isControl** 判断一个字符是否是控制字符。 **isSpace** 判断一个字符是否是空格字符，包括空格，tab，换行符等. **isLower** 判断一个字符是否为小写. **isUper** 判断一个字符是否为大写。 **isAlpha** 判断一个字符是否为字母. **isAlphaNum** 判断一个字符是否为字母或数字. **isPrint** 判断一个字符是否是可打印的. **isDigit** 判断一个字符是否为数字. **isOctDigit** 判断一个字符是否为八进制数字. **isHexDigit** 判断一个字符是否为十六进制数字. **isLetter** 判断一个字符是否为字母. **isMark** 判断是否为 unicode 注音字符，你如果是法国人就会经常用到的. **isNumber** 判断一个字符是否为数字. **isPunctuation** 判断一个字符是否为标点符号. **isSymbol**判断一个字符是否为货币符号. **isSeperater** 判断一个字符是否为 unicode 空格或分隔符. **isAscii** 判断一个字符是否在 unicode 字母表的前 128 位。 **isLatin1** 判断一个字符是否在 unicode 字母表的前 256 位. **isAsciiUpper** 判断一个字符是否为大写的 ascii 字符. **isAsciiLower** 判断一个字符是否为小写的 ascii 字符.
 
@@ -647,7 +647,7 @@ findKey :: (Eq k) => k -> [(k,v)] -> v
 findKey key xs = snd . head . filter (\(k,v) -> key == k) $ xs
 ```
 
-![](../../.gitbook/assets/legomap.png)
+![](./legomap.png)
 
 简洁漂亮。这个函数取一个键和 List 做参数，过滤这一 List 仅保留键匹配的项，并返回首个键值对。但若该关联列表中不存在这个键那会怎样? 哼，那就会在试图从空 List 中取 `head` 时引发一个运行时错误。无论如何也不能让进程就这么轻易地崩溃吧，所以就应该用 `Maybe` 型别。如果没找到相应的键，就返回 `Nothing`。而找到了就返回 `Just something`。而这 `something` 就是键对应的值。
 
@@ -848,7 +848,7 @@ fromList [(3,104),(5,103),(6,339)]
 
 ## Data.Set
 
-![](../../.gitbook/assets/legosets.png)
+![](./legosets.png)
 
 `Data.Set` 模块提供了对数学中集合的处理。集合既像 List 也像 `Map`: 它里面的每个元素都是唯一的，且内部的数据由一棵树来组织\(这和 `Data.Map` 模块的 `map` 很像\)，必须得是可排序的。同样是插入,删除,判断从属关系之类的操作，使用集合要比 List 快得多。对一个集合而言，最常见的操作莫过于并集，判断从属或是将集合转为 List.
 
@@ -1009,7 +1009,7 @@ rectangleArea :: Float -> Float -> Float
 rectangleArea a b = a * b
 ```
 
-![](../../.gitbook/assets/making_modules.png)
+![](./making_modules.png)
 
 标准的几何公式。有几个地方需要注意一下，由于立方体只是长方体的特殊形式，所以在求它面积和体积的时候我们就将它当作是边长相等的长方体。在这里还定义了一个 `helper`函数，`rectangleArea` 它可以通过长方体的两条边计算出长方体的面积。它仅仅是简单的相乘而已，份量不大。但请注意我们可以在这一模块中调用这个函数，而它不会被导出! 因为我们这个模块只与三维图形打交道.
 

@@ -2,7 +2,7 @@
 
 ## 模式匹配 \(Pattern matching\)
 
-![](../../.gitbook/assets/pattern%20%281%29.png)
+![](./pattern.png)
 
 本章讲的就是 Haskell 那套独特的语法结构，先从模式匹配开始。模式匹配通过检查数据的特定结构来检查其是否匹配，并按模式从中取得数据。
 
@@ -181,7 +181,7 @@ ghci> capital "Dracula"
 
 模式用来检查一个值是否合适并从中取值，而 guard 则用来检查一个值的某项属性是否为真。咋一听有点像是 `if` 语句，实际上也正是如此。不过处理多个条件分支时 guard 的可读性要高些，并且与模式匹配契合的很好。
 
-![](../../.gitbook/assets/guards%20%281%29.png)
+![](./guards.png)
 
 在讲解它的语法前，我们先看一个用到 guard 的函数。它会依据你的 BMI 值 \(body mass index，身体质量指数\)来不同程度地侮辱你。BMI 值即为体重除以身高的平方。如果小于 18.5，就是太瘦；如果在 18.5 到 25 之间，就是正常；25 到 30 之间，超重；如果超过 30，肥胖。这就是那个函数\(我们目前暂不为您计算 BMI，它只是直接取一个 BMI 值\)。
 
@@ -346,7 +346,7 @@ cylinder r h =
     in  sideArea + 2 * topArea
 ```
 
-![](../../.gitbook/assets/letitbe%20%281%29.png)
+![](./letitbe.png)
 
 `let` 的格式为 `let [bindings] in [expressions]`。在 `let` 中绑定的名字仅对 `in` 部分可见。`let` 里面定义的名字也得对齐到一列。不难看出，这用 `where` 绑定也可以做到。那么它俩有什么区别呢？看起来无非就是，`let` 把绑定放在语句前面而 `where` 放在后面嘛。
 
@@ -419,7 +419,7 @@ ghci> boot
 
 ## Case expressions
 
-![](../../.gitbook/assets/case%20%281%29.png)
+![](./case.png)
 
 有命令式编程语言 \(C, C++, Java, etc.\) 的经验的同学一定会有所了解，很多命令式语言都提供了 `case` 语句。就是取一个变量，按照对变量的判断选择对应的代码块。其中可能会存在一个万能匹配以处理未预料的情况。
 

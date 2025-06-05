@@ -18,7 +18,7 @@ _data_ 表示我们要定义一个新的型别。`=` 的左端标明型别的名
 data Int = -2147483648 | -2147483647 | ... | -1 | 0 | 1 | 2 | ... | 2147483647
 ```
 
-![](../../.gitbook/assets/caveman%20%281%29.png)
+![](./caveman.png)
 
 头尾两个值构造子分别表示了 `Int` 型别的最小值和最大值，注意到真正的型别宣告不是长这个样子的，这样写只是为了便于理解。我们用省略号表示中间省略的一大段数字。
 
@@ -262,7 +262,7 @@ Car {company = "Ford", model = "Mustang", year = 1967}
 data Maybe a = Nothing | Just a
 ```
 
-![](../../.gitbook/assets/yeti.png)
+![](./yeti.png)
 
 这里的a就是个型别参数。也正因为有了它，`Maybe` 就成为了一个型别构造子。在它的值不是 `Nothing` 时，它的型别构造子可以搞出 `Maybe Int`，`Maybe String` 等等诸多态别。但只一个 `Maybe` 是不行的，因为它不是型别，而是型别构造子。要成为真正的型别，必须得把它需要的型别参数全部填满。
 
@@ -289,7 +289,7 @@ Just 10.0
 
 型别参数很实用。有了它，我们就可以按照我们的需要构造出不同的型别。若执行 `:t Just "Haha"`，型别推导引擎就会认出它是个 `Maybe [Char]`，由于 `Just a` 里的 `a` 是个字符串，那么 `Maybe a` 里的 `a` 一定也是个字符串。
 
-![](../../.gitbook/assets/meekrat%20%281%29.png)
+![](./meekrat.png)
 
 注意下，`Nothing` 的型别为 `Maybe a`。它是多态的，若有函数取 `Maybe Int` 型别的参数，就一概可以传给它一个 `Nothing`，因为 `Nothing` 中不包含任何值。`Maybe a` 型别可以有 `Maybe Int` 的行为，正如 `5` 可以是 `Int` 也可以是 `Double`。与之相似，空 List 的型别是 `[a]`，可以与一切 List 打交道。因此，我们可以 `[1,2,3]++[]`，也可以 `["ha","ha,","ha"]++[]`。
 
@@ -387,7 +387,7 @@ Vector 148 666 222
 
 ## Derived instances
 
-![](../../.gitbook/assets/gob.png)
+![](./gob.png)
 
 在 [Typeclass 101](/zh-cn/ch03/type-and-typeclass#typeclasses-ru-men) 那一节里面，我们了解了 Typeclass 的基础内容。里面提到，型别类就是定义了某些行为的接口。例如，Int 型别是 `Eq` 型别类的一个 instance，`Eq` 类就定义了判定相等性的行为。Int 值可以判断相等性，所以 Int 就是 `Eq` 型别类的成员。它的真正威力体现在作为 `Eq` 接口的函数中，即 `==` 和 `/=`。只要一个型别是 `Eq` 型别类的成员，我们就可以使用 `==` 函数来处理这一型别。这便是为何 `4==4` 和 `"foo"/="bar"` 这样的表达式都需要作型别检查。
 
@@ -616,7 +616,7 @@ inPhoneBook :: Name -> PhoneNumber -> PhoneBook -> Bool
 inPhoneBook name pnumber pbook = (name,pnumber) `elem` pbook
 ```
 
-![](../../.gitbook/assets/chicken%20%281%29.png)
+![](./chicken.png)
 
 如果不用型别别名，我们函数的型别声明就只能是 `String -> String -> [(String ,String)] -> Bool` 了。在这里使用型别别名是为了让型别声明更加易读，但你也不必拘泥于它。引入型别别名的动机既非单纯表示我们函数中的既有型别，也不是为了替换掉那些重复率高的长名字体别\(如 `[(String,String)]`\)，而是为了让型别对事物的描述更加明确。
 

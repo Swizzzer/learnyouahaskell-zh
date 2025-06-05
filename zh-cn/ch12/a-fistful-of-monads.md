@@ -4,7 +4,7 @@
 
 在这一章，我们会学到 Monad，基本上他是一种加强版的 Applicative Functor，正如 Applicative Functor 是 Functor 的加强版一样。
 
-![](../../.gitbook/assets/smugpig%20%281%29.png)
+![](./smugpig.png)
 
 我们介绍到 Functor 是因为我们观察到有许多态态都可以被 function 给 map over，了解到这个目的，便抽象化了 `Functor` 这个 typeclass 出来。但这让我们想问：如果给定一个 `a -> b` 的函数以及 `f a` 的型态，我们要如何将函数 map over 这个型态而得到 `f b`？我们知道要如何 map over `Maybe a`，`[a]` 以及 `IO a`。我们甚至还知道如何用 `a -> b` map over `r -> a`，并且会得到 `r -> b`。要回答这个问题，我们只需要看 `fmap` 的型态就好了：
 
@@ -158,7 +158,7 @@ class Monad m where
     fail msg = error msg
 ```
 
-![](../../.gitbook/assets/kid.png)
+![](./kid.png)
 
 我们从第一行开始看。他说 `class Monad m where`。但我们之前不是提到 monad 是 applicative functors 的加强版吗？不是应该有一个限制说一个型态必须先是一个 applicative functor 才可能是一个 monad 吗？像是 `class (Applicative m) = > Monad m where`。他的确应该要有，但当 Haskell 被创造的早期，人们没有想到 applicative functor 适合被放进语言中，所以最后没有这个限制。但的确每个 monad 都是 applicative functor，即使 `Monad` 并没有这么宣告。
 
@@ -168,7 +168,7 @@ class Monad m where
 提醒一下：``return`` 跟其他语言中的 ``return`` 是完全不一样的。他并不是结束一个函数的执行，他只不过是把一个普通值包进一个 context 里面。
 ```
 
-![](../../.gitbook/assets/tur2%20%281%29.png)
+![](./tur2.png)
 
 接下来定义的函数是 bind: `>>=`。他就像是函数套用一样，只差在他不接受普通值，他是接受一个 monadic value（也就是具有 context 的值）并且把他喂给一个接受普通值的函数，并回传一个 monadic value。
 
@@ -207,7 +207,7 @@ Nothing
 
 ## 走钢索
 
-![](../../.gitbook/assets/pierre.png)
+![](./pierre.png)
 
 我们已经知道要如何把 `Maybe a` 喂进 `a -> Maybe b` 这样的函数。我们可以看看我们如何重复使用 `>>=` 来处理多个 `Maybe a` 的值。
 
@@ -360,7 +360,7 @@ ghci> return (0,0) >>= landLeft 1 >>= landRight 4 >>= landLeft (-1) >>= landRigh
 Nothing
 ```
 
-![](../../.gitbook/assets/banana%20%281%29.png)
+![](./banana.png)
 
 正如预期的，最后的情形代表了失败的情况。我们再进一步看看这是怎么产生的。首先 `return` 把 `(0,0)` 放到一个最小的 context 中，得到 `Just (0,0)`。然后是 `Just (0.0) >>= landLeft 1`。由于 `Just (0,0)` 是一个 `Just` 的值。`landLeft 1` 被套用至 `(0,0)` 而得到 `Just (1,0)`。这反应了我们仍保持在平衡的状态。接着是 `Just (1,0) >>= landright 4` 而得到了 `Just (1,4)`。距离不平衡只有一步之遥了。他又被喂给 `landLeft (-1)`，这组合成了 `landLeft (-1) (1,4)`。由于失去了平衡，我们变得到了 `Nothing`。而我们把 `Nothing` 喂给 `landRight (-2)`，由于他是 `Nothing`，也就自动得到了 `Nothing`。
 
@@ -424,7 +424,7 @@ routine = case landLeft 1 (0,0) of
                     Just pole3 -> landLeft 1 pole3
 ```
 
-![](../../.gitbook/assets/centaur.png)
+![](./centaur.png)
 
 左边先停了一只鸟，然后我们停下来检查有没有失败。当失败的时候我们回传 `Nothing`。当成功的时候，我们在右边停一只鸟，然后再重复前面做的事情。把这些琐事转换成 `>>=` 证明了 `Maybe` Monad 的力量，可以省去我们不少的时间。
 
@@ -489,7 +489,7 @@ foo = do
     Just (show x ++ y)
 ```
 
-![](../../.gitbook/assets/owld%20%281%29.png)
+![](./owld.png)
 
 这看起来好像让我们不用在每一步都去检查 `Maybe` 的值究竟是 `Just` 或 `Nothing`。这蛮方便的，如果在任何一个步骤我们取出了 `Nothing`。那整个 `do` 的结果就会是 `Nothing`。我们把整个责任都交给 `>>=`，他会帮我们处理所有 context 的问题。这边的 `do` 表示法不过是另外一种语法的形式来串连所有的 monadic value 罢了。
 
@@ -611,7 +611,7 @@ Nothing
 
 ## List Monad
 
-![](../../.gitbook/assets/deadcat%20%281%29.png)
+![](./deadcat.png)
 
 我们已经了解了 `Maybe` 可以被看作具有失败可能性 context 的值，也见识到如何用 `>>=` 来把这些具有失败考量的值传给函数。在这一个章节中，我们要看一下如何利用 list 的 monadic 的性质来写 non-deterministic 的程序。
 
@@ -670,7 +670,7 @@ ghci> [1,2] >>= \n -> ['a','b'] >>= \ch -> return (n,ch)
 [(1,'a'),(1,'b'),(2,'a'),(2,'b')]
 ```
 
-![](../../.gitbook/assets/concatmap.png)
+![](./concatmap.png)
 
 `[1,2]` 被绑定到 `n` 而 `['a','b']` 被绑定到 `ch`。最后我们用 `return (n,ch)` 来把他放到一个最小的 context 中。在这个案例中，就是把 `(n,ch)` 放到 list 中，这代表最低程度的 non-determinism。整套结构要表达的意思就是对于 `[1,2]` 的每个元素，以及 `['a','b']` 的每个元素，我们产生一个 tuple，每项分别取自不同的 list。
 
@@ -790,7 +790,7 @@ ghci> [ x | x <- [1..50], '7' `elem` show x ]
 
 这边来看一个可以用 non-determinism 解决的问题。假设你有一个西洋棋盘跟一只西洋棋中的骑士摆在上面。我们希望知道是否这只骑士可以在三步之内移到我们想要的位置。我们只要用一对数值来表示骑士在棋盘上的位置。第一个数值代表棋盘的行，而第二个数值代表棋盘的列。
 
-![](../../.gitbook/assets/chess%20%281%29.png)
+![](./chess.png)
 
 我们先帮骑士的位置定义一个 type synonym。
 
@@ -875,7 +875,7 @@ False
 
 ## Monad laws \(单子律\)
 
-![](../../.gitbook/assets/judgedog%20%281%29.png)
+![](./judgedog.png)
 
 正如 applicative functors 以及 functors，Monad 也有一些要遵守的定律。我们定义一个 `Monad` 的 instance 并不代表他是一个 monad，只代表他被定义成那个 type class 的 instance。一个型态要是 monad，则必须遵守单子律。这些定律让我们可以对这个型态的行为做一些合理的假设。
 

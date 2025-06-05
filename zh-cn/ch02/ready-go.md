@@ -2,7 +2,7 @@
 
 ## 准备好了吗？
 
-![](../../.gitbook/assets/startingout%20%281%29.png)
+![](./startingout.png)
 
 准备来开始我们的旅程！如果你就是那种从不看说明书的人，我推荐你还是回头看一下简介的最后一节。那里面讲了这个教学中你需要用到的工具及基本用法。我们首先要做的就是进入 ghc 的交互模式，接着就可以写几个函数体验一下 Haskell 了。打开终端机，输入 `ghci`，你会看到下列欢迎消息：
 
@@ -83,7 +83,7 @@ In the definition of `it': it = 5 + "llama"
 
 这边 ghci 提示说 `"llama"` 并不是数值型别，所以它不知道该怎样才能给它加上 5。即便是 `"four"` 甚至是 `“4”` 也不可以，Haskell 不拿它当数值。执行 `True==5`, ghci 就会提示型别不匹配。`+` 运算子要求两端都是数值，而 `==` 运算子仅对两个可比较的值可用。这就要求他们的型别都必须一致，苹果和橘子就无法做比较。我们会在后面深入地理解型别的概念。Note: `5+4.0` 是可以执行的，5 既可以做被看做整数也可以被看做浮点数，但 4.0 则不能被看做整数。
 
-![](../../.gitbook/assets/ringring.png)
+![](./ringring.png)
 
 也许你并未察觉，不过从始至终我们一直都在使用函数。`*` 就是一个将两个数相乘的函数，就像三明治一样，用两个参数将它夹在中央，这被称作中缀函数。而其他大多数不能与数夹在一起的函数则被称作前缀函数。绝大部分函数都是前缀函数，在接下来我们就不多做区别。大多数命令式编程语言中的函数调用形式通常就是函数名，括号，由逗号分隔的参数表。而在 Haskell 中，函数调用的形式是函数名，空格，空格分隔的参数表。简单举个例子，我们调用 Haskell 中最无趣的函数：
 
@@ -163,7 +163,7 @@ ghci> doubleUs 28 88 + doubleMe 123
 doubleUs x y = doubleMe x + doubleMe y
 ```
 
-![](../../.gitbook/assets/baby%20%281%29.png)
+![](./baby.png)
 
 这种情形在 Haskell 下边十分常见：编写一些简单的函数，然后将其组合，形成一个较为复杂的函数，这样可以减少重复工作。设想若是哪天有个数学家验证说 2 应该是 3，我们只需要将 `doubleMe` 改为 `x+x+x` 即可，由于 `doubleUs` 调用到 `doubleMe`，于是整个程序便进入了 2 即是 3 的古怪世界。
 
@@ -191,7 +191,7 @@ conanO'Brien = "It's a-me, Conan O'Brien!"
 
 ## List 入门
 
-![](../../.gitbook/assets/list%20%281%29.png)
+![](./list.png)
 
 在 Haskell 中，List 就像现实世界中的购物单一样重要。它是最常用的数据结构，并且十分强大，灵活地使用它可以解决很多问题。本节我们将对 List，字串和 list comprehension 有个初步了解。 在 Haskell 中，List 是一种单型别的数据结构，可以用来存储多个型别相同的元素。我们可以在里面装一组数字或者一组字符，但不能把字符和数字装在一起。
 
@@ -303,7 +303,7 @@ ghci> init [5,4,3,2,1]
 
 如果我们把 List 想象为一头怪兽，那这就是它的样子：
 
-![](../../.gitbook/assets/listmonster.png)
+![](./listmonster.png)
 
 试一下，若是取一个空 List 的 `head` 又会怎样？
 
@@ -394,7 +394,7 @@ False
 
 ## 使用 Range
 
-![](../../.gitbook/assets/cowboy.png)
+![](./cowboy.png)
 
 今天如果想得到一个包含 1 到 20 之间所有数的 List，你会怎么做? 我们可以将它们一个一个用键盘打出来，但很明显地这不是一个完美的方案，特别是你追求一个好的编程语言的时候。我们想用的是区间 \(Range\)。Range 是构造 List 方法之一，而其中的值必须是可枚举的，像 1、2、3、4...字符同样也可以枚举，字母表就是 `A..Z` 所有字符的枚举。而名字就不可以枚举了，`"john"` 后面是谁？我不知道。
 
@@ -449,9 +449,9 @@ ghci> take 10 (repeat 5)
 
 ## List Comprehension
 
-![](../../.gitbook/assets/kermit%20%281%29.png)
+![](./kermit.png)
 
-学过数学的你对集合的 comprehension \(Set Comprehension\) 概念一定不会陌生。通过它，可以从既有的集合中按照规则产生一个新集合。前十个偶数的 set comprehension 可以表示为![](../../.gitbook/assets/setnotation.png)，竖线左端的部分是输出函数，`x` 是变量，`N` 是输入集合。在 Haskell 下，我们可以通过类似 `take 10 [2,4..]` 的代码来实现。但若是把简单的乘 2 改成更复杂的函数操作该怎么办呢？用 list comprehension，它与 set comprehension 十分的相似，用它取前十个偶数轻而易举。这个 list comprehension 可以表示为：
+学过数学的你对集合的 comprehension \(Set Comprehension\) 概念一定不会陌生。通过它，可以从既有的集合中按照规则产生一个新集合。前十个偶数的 set comprehension 可以表示为![](./setnotation.png)，竖线左端的部分是输出函数，`x` 是变量，`N` 是输入集合。在 Haskell 下，我们可以通过类似 `take 10 [2,4..]` 的代码来实现。但若是把简单的乘 2 改成更复杂的函数操作该怎么办呢？用 list comprehension，它与 set comprehension 十分的相似，用它取前十个偶数轻而易举。这个 list comprehension 可以表示为：
 
 ```haskell
 ghci> [x*2 | x <- [1..10]]
@@ -551,7 +551,7 @@ ghci> [ [ x | x <- xs, even x ] | xs <- xxs]
 
 ## Tuple
 
-![](../../.gitbook/assets/tuple.png)
+![](./tuple.png)
 
 从某种意义上讲，Tuple \(元组\)很像 List --都是将多个值存入一个个体的容器。但它们却有着本质的不同，一组数字的 List 就是一组数字，它们的型别相同，且不关心其中包含元素的数量。而 Tuple 则要求你对需要组合的数据的数目非常的明确，它的型别取决于其中项的数目与其各自的型别。Tuple 中的项由括号括起，并由逗号隔开。
 

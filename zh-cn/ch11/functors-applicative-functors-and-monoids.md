@@ -6,7 +6,7 @@ Typeclass 的运用是很随意的。我们可以定义自己的数据型态，�
 
 ## 温习 Functors
 
-![](../../.gitbook/assets/frogtor.png)
+![](./frogtor.png)
 
 我们已经在之前的章节提到 functors。如果你还没读那个章节，也许你应该先去看看。或是你直接假装你已经读过了。
 
@@ -50,7 +50,7 @@ main = do line <- fmap reverse getLine
             putStrLn $ "Yes, you really said" ++ line ++ " backwards!"
 ```
 
-![](../../.gitbook/assets/alien.png)
+![](./alien.png)
 
 就像我们用 `fmap` `reverse` 来 map over `Just "blah"` 会得到 `Just "halb"`，我们也可以 `fmap` `reverse` 来 map over `getLine`。`getLine` 是一个 I/O action，他的 type 是 `IO String`，而用 `reverse` 来 map over 他会回传一个取回一个字串并 `reverse` 他的 I/O action。就像我们 apply 一个 function 到一个 `Maybe` 一样，我们也可以 apply 一个 function 到一个 `IO`，只是这个 `IO` 会跑去外面拿回某些值。然后我们把结果用 `<-` 绑定到某个名称，而这个名称绑定的值是已经 `reverse` 过了。
 
@@ -126,7 +126,7 @@ ghci> fmap (show . (*3)) (*100) 1
 
 `fmap` 等同于 function composition 这件事对我们来说并不是很实用，但至少是一个有趣的观点。这也让我们打开视野，看到盒子的比喻不是那么恰当，functors 其实比较像 computation。function 被 map over 到一个 computation 会产生经由那个 function 映射过后的 computation。
 
-![](../../.gitbook/assets/lifter%20%281%29.png)
+![](./lifter.png)
 
 在我们继续看 `fmap` 该遵守的规则之前，我们再看一次 `fmap` 的型态，他是 `fmap :: (a -> b) -> f a -> f b`。很明显我们是在讨论 Functor，所以为了简洁，我们就不写 `(Functor f) =>` 的部份。当我们在学 curry 的时候，我们说过 Haskell 的 function 实际上只接受一个参数。一个型态是 `a -> b -> c` 的函数实际上是接受 `a` 然后回传 `b -> c`，而 `b -> c` 实际上接受一个 `b` 然后回传一个 `c`。如果我们用比较少的参数调用一个函数，他就会回传一个函数需要接受剩下的参数。所以 `a -> b -> c` 可以写成 `a -> (b -> c)`。这样 curry 可以明显一些。
 
@@ -197,7 +197,7 @@ instance Functor Maybe where
 
 而将 `id` map over `Nothing` 会拿回 `Nothing` 并不稀奇。所以从这两个 `fmap` 的实作，我们可以看到的确 `fmap id = id` 有被遵守。
 
-![](../../.gitbook/assets/justice.png)
+![](./justice.png)
 
 _第二定律描述说先将两个函数合成并将结果 map over 一个 functor 的结果，应该跟先将第一个函数 map over 一个 functor，再将第二个函数 map over 那个 functor 的结果是一样的。_正式地写下来的话就是 `fmap (f . g) = fmap f . fmap g`。或是用另外一种写法，对于任何一个 functor F，下面这个式子应该要被遵守：`fmap (f . g) F = fmap f (fmap g F)`。
 
@@ -268,7 +268,7 @@ CJust 0 "haha"
 
 ## Applicative functors
 
-![](../../.gitbook/assets/present%20%281%29.png)
+![](./present.png)
 
 在这个章节中，我们会学到 applicative functors，也就是加强版的 functors，在 Haskell 中是用在 `Control.Applicative` 中的 `Applicative` 这个 typeclass 来定义的。
 
@@ -362,7 +362,7 @@ ghci> pure (+) <*> Nothing <*> Just 5
 Nothing
 ```
 
-![](../../.gitbook/assets/whale.png)
+![](./whale.png)
 
 究竟我们写了些什么？我们来一步步看一下。`<*>` 是 left-associative，也就是说 `pure (+) <*> Just 3 <*> Just 5` 可以写成 `(pure (+) <*> Just 3) <*> Just 5`。首先 `+` 是摆在一个 functor 中，在这边刚好他是一个 `Maybe`。所以首先，我们有 `pure (+)`，他等价于 `Just (+)`。接下来由于 partial application 的关系，`Just (+) <*> Just 3` 等价于 `Just (3+)`。把一个 `3` 喂给 `+` 形成另一个只接受一个参数的函数，他的效果等于加上 3。最后 `Just (3+) <*> Just 5` 被运算，其结果是 `Just 8`。
 
@@ -479,7 +479,7 @@ instance Applicative IO where
         return (f x)
 ```
 
-![](../../.gitbook/assets/knight.png)
+![](./knight.png)
 
 由于 `pure` 是把一个值放进最小的 context 中，所以将 `return` 定义成 `pure` 是很合理的。因为 `return` 也是做同样的事情。他做了一个不做任何事情的 I/O action，他可以产生某些值来作为结果，但他实际上并没有做任何 I/O 的动作，例如说印出结果到终端或是文件。
 
@@ -560,7 +560,7 @@ ghci> (\x y z -> [x,y,z]) <$> (+3) <*> (*2) <*> (/2) $ 5
 [8.0,10.0,2.5]
 ```
 
-![](../../.gitbook/assets/jazzb.png)
+![](./jazzb.png)
 
 这边也一样。我们创建了一个函数，他会调用 `\x y z -> [x,y,z]`，而丢的参数是 `(+3)`, `(*2)` 跟 `(/2)`。`5` 被丢给以上三个函数，然后他们结果又接到 `\x y z -> [x, y, z]`。
 
@@ -853,7 +853,7 @@ instance Functor Maybe where
 fmap :: (a -> b) -> Maybe a -> Maybe b
 ```
 
-![](../../.gitbook/assets/shamrock.png)
+![](./shamrock.png)
 
 看起来不错吧？现在我们想要 tuple 成为 `Functor` 的一个 instance，所以当我们用 `fmap` 来 map over 一个 tuple 时，他会先套用到 tuple 中的第一个元素。这样当我们做 `fmap (+3) (1,1)` 会得到 `(4,1)`。不过要定义出这样的 instance 有些困难。对于 `Maybe`，我们只要写 `instance Functor Maybe where`，这是因为对于只吃一个参数的型别构造子我们很容易定义成 `Functor` 的 instance。但对于 `(a,b)` 这样的就没办法。要绕过这样的困境，我们可以用 `newtype` 来重新定义我们的 tuple，这样第二个型别参数就代表了 tuple 中的第一个元素部份。
 
@@ -1034,7 +1034,7 @@ class Monoid m where
     mconcat = foldr mappend mempty
 ```
 
-![](../../.gitbook/assets/balloondog%20%281%29.png)
+![](./balloondog.png)
 
 `Monoid` typeclass 被定义在 `import Data.Monoid` 中。我们来花些时间好好了解他。
 
@@ -1087,7 +1087,7 @@ ghci> mempty :: [a]
 []
 ```
 
-![](../../.gitbook/assets/smug.png)
+![](./smug.png)
 
 注意到最后一行我们明白地标记出型别。这是因为如果只些 `mempty` 的话，GHCi 不会知道他是哪一个 instance 的 `mempty`，所以我们必须清楚说出他是 list instance 的 mempty。我们可以使用一般化的型别 `[a]`，因为空的 list 可以看作是属于任何型别。
 
@@ -1245,7 +1245,7 @@ instance Monoid Ordering where
     GT `mappend` _ = GT
 ```
 
-![](../../.gitbook/assets/bear%20%281%29.png)
+![](./bear.png)
 
 这个 instance 定义如下：当我们用 `mappend` 两个 `Ordering` 型别的值时，左边的会被保留下来。除非左边的值是 `EQ`，那我们就会保留右边的当作结果。而 identity 就是 `EQ`。乍看之下有点随便，但实际上他是我们比较两个英文本时所用的方法。我们先比较两个字母是否相等，如果他们不一样，那我们就知道那一个字在字典中会在前面。而如果两个字母相等，那我们就继续比较下一个字母，以此类推。
 
@@ -1452,7 +1452,7 @@ instance F.Foldable Tree where
                                 F.foldMap f r
 ```
 
-![](../../.gitbook/assets/accordion%20%281%29.png)
+![](./accordion.png)
 
 我们是这样思考的：如果我们写一个函数，他接受树中的一个元素并回传一个 monoid，那我们要怎么简化整棵树到只有单一一个 monoid？当我们在对树做 `fmap` 的时候，我们将那函数套用至节点上，并递归地套用至左子树以及右子树。这边我们不只是 map 一个函数而已，我们还要求要把结果用 `mappend` 简化成只有单一一个 monoid 值。首先我们考虑树为空的情形，一棵没有值也没有子树的情形。由于没有值我们也没办法将他套用上面转换成 monoid 的函数，所以当树为空的时候，结果应该要是 `mempty`。
 

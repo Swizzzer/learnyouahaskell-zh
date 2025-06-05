@@ -1,6 +1,6 @@
 # 输入与输出
 
-![](../../.gitbook/assets/dognap.png)
+![](./dognap.png)
 
 我们已经说明了 Haskell 是一个纯粹函数式语言。虽说在命令式语言中我们习惯给电脑执行一连串指令，在函数式语言中我们是用定义东西的方式进行。在 Haskell 中，一个函数不能改变状态，像是改变一个变量的内容。（当一个函数会改变状态，我们说这函数是有副作用的。）在 Haskell 中函数唯一可以做的事是根据我们给定的参数来算出结果。如果我们用同样的参数调用两次同一个函数，它会回传相同的结果。尽管这从命令式语言的角度来看是蛮大的限制，我们已经看过它可以达成多么酷的效果。在一个命令式语言中，编程语言没办法给你任何保证在一个简单如打印出几个数字的函数不会同时烧掉你的房子，绑架你的狗并刮伤你车子的烤漆。例如，当我们要建立一棵二元树的时候，我们并不插入一个节点来改变原有的树。由于我们无法改变状态，我们的函数实际上回传了一棵新的二元树。
 
@@ -10,7 +10,7 @@
 
 ## Hello, world!
 
-![](../../.gitbook/assets/helloworld%20%281%29.png)
+![](./helloworld.png)
 
 到目前为止我们都是将函数加载 GHCi 中来测试，像是标准函式库中的一些函式。但现在我们要做些不一样的，写一个真实跟世界交互的 Haskell 程序。当然不例外，我们会来写个 "hello world"。
 
@@ -72,7 +72,7 @@ ghci> :t getLine
 getLine :: IO String
 ```
 
-![](../../.gitbook/assets/luggage%20%281%29.png)
+![](./luggage.png)
 
 我们可以看到 `getLine` 是一个回传 `String` 的 I/O action。因为它会等用户输入某些字串，这很合理。那 `name <- getLine` 又是如何？你能这样解读它：执行一个 I/O action `getLine` 并将它的结果绑定到 `name` 这个名字。`getLine` 的型态是 `IO String`，所以 `name` 的型态会是 `String`。你能把 I/O action 想成是一个长了脚的盒子，它会跑到真实世界中替你做某些事，像是在墙壁上涂鸦，然后带回来某些数据。一旦它带了某些数据给你，打开盒子的唯一办法就是用 `<-`。而且如果我们要从 I/O action 拿出某些数据，就一定同时要在另一个 I/O action 中。这就是 Haskell 如何漂亮地分开纯粹跟不纯粹的程序的方法。`getLine` 在这样的意义下是不纯粹的，因为执行两次的时候它没办法保证会回传一样的值。这也是为什么它需要在一个 `IO` 的型态建构子中，那样我们才能在 I/O action 中取出数据。而且任何一段程序一旦依赖着 I/O 数据的话，那段程序也会被视为 I/O code。
 
@@ -426,7 +426,7 @@ orange
 
 ## 文件与字符流
 
-![](../../.gitbook/assets/streams.png)
+![](./streams.png)
 
 `getChar` 是一个读取单一字符的 I/O action。`getLine` 是一个读取一行的 I/O action。这是两个非常直觉的函式，多数编程语言也有类似这两个函式的 statement 或 function。但现在我们来看看 _getContents_。`getContents` 是一个从标准输入读取直到 end-of-file 字符的 I/O action。他的型态是 `getContents :: IO String`。最酷的是 `getContents` 是惰性 I/O \(Lazy I/O\)。当我们写了 `foo <- getContents`，他并不会马上读取所有输入，将他们存在 memory 里面。他只有当你真的需要输入数据的时候才会读取。
 
@@ -670,7 +670,7 @@ type FilePath = String
 data IOMode = ReadMode | WriteMode | AppendMode | ReadWriteMode
 ```
 
-![](../../.gitbook/assets/file%20%281%29.png)
+![](./file.png)
 
 就像我们之前定义的型态，分别代表一个星期的七天。这个型态代表了我们想对打开的文件做什么。很简单吧。留意到我们的型态是 `IOMode` 而不是 `IO Mode`。`IO Mode` 代表的是一个 I/O action 包含了一个型态为 `Mode` 的值，但 `IOMode` 不过是一个阳春的 enumeration。
 
@@ -704,7 +704,7 @@ withFile' path mode f = do
     return result
 ```
 
-![](../../.gitbook/assets/edd.png)
+![](./edd.png)
 
 我们知道要回传的是一个 I/O action，所以我们先放一个 do。首先我们打开文件，得到一个 handle。然后我们 apply `handle` 到我们的函数，并得到一个做事的 I/O action。我们绑定那个 I/O action 到 `result` 这个名字，关上 handle 并 `return result`。`return` 的作用把从 `f` 得到的结果包在 I/O action 中，这样一来 I/O action 中就包含了 `f handle` 得到的结果。如果 `f handle` 回传一个从标准输入读去数行并写到文件然后回传读入的行数的 I/O action，在 `withFile'` 的情形中，最后的 I/O action 就会包含读入的行数。
 
@@ -870,7 +870,7 @@ Take salad out of the oven
 
 ## 命令行参数
 
-![](../../.gitbook/assets/arguments.png)
+![](./arguments.png)
 
 如果你想要写一个在终端里运行的程序，处理命令行参数是不可或缺的。幸运的是，利用 Haskell 的 Standard Libary 能让我们有效地处理命令行参数。
 
@@ -1042,7 +1042,7 @@ remove [fileName, numberString] = do
     renameFile tempName fileName
 ```
 
-![](../../.gitbook/assets/salad%20%281%29.png)
+![](./salad.png)
 
 总结我们的程序：我们做了一个 dispatch association，将指令对应到一些会接受命令行参数并回传 I/O action 的函数。我们知道用户下了什么命令，并根据那个命令从 dispatch list 取出对影的函数。我们用剩下的命令行参数调用哪些函数而得到一些作相对应事情的 I/O action。然后便执行那些 I/O action。
 
@@ -1078,7 +1078,7 @@ $ ./todo view todo.txt
 
 ## 乱数
 
-![](../../.gitbook/assets/random.png)
+![](./random.png)
 
 在许多情况下，你写程序会需要些随机的数据。或许你在制作一个游戏，在游戏中你需要掷骰子。或是你需要测试程序的测试数据。精准一点地说，我们需要 pseudo-random 的数据，我们知道真正的随机数据好比是一只猴子拿着起司跟奶油骑在单轮车上，任何事情都会发生。在这个章节，我们要看看如何让 Haskell 产生些 pseudo-random 的数据。
 
@@ -1310,7 +1310,7 @@ askForNumber gen = do
             askForNumber newGen
 ```
 
-![](../../.gitbook/assets/jackofdiamonds.png)
+![](./jackofdiamonds.png)
 
 我们写了一个 `askForNumber` 的函数，他接受一个 random generator 并回传一个问用户要数字并回答是否正确的 I/O action。在那个函数里面，我们先根据从参数拿到的 generator 产生一个乱数以及一个新的 generator，分别叫他们为 `randomNumber` 跟 `newGen`。假设那个产生的数字是 `7`。则我们要求用户猜我们握有的数字是什么。我们用 `getLine` 来将结果绑定到 `numberString` 上。当用户输入 `7`，`numberString` 就会是 `"7"`。接下来，我们用 `when` 来检查用户输入的是否是空字串。如果是，那一个空的 I/O action `return ()` 就会被回传。基本上就等于是结束程序的意思。如果不是，那 I/O action 就会被执行。我们用 `read` 来把 `numberString` 转成一个数字，所以 `number` 便会是 `7`。
 
@@ -1361,7 +1361,7 @@ main = do
 
 ## Bytestrings
 
-![](../../.gitbook/assets/chainchomp%20%281%29.png)
+![](./chainchomp.png)
 
 List 是一种有用又酷的数据结构。到目前为止，我们几乎无处不使用他。有好几个函数是专门处理 List 的，而 Haskell 惰性的性质又让我们可以用 filter 跟 map 来替换其他语言中的 for loop 跟 while loop。也由于 evaluation 只会发生在需要的时候，像 infinite list 也对于 Haskell 不成问题（甚至是 infinite list of infinite list）。这也是为什么 list 能被用来表达 stream，像是读取标准输入或是读取文件。我们可以打开文件然后读取内容成字串，即便实际上我们是需要的时候才会真正取读取。
 
@@ -1456,7 +1456,7 @@ $ runhaskell bytestringcopy.hs something.txt ../../something.txt
 
 ## Exceptions \(例外\)
 
-![](../../.gitbook/assets/timber%20%281%29.png)
+![](./timber.png)
 
 所有的编程语言都有要处理失败的情形。这就是人生。不同的语言有不同的处理方式。在 C 里面，我们通常用非正常范围的回传值（像是 `-1` 或 null）来回传错误。Java 跟 C\#则倾向于使用 exception 来处理失败的情况。当一个 exception 被丢出的时候，控制流程就会跳到我们做一些清理动作的地方，做完清理后 exception 被重新丢出，这样一些处理错误的代码可以完成他们的工作。
 
@@ -1473,7 +1473,7 @@ ghci> head []
 *** Exception: Prelude.head: empty list
 ```
 
-![](../../.gitbook/assets/police.png)
+![](./police.png)
 
 pure code 能丢出 Exception，但 Exception 只能在 I/O section 中被接到（也就是在 `main` 的 do block 中）这是因为在 pure code 中你不知道什么东西什么时候会被 evaluate。因为 lazy 特性的缘故，程序没有一个特定的执行顺序，但 I/O code 有。
 
@@ -1518,7 +1518,7 @@ main = do (fileName:_) <- getArgs
 
 要这样使用 Exception，我们必须使用 `System.IO.Error` 中的 **catch** 函数。他的型态是 `catch :: IO a -> (IOError -> IO a) -> IO a`。他接受两个参数，第一个是一个 I/O action。像是他可以接受一个打开文件的 I/O action。第二个是 handler。如果第一个参数的 I/O action 丢出了 Exception，则他会被传给 handler，他会决定要作些什么。所以整个 I/O action 的结果不是如预期中做完第一个参数的 I/O action，就是 handler 处理的结果。
 
-![](../../.gitbook/assets/puppy.png)
+![](./puppy.png)
 
 如果你对其他语言像是 Java, Python 中 try-catch 的形式很熟，那 `catch` 其实跟他们很像。第一个参数就是其他语言中的 try block。第二个参数就是其他语言中的 catch block。其中 handler 只有在 exception 被丢出时才会被执行。
 

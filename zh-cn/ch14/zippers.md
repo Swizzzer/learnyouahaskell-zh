@@ -1,6 +1,6 @@
 # Zippers 数据结构
 
-![](../../.gitbook/assets/60sdude.png)
+![](./60sdude.png)
 
 尽管 Haskell 的纯粹性质带来很多好处，但他让一些在非纯粹语言很容易处理的一些事情变得要用另一种方法解决。由于 referential transparency，同样一件事在 Haskell 中是没有分别的。所以如果我们有一个装满 5 的树，而我们希望把其中一个换成 6，那我们必须要知道我们究竟是想改变哪个 5。我们也必须知道我们身处在这棵树的哪里。但在 Haskell 中，每个 5 都长得一样，我们并不能因为他们在内存中的地址不同就把他们区分开来。我们也不能改变任何状态，当我们想要改变一棵树的时候，我们实际上是说我们要一棵新的树，只是他长得很像旧的。一种解决方式是记住一条从根节点到现在这个节点的路径。我们可以这样表达：给定一棵树，先往左走，再往右走，再往左走，然后改变你走到的元素。虽然这是可行的，但这非常没有效率。如果我们想接连改变一个在附近的节点，我们必须再从根节点走一次。在这个章节中，我们会看到我们可以集中注意在某个数据结构上，这样让改变数据结构跟遍历的动作非常有效率。
 
@@ -42,7 +42,7 @@ freeTree =
 
 画成图的话就是像这样：
 
-![](../../.gitbook/assets/pollywantsa.png)
+![](./pollywantsa.png)
 
 注意到 `W` 这个节点了吗？如果我们想要把他变成 `P`。我们会怎么做呢？一种方式是用 pattern match 的方式做，直到我们找到那个节点为止。要先往右走再往左走，再改变元素内容，像是这样：
 
@@ -92,7 +92,7 @@ ghci> elemAt [R,L] newTree
 
 ## 凡走过必留下痕迹
 
-![](../../.gitbook/assets/bread.png)
+![](./bread.png)
 
 我们需要一个比包含一串方向的 list 更好的聚焦的方法。如果我们能够在从 root 走到指定地点的沿路上撒下些面包屑，来纪录我们的足迹呢？当我们往左走，我们便记住我们选择了左边，当我们往右走，便记住我们选择了右边。
 
@@ -123,7 +123,7 @@ ghci> goLeft (goRight (freeTree, []))
 (Node 'W' (Node 'C' Empty Empty) (Node 'R' Empty Empty),[L,R])
 ```
 
-![](../../.gitbook/assets/almostzipper.png)
+![](./almostzipper.png)
 
 现在我们有了一棵树，他的 root 是 `'W'`，而他的左子树的 root 是 `'C'`，右子树的 root 是 `'R'`。而由于我们先往右走再往左走，所以面包屑是 `[L,R]`。
 
@@ -190,7 +190,7 @@ goUp (t, LeftCrumb x r:bs) = (Node x t r, bs)
 goUp (t, RightCrumb x l:bs) = (Node x l t, bs)
 ```
 
-![](../../.gitbook/assets/asstronaut.png)
+![](./asstronaut.png)
 
 我们锁定了 `t` 这棵树并检查最新的 `Crumb`。如果他是 `LeftCrumb`，那我们就建立一棵新的树，其中 `t` 是他的左子树并用关于我们没走过得右子树的信息来填写其他 `Node` 的信息。由于我们使用了面包屑的信息来建立父子树，所以新的 list 移除了我们的面包屑。
 
@@ -276,7 +276,7 @@ Zippers 几乎可以套用在任何数据结构上，所以听到他可以被套
 data List a = Empty | Cons a (List a) deriving (Show, Read, Eq, Ord)
 ```
 
-![](../../.gitbook/assets/picard%20%281%29.png)
+![](./picard.png)
 
 跟我们二元树的定义比较，我们就可以看出我们把 list 看作树的原则是正确的。
 
@@ -368,7 +368,7 @@ myDisk :: FSItem
 
 ### A zipper for our file system
 
-![](../../.gitbook/assets/spongedisk%20%281%29.png)
+![](./spongedisk.png)
 
 我们有了一个文件系统，我们需要一个 Zipper 来让我们可以四处走动，并且增加、修改或移除文件跟文件夹。就像二元树或 list，我们会用面包屑留下我们未走过路径的信息。正如我们说的，一个面包屑就像是一个节点，只是他包含所有除了我们现在正锁定的子树的信息。
 
@@ -416,7 +416,7 @@ nameIs name (File fileName _) = name == fileName
 
 `fsTo` 接受一个 `Name` 跟 `FSZipper`，回传一个新的 `FSZipper` 锁定在某个文件上。那个文件必须在现在身处的文件夹才行。这函数不会四处找寻这文件，他只会看现在的文件夹。
 
-![](../../.gitbook/assets/cool.png)
+![](./cool.png)
 
 首先我们用 `break` 来把身处文件夹中的文件们分成在我们要找的文件前的，跟之后的。如果记性好，`break` 会接受一个 predicate 跟一个 list，并回传两个 list 组成的 pair。第一个 list 装有 predicate 会回传 `False` 的元素，而一旦碰到一个元素回传 `True`，他就把剩下的所有元素都放进第二个 list 中。我们用了一个辅助函数叫做 `nameIs`，他接受一个名字跟一个文件系统的元素，如果名字相符的话他就会回传 `True`。
 
@@ -490,7 +490,7 @@ goLeft :: Zipper a -> Zipper a
 goLeft (Node x l r, bs) = (l, LeftCrumb x r:bs)
 ```
 
-![](../../.gitbook/assets/bigtree%20%281%29.png)
+![](./bigtree.png)
 
 但如果我们走的树其实是空的树呢？也就是说，如果他不是 `Node` 而是 `Empty`？再这情况，我们会因为模式匹配不到东西而造成 runtime error。我们没有处理空的树的情形，也就是没有子树的情形。到目前为止，我们并没有试着在左子树不存在的情形下锁定左子树。但要走到一棵空的树的左子树并不合理，只是到目前为止我们视而不见而已。
 
