@@ -368,5 +368,5 @@ The best path to take is: BCACBBC
 The price is: 75
 ```
 
-执行成功！你可以用你对 `Data.Random` 的了解来产生一个比较大的路径配置，然后你可以把产生的乱数数据喂给你的程序。如果你碰到堆叠溢出，试试看用 `foldl'` 而不要用 `foldl`。`foldl'` 是 strict 的可以减少内存消耗。
+执行成功！你可以用你对 `Data.Random` 的了解来产生一个比较大的路径配置，然后你可以把产生的随机数数据喂给你的程序。如果你碰到堆叠溢出，试试看用 `foldl'` 而不要用 `foldl`。`foldl'` 是 strict 的可以减少内存消耗。
 

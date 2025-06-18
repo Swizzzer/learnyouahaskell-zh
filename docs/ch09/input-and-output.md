@@ -1076,30 +1076,30 @@ $ ./todo view todo.txt
 
 对于不合法的输入你也可以让程序结束地漂亮一点。\(例如用户输入了 `todo UP YOURS HAHAHAHA`\)可以作一个回报错误的 I/O action \(例如 \`\`errorExist :: IO \(\)\)检查有没有不合法的输入，如果有便执行这个回报错误的 I/O action。我们之后会谈另一个可能，就是用 exception。
 
-## 乱数
+## 随机数
 
 ![](./random.png)
 
 在许多情况下，你写程序会需要些随机的数据。或许你在制作一个游戏，在游戏中你需要掷骰子。或是你需要测试程序的测试数据。精准一点地说，我们需要 pseudo-random 的数据，我们知道真正的随机数据好比是一只猴子拿着起司跟奶油骑在单轮车上，任何事情都会发生。在这个章节，我们要看看如何让 Haskell 产生些 pseudo-random 的数据。
 
-在大多数其他的编程语言中，会给你一些函数能让你拿到些随机乱数。每调用一次他就会拿到一个不同的数字。那在 Haskell 中是如何？要记住 Haskell 是一个纯粹函数式语言。代表任何东西都具有 referential transparency。那代表你喂给一个函数相同的参数，不管怎么调用都是返回相同的结果。这很新奇的原因是因为他让我们理解程序的方式不同，而且可以让我们延迟计算，直到我们真正需要他。如果我调用一个函数，我可以确定他不会乱来。我真正在乎的是他的结果。然而，这会造成在乱数的情况有点复杂。如果我有一个函数像这样：
+在大多数其他的编程语言中，会给你一些函数能让你拿到些随机随机数。每调用一次他就会拿到一个不同的数字。那在 Haskell 中是如何？要记住 Haskell 是一个纯粹函数式语言。代表任何东西都具有 referential transparency。那代表你喂给一个函数相同的参数，不管怎么调用都是返回相同的结果。这很新奇的原因是因为他让我们理解程序的方式不同，而且可以让我们延迟计算，直到我们真正需要他。如果我调用一个函数，我可以确定他不会乱来。我真正在乎的是他的结果。然而，这会造成在随机数的情况有点复杂。如果我有一个函数像这样：
 
 ```haskell
 randomNumber :: (Num a) => a
 randomNumber = 4
 ```
 
-由于他永远返回 `4`，所以对于乱数的情形而言是没什么意义。就算 4 这个结果是掷骰子来的也没有意义。
+由于他永远返回 `4`，所以对于随机数的情形而言是没什么意义。就算 4 这个结果是掷骰子来的也没有意义。
 
-其他的编程语言是怎么产生乱数的呢？他们可能随便拿取一些电脑的信息，像是现在的时间，你怎么移动你的鼠标，以及周围的声音。根据这些算出一个数值让他看起来好像随机的。那些要素算出来的结果可能在每个时间都不同，所以你会拿到不同的随机数字。
+其他的编程语言是怎么产生随机数的呢？他们可能随便拿取一些电脑的信息，像是现在的时间，你怎么移动你的鼠标，以及周围的声音。根据这些算出一个数值让他看起来好像随机的。那些要素算出来的结果可能在每个时间都不同，所以你会拿到不同的随机数字。
 
 所以说在 Haskell 中，假如我们能作一个函数，他会接受一个具随机性的参数，然后根据那些信息还传一个数值。
 
-在 `System.Random` 模块中。他包含所有满足我们需求的函数。让我们先来看其中一个，就是 **random**。他的型态是 `random :: (RandomGen g, Random a) => g -> (a, g)`。哇，出现了新的 typeclass。**RandomGen** typeclass 是指那些可以当作乱源的型态。而**Random** typeclass 则是可以装乱数的型态。一个布尔值可以是随机值，不是 `True` 就是 `False`。一个整数可以是随机的好多不同值。那你会问，函数可以是一个随机值吗？我不这么认为。如果我们试着翻译 `random` 的型态宣告，大概会是这样：他接受一个 random generator \(乱源所在\)，然后返回一个随机值以及一个新的 random generator。为什么他要返回一个新的 random generator 呢？就是下面我们要讲的。
+在 `System.Random` 模块中。他包含所有满足我们需求的函数。让我们先来看其中一个，就是 **random**。他的型态是 `random :: (RandomGen g, Random a) => g -> (a, g)`。哇，出现了新的 typeclass。**RandomGen** typeclass 是指那些可以当作乱源的型态。而**Random** typeclass 则是可以装随机数的型态。一个布尔值可以是随机值，不是 `True` 就是 `False`。一个整数可以是随机的好多不同值。那你会问，函数可以是一个随机值吗？我不这么认为。如果我们试着翻译 `random` 的型态宣告，大概会是这样：他接受一个 random generator \(乱源所在\)，然后返回一个随机值以及一个新的 random generator。为什么他要返回一个新的 random generator 呢？就是下面我们要讲的。
 
 要使用 `random` 函数， 我们必须要了解 random generator。 在 `System.Random` 中有一个很酷的型态，叫做 **StdGen**， 他是 `RandomGen` 的一个 instance。 我们可以自己手动作一个 `StdGen` 也可以告诉系统给我们一个现成的。
 
-要自己做一个 random generator，要使用 **mkStdGen** 这个函数。他的型态是 `mkStdGen :: Int -> StdGen`。他接受一个整数，然后根据这个整数会给一个 random generator。让我们来试一下 `random` 以及 `mkStdGen`，用他们产生一个乱数吧。
+要自己做一个 random generator，要使用 **mkStdGen** 这个函数。他的型态是 `mkStdGen :: Int -> StdGen`。他接受一个整数，然后根据这个整数会给一个 random generator。让我们来试一下 `random` 以及 `mkStdGen`，用他们产生一个随机数吧。
 
 ```haskell
 ghci> random (mkStdGen 100)
@@ -1119,7 +1119,7 @@ ghci> random (mkStdGen 100) :: (Int, StdGen)
 (-1352021624,651872571 1655838864)
 ```
 
-我们终于有了一个看起来像乱数的数字。tuple 的第一个部份是我们的乱数，而第二个部份是一个新的 random generator 的文本表示。如果我们用相同的 random generator 再调用 `random` 一遍呢？
+我们终于有了一个看起来像随机数的数字。tuple 的第一个部份是我们的随机数，而第二个部份是一个新的 random generator 的文本表示。如果我们用相同的 random generator 再调用 `random` 一遍呢？
 
 ```haskell
 ghci> random (mkStdGen 100) :: (Int, StdGen)
@@ -1133,7 +1133,7 @@ ghci> random (mkStdGen 949494) :: (Int, StdGen)
 (539963926,466647808 1655838864)
 ```
 
-很好，我们拿到了不同的数字。我们可以用不同的型态标志来拿到不同型态的乱数
+很好，我们拿到了不同的数字。我们可以用不同的型态标志来拿到不同型态的随机数
 
 ```haskell
 ghci> random (mkStdGen 949488) :: (Float, StdGen)
@@ -1144,7 +1144,7 @@ ghci> random (mkStdGen 949488) :: (Integer, StdGen)
 (1691547873,1597344447 1655838864)
 ```
 
-让我们写一个仿真丢三次铜板的函数。假如 `random` 不同时返回一个乱数以及一个新的 random generator，我们就必须让这函数接受三个 random generators 让他们每个返回一个掷铜板的结果。但那样听起来怪怪的，加入一个 generator 可以产生一个型态是 `Int` 的乱数，他应该可以产生掷三次铜板的结果（总共才八个组合）。这就是 `random` 为什么要返回一个新的 generator 的关键了。
+让我们写一个仿真丢三次铜板的函数。假如 `random` 不同时返回一个随机数以及一个新的 random generator，我们就必须让这函数接受三个 random generators 让他们每个返回一个掷铜板的结果。但那样听起来怪怪的，加入一个 generator 可以产生一个型态是 `Int` 的随机数，他应该可以产生掷三次铜板的结果（总共才八个组合）。这就是 `random` 为什么要返回一个新的 generator 的关键了。
 
 我们将一个铜板表示成 `Bool`。`True` 代表反面，`False` 代表正面。
 
@@ -1190,9 +1190,9 @@ randoms' :: (RandomGen g, Random a) => g -> [a]
 randoms' gen = let (value, newGen) = random gen in value:randoms' newGen
 ```
 
-一个递归的定义。我们由现在的 generator 拿到一个乱数跟一个新的 generator，然后制作一个 list，list 的第一个值是那个乱数，而 list 的其余部份是根据新的 generator 产生出的其余乱数们。由于我们可能产生出无限的乱数，所以不可能返回一个新的 generator。
+一个递归的定义。我们由现在的 generator 拿到一个随机数跟一个新的 generator，然后制作一个 list，list 的第一个值是那个随机数，而 list 的其余部份是根据新的 generator 产生出的其余随机数们。由于我们可能产生出无限的随机数，所以不可能返回一个新的 generator。
 
-我们可以写一个函数，他会返回有限个乱数跟一个新的 generator
+我们可以写一个函数，他会返回有限个随机数跟一个新的 generator
 
 ```haskell
 finiteRandoms :: (RandomGen g, Random a, Num n, Eq n) => n -> g -> ([a], g)
@@ -1203,9 +1203,9 @@ finiteRandoms n gen =
     in  (value:restOfList, finalGen)
 ```
 
-又是一个递归的定义。我们说如果我们要 0 个乱数，我们便返回一个空的 list 跟原本给我们的 generator。对于其他数量的乱数，我们先拿一个乱数跟一个新的 generator。这一个乱数便是 list 的第一个数字。然后 list 中剩下的便是 n-1 个由新的 generator 产生出的乱数。然后我们返回整个 list 跟最后一个产生完 n-1 个乱数后 generator。
+又是一个递归的定义。我们说如果我们要 0 个随机数，我们便返回一个空的 list 跟原本给我们的 generator。对于其他数量的随机数，我们先拿一个随机数跟一个新的 generator。这一个随机数便是 list 的第一个数字。然后 list 中剩下的便是 n-1 个由新的 generator 产生出的随机数。然后我们返回整个 list 跟最后一个产生完 n-1 个随机数后 generator。
 
-如果我们要的是在某个范围内的乱数呢？现在拿到的乱数要不是太大就是太小。如果我们想要的是骰子上的数字呢？**randomR** 能满足我们的需求。他的型态是 `randomR :: (RandomGen g, Random a) :: (a, a) -> g -> (a, g)`，代表他有点类似 `random`。只不过他的第一个参数是一对数目，定义了最后产生乱数的上界以及下界。
+如果我们要的是在某个范围内的随机数呢？现在拿到的随机数要不是太大就是太小。如果我们想要的是骰子上的数字呢？**randomR** 能满足我们的需求。他的型态是 `randomR :: (RandomGen g, Random a) :: (a, a) -> g -> (a, g)`，代表他有点类似 `random`。只不过他的第一个参数是一对数目，定义了最后产生随机数的上界以及下界。
 
 ```haskell
 ghci> randomR (1,6) (mkStdGen 359353)
@@ -1214,7 +1214,7 @@ ghci> randomR (1,6) (mkStdGen 35935335)
 (3,1250031057 40692)
 ```
 
-另外也有一个 **randomRs** 的函数，他会产生一连串在给定范围内的乱数：
+另外也有一个 **randomRs** 的函数，他会产生一连串在给定范围内的随机数：
 
 ```haskell
 ghci> take 10 $ randomRs ('a','z') (mkStdGen 3) :: [Char]
@@ -1223,7 +1223,7 @@ ghci> take 10 $ randomRs ('a','z') (mkStdGen 3) :: [Char]
 
 这结果看起来像是一个安全性很好的密码。
 
-你会问你自己，这一单元跟 I/O 有关系吗？到现在为止还没出现任何跟 I/O 有关的东西。到现在为止我们都是手动地做我们的 random generator。但那样的问题是，程序永远都会返回同样的乱数。这在真实世界中的程序是不能接受的。这也是为什么 `System.Random` 要提供 **getStdGen** 这个 I/O action，他的型态是 `IO StdGen`。当你的程序执行时，他会跟系统要一个 random generator，并存成一个 global generator。`getStdGen` 会替你拿那个 global random generator 并把他绑定到某个名称上。
+你会问你自己，这一单元跟 I/O 有关系吗？到现在为止还没出现任何跟 I/O 有关的东西。到现在为止我们都是手动地做我们的 random generator。但那样的问题是，程序永远都会返回同样的随机数。这在真实世界中的程序是不能接受的。这也是为什么 `System.Random` 要提供 **getStdGen** 这个 I/O action，他的型态是 `IO StdGen`。当你的程序执行时，他会跟系统要一个 random generator，并存成一个 global generator。`getStdGen` 会替你拿那个 global random generator 并把他绑定到某个名称上。
 
 这里有一个简单的产生随机字串的程序。
 
@@ -1312,7 +1312,7 @@ askForNumber gen = do
 
 ![](./jackofdiamonds.png)
 
-我们写了一个 `askForNumber` 的函数，他接受一个 random generator 并返回一个问用户要数字并回答是否正确的 I/O action。在那个函数里面，我们先根据从参数拿到的 generator 产生一个乱数以及一个新的 generator，分别叫他们为 `randomNumber` 跟 `newGen`。假设那个产生的数字是 `7`。则我们要求用户猜我们握有的数字是什么。我们用 `getLine` 来将结果绑定到 `numberString` 上。当用户输入 `7`，`numberString` 就会是 `"7"`。接下来，我们用 `when` 来检查用户输入的是否是空字串。如果是，那一个空的 I/O action `return ()` 就会被返回。基本上就等于是结束程序的意思。如果不是，那 I/O action 就会被执行。我们用 `read` 来把 `numberString` 转成一个数字，所以 `number` 便会是 `7`。
+我们写了一个 `askForNumber` 的函数，他接受一个 random generator 并返回一个问用户要数字并回答是否正确的 I/O action。在那个函数里面，我们先根据从参数拿到的 generator 产生一个随机数以及一个新的 generator，分别叫他们为 `randomNumber` 跟 `newGen`。假设那个产生的数字是 `7`。则我们要求用户猜我们握有的数字是什么。我们用 `getLine` 来将结果绑定到 `numberString` 上。当用户输入 `7`，`numberString` 就会是 `"7"`。接下来，我们用 `when` 来检查用户输入的是否是空字串。如果是，那一个空的 I/O action `return ()` 就会被返回。基本上就等于是结束程序的意思。如果不是，那 I/O action 就会被执行。我们用 `read` 来把 `numberString` 转成一个数字，所以 `number` 便会是 `7`。
 
 ```text
 如果用户给我们一些 ``read`` 没办法读取的输入（像是 ``"haha"``），我们的程序便会当掉并打印出错误消息。 如果你不希望你的程序当掉，就用 **reads**，当读取失败的时候他会返回一个空的 list。当成功的时候他就返回一个 tuple，第一个部份是我们想要的数字，第二个部份是读取失败的字串。

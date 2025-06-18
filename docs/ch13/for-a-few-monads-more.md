@@ -541,7 +541,7 @@ addStuff x = let
 
 Haskell 是一个纯粹的语言，正因为如此，我们的程序是有一堆没办法改变全域状态或变量的函数所组成，他们只会作些处理并返回结果。这样的性质让我们很容易思考我们的程序在干嘛，因为我们不需要担心变量在某一个时间点的值是什么。然而，有一些领域的问题根本上就是依赖于随着时间而改变的状态。虽然我们也可以用 Haskell 写出这样的程序，但有时候写起来蛮痛苦的。这也是为什么 Haskell 要加进 State Monad 这个特性。这让我们在 Haskell 中可以容易地处理状态性的问题，并让其他部份的程序还是保持纯粹性。
 
-当我们处理乱数的时候，我们的函数接受一个 random generator 并返回一个新的乱数跟一个新的 random generator。如果我们需要很多个乱数，我们可以用前一个函数返回的 random generator 继续做下去。当我们要写一个接受 `StdGen` 的函数并产生丢三个硬币结果的函数，我们会这样写：
+当我们处理随机数的时候，我们的函数接受一个 random generator 并返回一个新的随机数跟一个新的 random generator。如果我们需要很多个随机数，我们可以用前一个函数返回的 random generator 继续做下去。当我们要写一个接受 `StdGen` 的函数并产生丢三个硬币结果的函数，我们会这样写：
 
 ```haskell
 threeCoins :: StdGen -> (Bool, Bool, Bool)  
@@ -552,7 +552,7 @@ threeCoins gen =
     in  (firstCoin, secondCoin, thirdCoin)
 ```
 
-他接受一个 `gen` 然后用 `random gen` 产生一个 `Bool` 型态的值以及新的 generator。要仿真丢第二个硬币的话，便使用新的 generator。在其他语言中，多半除了乱数之外不需要多返回一个 generator。那是因为我们可以对现有的进行修改。但 Haskell 是纯粹的语言，我们没办法那么做，所以我们必须要接受一个状态，产生结果然后返回一个新的状态，然后用新的状态来继续做下去。
+他接受一个 `gen` 然后用 `random gen` 产生一个 `Bool` 型态的值以及新的 generator。要仿真丢第二个硬币的话，便使用新的 generator。在其他语言中，多半除了随机数之外不需要多返回一个 generator。那是因为我们可以对现有的进行修改。但 Haskell 是纯粹的语言，我们没办法那么做，所以我们必须要接受一个状态，产生结果然后返回一个新的状态，然后用新的状态来继续做下去。
 
 一般来讲你应该不会喜欢这么写，在程序中有赤裸裸的状态，但我们又不想放弃 Haskell 的纯粹性质。这就是 State Monad 的好处了，他可以帮我们处理这些琐碎的事情，又让我们保持 Haskell 的纯粹性。
 
@@ -759,7 +759,7 @@ stackyStack = do
 
 ### 随机性与 state monad
 
-在章节的一开始，我们知道了在 Haskell 中要产生乱数的不方便。我们要拿一个产生器，并返回一个乱数跟一个新的产生器。接下来我们还一定要用新的产生器不可。但 State Monad 让我们可以方便一些。
+在章节的一开始，我们知道了在 Haskell 中要产生随机数的不方便。我们要拿一个产生器，并返回一个随机数跟一个新的产生器。接下来我们还一定要用新的产生器不可。但 State Monad 让我们可以方便一些。
 
 `System.Random` 中的 `random` 函数有下列的型态：
 
@@ -767,7 +767,7 @@ stackyStack = do
 random :: (RandomGen g, Random a) => g -> (a, g)
 ```
 
-代表他接受一个乱数产生器，并产生一个乱数跟一个新的产生器。很明显他是一个会改变状态的计算，所以我们可以用 `newtype` 把他包在一个 `State` 中，然后把他当作 monadic value 来操作。
+代表他接受一个随机数产生器，并产生一个随机数跟一个新的产生器。很明显他是一个会改变状态的计算，所以我们可以用 `newtype` 把他包在一个 `State` 中，然后把他当作 monadic value 来操作。
 
 ```haskell
 import System.Random  
@@ -791,7 +791,7 @@ threeCoins = do
   return (a,b,c)
 ```
 
-`threeCoins` 是一个改变状态的计算，他接受一个初始的乱数产生器，他会把他喂给 `randomSt`，他会产生一个数字跟一个新的产生器，然后会一直传递下去。我们用 `return (a,b,c)` 来呈现 `(a,b,c)`，这样并不会改变最近一个产生器的状态。
+`threeCoins` 是一个改变状态的计算，他接受一个初始的随机数产生器，他会把他喂给 `randomSt`，他会产生一个数字跟一个新的产生器，然后会一直传递下去。我们用 `return (a,b,c)` 来呈现 `(a,b,c)`，这样并不会改变最近一个产生器的状态。
 
 ```haskell
 ghci> runState threeCoins (mkStdGen 33)  
