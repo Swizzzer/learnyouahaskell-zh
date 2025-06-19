@@ -4,7 +4,7 @@
 
 在前面的章节中，我们谈了一些 Haskell 内置的类型和 Typeclass。而在本章中，我们将学习构造类型和 Typeclass 的方法。
 
-我们已经见识过许多态别，如 `Bool`、`Int`、`Char`、`Maybe` 等等，不过在 Haskell 中该如何构造自己的类型呢？好问题，一种方法是使用 _data_ 关键字。首先我们来看看 `Bool` 在标准函式库中的定义：
+我们已经见识过许多类型，如 `Bool`、`Int`、`Char`、`Maybe` 等等，不过在 Haskell 中该如何构造自己的类型呢？好问题，一种方法是使用 _data_ 关键字。首先我们来看看 `Bool` 在标准函式库中的定义：
 
 ```haskell
 data Bool = False | True
@@ -264,7 +264,7 @@ data Maybe a = Nothing | Just a
 
 ![](./yeti.png)
 
-这里的a就是个类型参数。也正因为有了它，`Maybe` 就成为了一个类型构造子。在它的值不是 `Nothing` 时，它的类型构造子可以搞出 `Maybe Int`，`Maybe String` 等等诸多态别。但只一个 `Maybe` 是不行的，因为它不是类型，而是类型构造子。要成为真正的类型，必须得把它需要的类型参数全部填满。
+这里的a就是个类型参数。也正因为有了它，`Maybe` 就成为了一个类型构造子。在它的值不是 `Nothing` 时，它的类型构造子可以搞出 `Maybe Int`，`Maybe String` 等等诸多类型。但只一个 `Maybe` 是不行的，因为它不是类型，而是类型构造子。要成为真正的类型，必须得把它需要的类型参数全部填满。
 
 所以，如果拿 `Char` 作参数交给 `Maybe`，就可以得到一个 `Maybe Char` 的类型。如，`Just 'a'` 的类型就是 `Maybe Char` 。
 
