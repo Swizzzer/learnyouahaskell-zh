@@ -358,7 +358,9 @@ ghci> take 0 [6,6,6]
 []
 ```
 
-如上，若是图取超过 List 长度的元素个数，只能得到原 List。若 `take 0` 个元素，则会得到一个空 List！ `drop` 与 `take` 的用法大体相同，它会删除一个 List 中的前几个元素。
+如上，若是 `take` 超过 List 长度的元素个数，只能得到原 List。若 `take 0` 个元素，则会得到一个空 List！
+
+`drop` 与 `take` 的用法大体相同，它会删除一个 List 中的前几个元素。
 
 ```haskell
 ghci> drop 3 [8,4,2,1,5,6]  
